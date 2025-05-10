@@ -131,15 +131,21 @@ public class Player extends Entity {
             direction = "right";
             worldX += speed; // Update worldX
             moving = true;
+        }        // Ensure the player does not move out of bounds
+        if (worldX < 0) {
+            worldX = 0;
+        } else if (worldX > gp.maxWorldWidth - playerVisualWidth) {
+            worldX = gp.maxWorldWidth - playerVisualWidth;
         }
 
-        // Mouse movement updates player's world position
-        // Mouse movement overrides keyboard movement if a target is set
-        if (mouseHandler.hasTarget) {
-            moving = true; // Player is moving towards the mouse target
+        if (worldY < 0) {
+            worldY = 0;
+        } else if (worldY > gp.maxWorldHeight - playerVisualHeight) {
+            worldY = gp.maxWorldHeight - playerVisualHeight;
+        }
 
-            // mouseHandler.targetX and targetY are screen coordinates
-            // Convert mouse target screen coordinates to world coordinates
+        if (mouseHandler.hasTarget) {
+            moving = true; 
             int targetWorldX = mouseHandler.targetX + gp.cameraX;
             int targetWorldY = mouseHandler.targetY + gp.cameraY;
 
@@ -185,8 +191,18 @@ public class Player extends Entity {
                  mouseHandler.hasTarget = false;
                  moving = false;
             }
+        }        // Ensure the player does not move out of bounds after mouse movement
+        if (worldX < 0) {
+            worldX = 0;
+        } else if (worldX > gp.maxWorldWidth - playerVisualWidth) {
+            worldX = gp.maxWorldWidth - playerVisualWidth;
         }
 
+        if (worldY < 0) {
+            worldY = 0;
+        } else if (worldY > gp.maxWorldHeight - playerVisualHeight) {
+            worldY = gp.maxWorldHeight - playerVisualHeight;
+        }
 
         // Update animation only if moving
         if (moving) {
@@ -233,21 +249,10 @@ public class Player extends Entity {
             g2.setColor(Color.white);
             g2.fillRect(screenX, screenY, playerVisualWidth, playerVisualHeight);
         }
-        // -------------------------------------------------------------
-
-        // Debug: Draw the mouse target indicator (always on screen)
-        // This is drawn relative to the screen, not the world or camera
         if (mouseHandler.hasTarget) {
             g2.setColor(Color.red);
             // Draw oval at the mouse target screen position
             g2.drawOval(mouseHandler.targetX - 5, mouseHandler.targetY - 5, 10, 10);
         }
-
-        // Debug: Draw player hitbox (relative to screen position)
-        // This shows where the solid area is on the screen
-        // Note: The solidArea's x and y are offsets from the entity's top-left corner (worldX, worldY).
-        // So, on screen, the solid area is drawn at (screenX + solidArea.x, screenY + solidArea.y)
-        //  g2.setColor(Color.BLUE); // Example color for hitbox
-        //  g2.drawRect(screenX + solidArea.x, screenY + solidArea.y, solidArea.width, solidArea.height);
     }
 }
