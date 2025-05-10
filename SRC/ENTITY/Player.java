@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
+import java.util.ArrayList;
+import java.util.List;
 
+import SRC.ITEMS.Item;
 import SRC.MAIN.GamePanel;
 import SRC.MAIN.KeyHandler;
 import SRC.MAIN.MouseHandler;
@@ -16,6 +19,9 @@ public class Player extends Entity {
     GamePanel gp;
     KeyHandler keyH;
     MouseHandler mouseHandler;
+    private int energy;
+    private List<Item> inventory;
+    private final int MAX_ENERGY = 100; // Maximum energy value
     private final int TOTAL_FRAMES = 8;
 
     // --- Variabel Entitas (Deklarasikan jika tidak di Entity) ---
@@ -46,12 +52,8 @@ public class Player extends Entity {
         this.gp = gp;
         this.keyH = keyH;
         this.mouseHandler = mouseHandler;
-
-        // Set the player's collision area (hitbox) relative to its worldX, worldY
-        // Ukuran solidArea biasanya tidak langsung mengikuti skala visual 4x.
-        // Anda mungkin ingin solidArea lebih kecil dari ukuran visual
-        // agar pergerakan terasa lebih luwes, atau sama dengan ukuran tile gp.tileSize.
-        // Contoh: hitbox seukuran tile (48x48)
+        this.energy = 100; 
+        this.inventory = new ArrayList<>();
         solidArea = new Rectangle(0, 0, gp.tileSize, gp.tileSize);
 
         // Hitung ukuran visual player berdasarkan skala
@@ -254,5 +256,29 @@ public class Player extends Entity {
             // Draw oval at the mouse target screen position
             g2.drawOval(mouseHandler.targetX - 5, mouseHandler.targetY - 5, 10, 10);
         }
+    }
+    public int getEnergy() {
+        return energy;
+    }   
+    public void setEnergy(int energy) {
+        if (energy < 0) {
+            this.energy = 0; // Prevent negative energy
+        } else if (energy > MAX_ENERGY) {
+            this.energy = MAX_ENERGY; // Prevent exceeding max energy
+        } else {
+            this.energy = energy;
+        }
+    }
+    public void addItemToInventory(Item item) {
+        inventory.add(item);
+    }
+    public void removeItemFromInventory(Item item) {
+        inventory.remove(item);
+    }
+    public List<Item> getInventory() {
+        return inventory;
+    }
+    public void setInventory(List<Item> inventory) {
+        this.inventory = inventory;
     }
 }
