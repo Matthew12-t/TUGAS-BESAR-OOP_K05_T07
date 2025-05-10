@@ -2,6 +2,7 @@ package SRC.ENTITY;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -15,153 +16,201 @@ public class Player extends Entity {
     GamePanel gp;
     KeyHandler keyH;
     MouseHandler mouseHandler;
-      private final int TOTAL_FRAMES = 8;
-    
+    private final int TOTAL_FRAMES = 8;
+
+    // --- Variabel Entitas (Deklarasikan jika tidak di Entity) ---
+    public int worldX, worldY; // Player's position in the game world
+    public int speed;         // Player's movement speed
+    public String direction;  // Player's current direction ("up", "down", "left", "right")
+    public Rectangle solidArea; // Collision area for the player
+    // -----------------------------------------------------------
+
     // Arrays untuk menyimpan 8 frame animasi untuk setiap arah
     private BufferedImage[] up;
-    private BufferedImage[] down; 
+    private BufferedImage[] down;
     private BufferedImage[] left;
     private BufferedImage[] right;
-    
+
     // Variabel animasi
     private int spriteCounter = 0;
     private int spriteNum = 0;
-    
-    // Ukuran player
-    private final int playerScale = 4; // Faktor skala untuk player
-    private int playerWidth;
-    private int playerHeight;    
-    
+
+    // --- Tambahkan skala visual player ---
+    private final int visualScale = 4;
+    private int playerVisualWidth;
+    private int playerVisualHeight;
+    // -------------------------------------
+
+
     public Player(GamePanel gp, KeyHandler keyH, MouseHandler mouseHandler) {
         this.gp = gp;
         this.keyH = keyH;
         this.mouseHandler = mouseHandler;
-        
+
+        // Set the player's collision area (hitbox) relative to its worldX, worldY
+        // Ukuran solidArea biasanya tidak langsung mengikuti skala visual 4x.
+        // Anda mungkin ingin solidArea lebih kecil dari ukuran visual
+        // agar pergerakan terasa lebih luwes, atau sama dengan ukuran tile gp.tileSize.
+        // Contoh: hitbox seukuran tile (48x48)
+        solidArea = new Rectangle(0, 0, gp.tileSize, gp.tileSize);
+
+        // Hitung ukuran visual player berdasarkan skala
+        this.playerVisualWidth = gp.tileSize * visualScale; // 48 * 4 = 192 pixels
+        this.playerVisualHeight = gp.tileSize * visualScale; // 48 * 4 = 192 pixels
+
+
         // Inisialisasi array gambar
         up = new BufferedImage[TOTAL_FRAMES];
         down = new BufferedImage[TOTAL_FRAMES];
         left = new BufferedImage[TOTAL_FRAMES];
         right = new BufferedImage[TOTAL_FRAMES];
-        
-        // Hitung ukuran player berdasarkan skala
-        this.playerWidth = gp.tileSize * playerScale;
-        this.playerHeight = gp.tileSize * playerScale;
-        
+
         setDefaultValues();
         getPlayerImage();
     }
 
     public void setDefaultValues() {
-        x = 100;
-        y = 100;
-        speed = 4;
+        worldX = 100; // Starting position in the game world (world coordinates)
+        worldY = 100;
+        speed = 4; // Movement speed in pixels per frame
         direction = "down"; // default direction
     }
 
     public void getPlayerImage() {
-        try{
-            // Load gambar untuk arah ke atas (belakang)
+        try {
+            // Load images for each direction and frame
+            // Using getClass().getResourceAsStream is generally better for deploying in a JAR
             for (int i = 0; i < TOTAL_FRAMES; i++) {
-                up[i] = ImageIO.read(new File("RES/cw belakang/barcode" + (i+1) + ".png"));
+                 // Attempt to load from classpath first
+                 up[i] = ImageIO.read(getClass().getResourceAsStream("/RES/cw belakang/barcode" + (i+1) + ".png"));
+                 down[i] = ImageIO.read(getClass().getResourceAsStream("/RES/cw depan/barcode" + (i+1) + ".png"));
+                 left[i] = ImageIO.read(getClass().getResourceAsStream("/RES/cw kiri/barcode" + (i+1) + ".png"));
+                 right[i] = ImageIO.read(getClass().getResourceAsStream("/RES/cw kanan/barcode" + (i+1) + ".png"));
+
+                 // Fallback for direct file access if running outside JAR (less recommended)
+                 if (up[i] == null) up[i] = ImageIO.read(new File("RES/cw belakang/barcode" + (i+1) + ".png"));
+                 if (down[i] == null) down[i] = ImageIO.read(new File("RES/cw depan/barcode" + (i+1) + ".png"));
+                 if (left[i] == null) left[i] = ImageIO.read(new File("RES/cw kiri/barcode" + (i+1) + ".png"));
+                 if (right[i] == null) right[i] = ImageIO.read(new File("RES/cw kanan/barcode" + (i+1) + ".png"));
             }
-            
-            // Load gambar untuk arah ke bawah (depan)
-            for (int i = 0; i < TOTAL_FRAMES; i++) {
-                down[i] = ImageIO.read(new File("RES/cw depan/barcode" + (i+1) + ".png"));
+
+            // Check if any images failed to load and print a warning
+            if (up[0] == null || down[0] == null || left[0] == null || right[0] == null) {
+                 System.err.println("Warning: Some player images failed to load. Check file paths and if resources are included in classpath.");
+            } else {
+                System.out.println("All player images successfully loaded!");
             }
-            
-            // Load gambar untuk arah ke kiri
-            for (int i = 0; i < TOTAL_FRAMES; i++) {
-                left[i] = ImageIO.read(new File("RES/cw kiri/barcode" + (i+1) + ".png"));
-            }
-            
-            // Load gambar untuk arah ke kanan
-            for (int i = 0; i < TOTAL_FRAMES; i++) {
-                right[i] = ImageIO.read(new File("RES/cw kanan/barcode" + (i+1) + ".png"));
-            }
-            
-            System.out.println("Semua gambar player berhasil dimuat!");
-        }
-        catch(IOException e) {
-            System.err.println("Error saat memuat gambar: " + e.getMessage());
+
+
+        } catch (IOException e) {
+            System.err.println("Error loading player images: " + e.getMessage());
             e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+             System.err.println("Resource not found: Check player image paths in RES folder. Make sure RES is in your classpath.");
+             e.printStackTrace();
         }
     }
 
     public void update() {
         boolean moving = false;
-        
-        //keyboard movement
-        if(keyH.upPressed == true) {
+
+        // Keyboard movement updates player's world position
+        if (keyH.upPressed) {
             direction = "up";
-            y -= speed;
+            worldY -= speed; // Update worldY
             moving = true;
-        }
-        if(keyH.downPressed == true) {
+        } else if (keyH.downPressed) { // Use else if for mutually exclusive movements
             direction = "down";
-            y += speed;
+            worldY += speed; // Update worldY
             moving = true;
-        }
-        if(keyH.leftPressed == true) {
+        } else if (keyH.leftPressed) { // Use else if
             direction = "left";
-            x -= speed;
+            worldX -= speed; // Update worldX
             moving = true;
-        }
-        if(keyH.rightPressed == true) {
+        } else if (keyH.rightPressed) { // Use else if
             direction = "right";
-            x += speed;
+            worldX += speed; // Update worldX
             moving = true;
-        }        //mouse movement
-        if(mouseHandler.hasTarget) {
-            int dx = mouseHandler.targetX - (x + playerWidth/2);
-            int dy = mouseHandler.targetY - (y + playerHeight/2);
-            
+        }
+
+        // Mouse movement updates player's world position
+        // Mouse movement overrides keyboard movement if a target is set
+        if (mouseHandler.hasTarget) {
+            moving = true; // Player is moving towards the mouse target
+
+            // mouseHandler.targetX and targetY are screen coordinates
+            // Convert mouse target screen coordinates to world coordinates
+            int targetWorldX = mouseHandler.targetX + gp.cameraX;
+            int targetWorldY = mouseHandler.targetY + gp.cameraY;
+
+            // Calculate vector from player's center to the world target
+            // Gunakan solidArea untuk menentukan pusat player untuk perhitungan mouse
+            int dx = targetWorldX - (worldX + solidArea.width / 2);
+            int dy = targetWorldY - (worldY + solidArea.height / 2);
+
             // Calculate distance to target
-            double distance = Math.sqrt(dx*dx + dy*dy);
-            
-            // Tentukan arah berdasarkan vector gerakan
-            if(Math.abs(dx) > Math.abs(dy)) {
-                if(dx > 0) {
-                    direction = "right";
+            double distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Determine direction based on movement vector
+            if (distance > 0) { // Avoid division by zero if distance is 0
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    if (dx > 0) {
+                        direction = "right";
+                    } else {
+                        direction = "left";
+                    }
                 } else {
-                    direction = "left";
+                    if (dy > 0) {
+                        direction = "down";
+                    } else {
+                        direction = "up";
+                    }
                 }
+
+                 // If player is close to target, stop moving
+                 if (distance < speed) {
+                     // Move the remaining distance to the target
+                     worldX = targetWorldX - solidArea.width / 2;
+                     worldY = targetWorldY - solidArea.height / 2;
+                     mouseHandler.hasTarget = false; // Stop moving
+                     moving = false; // Stop animation if not moving anymore
+                 } else {
+                     // Move player towards target in world coordinates
+                     double moveRatio = speed / distance;
+                     worldX += dx * moveRatio; // Update worldX
+                     worldY += dy * moveRatio; // Update worldY
+                 }
             } else {
-                if(dy > 0) {
-                    direction = "down";
-                } else {
-                    direction = "up";
-                }
-            }
-            
-            // If player is close to target, stop moving
-            if(distance < speed) {
-                mouseHandler.hasTarget = false;
-            } else {
-                // Move player towards target
-                double moveRatio = speed / distance;
-                x += dx * moveRatio;
-                y += dy * moveRatio;
-                moving = true;
+                 // Player is exactly on the target
+                 mouseHandler.hasTarget = false;
+                 moving = false;
             }
         }
-        
-        // Update animasi hanya jika bergerak
-        if(moving) {
+
+
+        // Update animation only if moving
+        if (moving) {
             spriteCounter++;
-            // Ubah frame setiap 5 update
-            if(spriteCounter > 5) {
+            // Change frame every few updates (adjust '5' for animation speed)
+            // A higher number makes the animation slower
+            if (spriteCounter > 8) { // Increased sprite counter threshold slightly for smoother look
                 spriteNum = (spriteNum + 1) % TOTAL_FRAMES;
                 spriteCounter = 0;
             }
+        } else {
+             // Optional: Reset animation to the standing frame (e.g., frame 0) when not moving
+             // This prevents the animation from continuing when the player is idle.
+             // spriteNum = 0;
+             // spriteCounter = 0; // Reset counter too
         }
     }
 
-    public void draw(Graphics2D g2) {
+    // Method to draw the player at a specific screen position
+    public void draw(Graphics2D g2, int screenX, int screenY) {
         BufferedImage image = null;
-        
-        // Pilih gambar yang sesuai berdasarkan arah dan frame animasi
-        switch(direction) {
+
+        // Select the appropriate image based on direction and animation frame
+        switch (direction) {
             case "up":
                 image = up[spriteNum];
                 break;
@@ -175,19 +224,30 @@ public class Player extends Entity {
                 image = right[spriteNum];
                 break;
         }
-          // Gambar karakter menggunakan skala
-        if(image != null) {
-            g2.drawImage(image, x, y, playerWidth, playerHeight, null);
-        } else {
-            // Fallback jika gambar tidak ditemukan
-            g2.setColor(Color.white);
-            g2.fillRect(x, y, playerWidth, playerHeight);
-        }
 
-        // Debug: Indikator target
-        if(mouseHandler.hasTarget) {
+        // --- Gambar karakter menggunakan ukuran visual yang diskalakan ---
+        if (image != null) {
+            g2.drawImage(image, screenX, screenY, playerVisualWidth, playerVisualHeight, null);
+        } else {
+            // Fallback: Draw a white rectangle if image not found
+            g2.setColor(Color.white);
+            g2.fillRect(screenX, screenY, playerVisualWidth, playerVisualHeight);
+        }
+        // -------------------------------------------------------------
+
+        // Debug: Draw the mouse target indicator (always on screen)
+        // This is drawn relative to the screen, not the world or camera
+        if (mouseHandler.hasTarget) {
             g2.setColor(Color.red);
+            // Draw oval at the mouse target screen position
             g2.drawOval(mouseHandler.targetX - 5, mouseHandler.targetY - 5, 10, 10);
         }
+
+        // Debug: Draw player hitbox (relative to screen position)
+        // This shows where the solid area is on the screen
+        // Note: The solidArea's x and y are offsets from the entity's top-left corner (worldX, worldY).
+        // So, on screen, the solid area is drawn at (screenX + solidArea.x, screenY + solidArea.y)
+        //  g2.setColor(Color.BLUE); // Example color for hitbox
+        //  g2.drawRect(screenX + solidArea.x, screenY + solidArea.y, solidArea.width, solidArea.height);
     }
 }
