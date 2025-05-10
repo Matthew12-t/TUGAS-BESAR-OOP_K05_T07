@@ -62,22 +62,22 @@ public class Player extends Entity {
         try{
             // Load gambar untuk arah ke atas (belakang)
             for (int i = 0; i < TOTAL_FRAMES; i++) {
-                up[i] = ImageIO.read(new File("RES/cw belakang/barcode" + (i+1) + ".jpg"));
+                up[i] = ImageIO.read(new File("RES/cw belakang/barcode" + (i+1) + ".png"));
             }
             
             // Load gambar untuk arah ke bawah (depan)
             for (int i = 0; i < TOTAL_FRAMES; i++) {
-                down[i] = ImageIO.read(new File("RES/cw depan/barcode" + (i+1) + ".jpg"));
+                down[i] = ImageIO.read(new File("RES/cw depan/barcode" + (i+1) + ".png"));
             }
             
             // Load gambar untuk arah ke kiri
             for (int i = 0; i < TOTAL_FRAMES; i++) {
-                left[i] = ImageIO.read(new File("RES/cw kiri/barcode" + (i+1) + ".jpg"));
+                left[i] = ImageIO.read(new File("RES/cw kiri/barcode" + (i+1) + ".png"));
             }
             
             // Load gambar untuk arah ke kanan
             for (int i = 0; i < TOTAL_FRAMES; i++) {
-                right[i] = ImageIO.read(new File("RES/cw kanan/barcode" + (i+1) + ".jpg"));
+                right[i] = ImageIO.read(new File("RES/cw kanan/barcode" + (i+1) + ".png"));
             }
             
             System.out.println("Semua gambar player berhasil dimuat!");
