@@ -1,4 +1,4 @@
-package MAIN;
+package SRC.MAIN;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;

@@ -1,4 +1,4 @@
-package MAIN;
+package SRC.MAIN;
 
 import javax.swing.JFrame;
 
