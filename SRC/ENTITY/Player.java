@@ -76,24 +76,22 @@ public class Player extends Entity {
         worldY = 100;
         speed = 4; // Movement speed in pixels per frame
         direction = "down"; // default direction
-    }
-
-    public void getPlayerImage() {
+    }    public void getPlayerImage() {
         try {
             // Load images for each direction and frame
             // Using getClass().getResourceAsStream is generally better for deploying in a JAR
             for (int i = 0; i < TOTAL_FRAMES; i++) {
                  // Attempt to load from classpath first
-                 up[i] = ImageIO.read(getClass().getResourceAsStream("/RES/cw belakang/barcode" + (i+1) + ".png"));
-                 down[i] = ImageIO.read(getClass().getResourceAsStream("/RES/cw depan/barcode" + (i+1) + ".png"));
-                 left[i] = ImageIO.read(getClass().getResourceAsStream("/RES/cw kiri/barcode" + (i+1) + ".png"));
-                 right[i] = ImageIO.read(getClass().getResourceAsStream("/RES/cw kanan/barcode" + (i+1) + ".png"));
+                 up[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/cw belakang/barcode" + (i+1) + ".png"));
+                 down[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/cw depan/barcode" + (i+1) + ".png"));
+                 left[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/cw kiri/barcode" + (i+1) + ".png"));
+                 right[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/cw kanan/barcode" + (i+1) + ".png"));
 
                  // Fallback for direct file access if running outside JAR (less recommended)
-                 if (up[i] == null) up[i] = ImageIO.read(new File("RES/cw belakang/barcode" + (i+1) + ".png"));
-                 if (down[i] == null) down[i] = ImageIO.read(new File("RES/cw depan/barcode" + (i+1) + ".png"));
-                 if (left[i] == null) left[i] = ImageIO.read(new File("RES/cw kiri/barcode" + (i+1) + ".png"));
-                 if (right[i] == null) right[i] = ImageIO.read(new File("RES/cw kanan/barcode" + (i+1) + ".png"));
+                 if (up[i] == null) up[i] = ImageIO.read(new File("RES/ENTITY/PLAYER/cw belakang/barcode" + (i+1) + ".png"));
+                 if (down[i] == null) down[i] = ImageIO.read(new File("RES/ENTITY/PLAYER/cw depan/barcode" + (i+1) + ".png"));
+                 if (left[i] == null) left[i] = ImageIO.read(new File("RES/ENTITY/PLAYER/cw kiri/barcode" + (i+1) + ".png"));
+                 if (right[i] == null) right[i] = ImageIO.read(new File("RES/ENTITY/PLAYER/cw kanan/barcode" + (i+1) + ".png"));
             }
 
             // Check if any images failed to load and print a warning
@@ -144,17 +142,18 @@ public class Player extends Entity {
             worldY = 0;
         } else if (worldY > gp.maxWorldHeight - playerVisualHeight) {
             worldY = gp.maxWorldHeight - playerVisualHeight;
-        }
-
-        if (mouseHandler.hasTarget) {
+        }        if (mouseHandler.hasTarget) {
             moving = true; 
-            int targetWorldX = mouseHandler.targetX + gp.cameraX;
-            int targetWorldY = mouseHandler.targetY + gp.cameraY;
+            
+            // mouseHandler.targetX/Y sudah dalam koordinat dunia (world coordinates)
+            int targetWorldX = mouseHandler.targetX;
+            int targetWorldY = mouseHandler.targetY;
 
             // Calculate vector from player's center to the world target
-            // Gunakan solidArea untuk menentukan pusat player untuk perhitungan mouse
-            int dx = targetWorldX - (worldX + solidArea.width / 2);
-            int dy = targetWorldY - (worldY + solidArea.height / 2);
+            int playerCenterX = worldX + playerVisualWidth / 2;
+            int playerCenterY = worldY + playerVisualHeight / 2;
+            int dx = targetWorldX - playerCenterX;
+            int dy = targetWorldY - playerCenterY;
 
             // Calculate distance to target
             double distance = Math.sqrt(dx * dx + dy * dy);
@@ -175,35 +174,56 @@ public class Player extends Entity {
                     }
                 }
 
-                 // If player is close to target, stop moving
-                 if (distance < speed) {
-                     // Move the remaining distance to the target
-                     worldX = targetWorldX - solidArea.width / 2;
-                     worldY = targetWorldY - solidArea.height / 2;
-                     mouseHandler.hasTarget = false; // Stop moving
-                     moving = false; // Stop animation if not moving anymore
-                 } else {
-                     // Move player towards target in world coordinates
-                     double moveRatio = speed / distance;
-                     worldX += dx * moveRatio; // Update worldX
-                     worldY += dy * moveRatio; // Update worldY
-                 }
+                // If player is close to target, stop moving
+                if (distance < speed) {
+                    // Position player precisely so that its center is at the center of the target tile
+                    worldX = targetWorldX - playerVisualWidth / 2;
+                    worldY = targetWorldY - playerVisualHeight / 2;
+                    mouseHandler.hasTarget = false; // Stop moving and remove target indicator
+                    moving = false; // Stop animation
+                    System.out.println("Player reached target tile center at: " + targetWorldX + ", " + targetWorldY);                } else {
+                    // Move player towards target in world coordinates
+                    double moveRatio = speed / distance;
+                    int newWorldX = worldX + (int)(dx * moveRatio);
+                    int newWorldY = worldY + (int)(dy * moveRatio);
+                    
+                    // Check if new position would be out of bounds
+                    boolean hitBoundary = false;
+                    
+                    // Check X boundaries
+                    if (newWorldX < 0) {
+                        worldX = 0;
+                        hitBoundary = true;
+                    } else if (newWorldX > gp.maxWorldWidth - playerVisualWidth) {
+                        worldX = gp.maxWorldWidth - playerVisualWidth;
+                        hitBoundary = true;
+                    } else {
+                        worldX = newWorldX;
+                    }
+                    
+                    // Check Y boundaries
+                    if (newWorldY < 0) {
+                        worldY = 0;
+                        hitBoundary = true;
+                    } else if (newWorldY > gp.maxWorldHeight - playerVisualHeight) {
+                        worldY = gp.maxWorldHeight - playerVisualHeight;
+                        hitBoundary = true;
+                    } else {
+                        worldY = newWorldY;
+                    }
+                    
+                    // If hit boundary, stop moving towards target
+                    if (hitBoundary) {
+                        mouseHandler.hasTarget = false;
+                        moving = false;
+                        System.out.println("Hit boundary, stopped moving to target");
+                    }
+                }
             } else {
-                 // Player is exactly on the target
-                 mouseHandler.hasTarget = false;
-                 moving = false;
+                // Player is exactly on the target
+                mouseHandler.hasTarget = false;
+                moving = false;
             }
-        }        // Ensure the player does not move out of bounds after mouse movement
-        if (worldX < 0) {
-            worldX = 0;
-        } else if (worldX > gp.maxWorldWidth - playerVisualWidth) {
-            worldX = gp.maxWorldWidth - playerVisualWidth;
-        }
-
-        if (worldY < 0) {
-            worldY = 0;
-        } else if (worldY > gp.maxWorldHeight - playerVisualHeight) {
-            worldY = gp.maxWorldHeight - playerVisualHeight;
         }
 
         // Update animation only if moving
@@ -250,11 +270,26 @@ public class Player extends Entity {
             // Fallback: Draw a white rectangle if image not found
             g2.setColor(Color.white);
             g2.fillRect(screenX, screenY, playerVisualWidth, playerVisualHeight);
-        }
-        if (mouseHandler.hasTarget) {
-            g2.setColor(Color.red);
-            // Draw oval at the mouse target screen position
-            g2.drawOval(mouseHandler.targetX - 5, mouseHandler.targetY - 5, 10, 10);
+        }        if (mouseHandler.hasTarget) {
+            // Set transparent white color
+            Color targetColor = new Color(255, 255, 255, 100); // RGBA format with alpha=100 (semitransparent white)
+            g2.setColor(targetColor);
+            
+            // mouseHandler.targetX/Y sekarang dalam koordinat dunia, konversi ke screen coordinates
+            int targetWorldX = mouseHandler.targetX;
+            int targetWorldY = mouseHandler.targetY;
+            
+            // Convert world coordinates to screen coordinates
+            int targetScreenX = targetWorldX - gp.cameraX;
+            int targetScreenY = targetWorldY - gp.cameraY;
+            
+            // Draw a semi-transparent square centered on the target tile
+            int tileSize = gp.tileSize;
+            g2.fillRect(targetScreenX - tileSize/2, targetScreenY - tileSize/2, tileSize, tileSize);
+            
+            // Add a white border with slightly higher opacity to make it more visible
+            g2.setColor(new Color(255, 255, 255, 150));
+            g2.drawRect(targetScreenX - tileSize/2, targetScreenY - tileSize/2, tileSize, tileSize);
         }
     }
     public int getEnergy() {

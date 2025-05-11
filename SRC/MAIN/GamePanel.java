@@ -4,22 +4,17 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-//import java.awt.RenderingHints.Key;
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
-
 import javax.swing.JPanel;
-
 import SRC.ENTITY.Player;
-// import SRC.TILE.TileManager; // Jika Anda memiliki TileManager untuk mengelola peta
 
 public class GamePanel extends JPanel implements Runnable {
-    // SCREEN SETTINGS
+    
     final int originalTileSize = 16; // 16x16 tile from source image
     final int scale = 3;
-
     final public int tileSize = originalTileSize * scale; // 48x48 tile displayed on screen
     final int maxScreenCol = 16; // Number of tiles horizontally on screen
     final int maxScreenRow = 12; // Number of tiles vertically on screen
@@ -28,7 +23,6 @@ public class GamePanel extends JPanel implements Runnable {
     final int FPS = 60;
 
     // WORLD SETTINGS
-    // Assuming your map is 32x32 tiles for demonstration
     public final int maxWorldCol = 32;
     public final int maxWorldRow = 32;
     public final int maxWorldWidth = tileSize * maxWorldCol; // 32 * 48 = 1536 pixels
@@ -43,34 +37,32 @@ public class GamePanel extends JPanel implements Runnable {
     Player player = new Player(this, keyHandler, mouseHandler);
 
     // CAMERA
-    public int cameraX = 0; // Top-left corner of the camera view in world coordinates
+    public int cameraX = 0; 
     public int cameraY = 0;
 
-    // RESOURCES (Simple example, you'd likely use a TileManager)
+    // RESOURCES 
     Image grassTile;
 
     public GamePanel() {
         // Set the size of the game panel
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.black);
-        this.setDoubleBuffered(true); // Improves rendering performance
+        this.setDoubleBuffered(true); 
         this.addKeyListener(keyHandler);
         this.addMouseListener(mouseHandler);
-        this.setFocusable(true); // Make the panel focusable to receive key/mouse events
+        this.setFocusable(true); 
 
-        // Load resources
+        // Load resources        
         try {
-            // Using getResourceAsStream for loading from JAR/classpath
-             grassTile = ImageIO.read(getClass().getResourceAsStream("/RES/tile/grass.png"));
-             if (grassTile == null) {
-                 // Fallback for direct file access if running outside JAR (less recommended for final build)
-                 grassTile = ImageIO.read(new File("RES/tile/grass.png"));
+             grassTile = ImageIO.read(getClass().getResourceAsStream("/RES/TILE/grass.png"));
+                if (grassTile == null) {
+                 grassTile = ImageIO.read(new File("RES/TILE/grass.png"));
              }
         } catch (IOException e) {
              System.err.println("Error loading grass tile image: " + e.getMessage());
              e.printStackTrace();
         } catch (IllegalArgumentException e) {
-            System.err.println("Resource not found: /RES/tile/grass.png. Check the path and if it's included in classpath.");
+            System.err.println("Resource not found: /RES/TILE/grass.png. Check the path and if it's included in classpath.");
             e.printStackTrace();
         }
 
@@ -189,11 +181,7 @@ public class GamePanel extends JPanel implements Runnable {
         int playerScreenY = player.worldY - cameraY;
 
         // Draw the player at their screen position
-        player.draw(g2, playerScreenX, playerScreenY); // Pass the screen coordinates
-
-        // --- UI (Optional - Draw UI elements here, they are not affected by camera) ---
-        // Example: g2.setColor(Color.WHITE); g2.drawString("Score: " + score, 20, 20);
-
+        player.draw(g2, playerScreenX, playerScreenY); 
         g2.dispose(); // Release system resources
     }
 }

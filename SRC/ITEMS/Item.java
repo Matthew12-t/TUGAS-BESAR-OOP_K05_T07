@@ -38,8 +38,5 @@ public abstract class Item {
     }
     public void setBuyPrice(int buyPrice) {
         this.buyPrice = buyPrice;
-    }
-
-
-    
+    }    
 }

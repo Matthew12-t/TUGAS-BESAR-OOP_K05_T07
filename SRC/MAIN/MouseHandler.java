@@ -15,15 +15,29 @@ public class MouseHandler extends MouseAdapter {
         this.gamePanel = gamePanel;
         this.hasTarget = false;
     }
-    
-    @Override
+      @Override
     public void mousePressed(MouseEvent e) { // Ubah dari mouseClicked ke mousePressed
-        // Set target position to mouse click location
-        targetX = e.getX();
-        targetY = e.getY();
+        // Ambil posisi klik mouse (screen coordinates)
+        int screenX = e.getX();
+        int screenY = e.getY();
+        
+        // Convert to world coordinates
+        int worldX = screenX + gamePanel.cameraX;
+        int worldY = screenY + gamePanel.cameraY;
+        
+        // Snap to tile grid
+        int tileSize = gamePanel.tileSize;
+        worldX = (worldX / tileSize) * tileSize + (tileSize / 2);
+        worldY = (worldY / tileSize) * tileSize + (tileSize / 2);
+        
+        // Simpan koordinat dunia (world coordinates)
+        targetX = worldX;
+        targetY = worldY;
+        
         hasTarget = true;
         
         // Debug info
-        System.out.println("Mouse clicked at: " + targetX + ", " + targetY);
+        System.out.println("Mouse clicked at screen: " + screenX + ", " + screenY + 
+                          " | Target world position: " + targetX + ", " + targetY);
     }
 }
