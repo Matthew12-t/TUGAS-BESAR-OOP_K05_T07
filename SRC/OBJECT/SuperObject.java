@@ -1,4 +1,4 @@
-package object;
+package SRC.OBJECT;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;

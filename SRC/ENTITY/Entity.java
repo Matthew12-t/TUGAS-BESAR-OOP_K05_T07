@@ -1,16 +1,86 @@
 package SRC.ENTITY;
 
-import java.awt.image.BufferedImage;
+import SRC.TILES.Tile;
+import SRC.MAIN.GamePanel;
 
-
-public class Entity {
-    public int x, y;
-    public int speed;
+public abstract class Entity {
+    protected Tile position;
+    protected int speed;
     
     // Direction
-    public String direction;
+    protected String direction;
     
     // Animation variables
-    public int spriteCounter = 0;
-    public int spriteNum = 0;
+    protected int spriteCounter = 0;
+    protected int spriteNum = 0;
+    
+    // Constructor
+    public Entity(GamePanel gp, int worldX, int worldY) {
+        this.position = new Tile(gp, worldX, worldY, true);
+        this.speed = 0;
+        this.direction = "down";
+    }
+    
+    // Abstract method that must be implemented by subclasses
+    public abstract void update();
+      // Getters and Setters
+    public int getWorldX() {
+        return position.getWorldX();
+    }
+    
+    public void setWorldX(int x) {
+        this.position.setWorldX(x);
+    }
+    
+    public int getWorldY() {
+        return position.getWorldY();
+    }
+    
+    public void setWorldY(int y) {
+        this.position.setWorldY(y);
+    }
+    
+    public int getSpeed() {
+        return speed;
+    }
+    
+    public void setSpeed(int speed) {
+        this.speed = speed;
+    }
+    
+    public String getDirection() {
+        return direction;
+    }
+    
+    public void setDirection(String direction) {
+        this.direction = direction;
+    }
+    
+    public int getSpriteCounter() {
+        return spriteCounter;
+    }
+    
+    public void setSpriteCounter(int spriteCounter) {
+        this.spriteCounter = spriteCounter;
+    }
+    
+    public int getSpriteNum() {
+        return spriteNum;
+    }
+    
+    public void setSpriteNum(int spriteNum) {
+        this.spriteNum = spriteNum;
+    }
+    
+    public void incrementSpriteCounter() {
+        this.spriteCounter++;
+    }
+    
+    public Tile getPosition() {
+        return position;
+    }
+    
+    public void setPosition(Tile position) {
+        this.position = position;
+    }
 }

@@ -16,19 +16,16 @@ import SRC.MAIN.KeyHandler;
 import SRC.MAIN.MouseHandler;
 
 public class Player extends Entity {
-    GamePanel gp;
-    KeyHandler keyH;
-    MouseHandler mouseHandler;
+    private GamePanel gp;
+    private KeyHandler keyH;
+    private MouseHandler mouseHandler;
     private int energy;
     private List<Item> inventory;
     private final int MAX_ENERGY = 100; // Maximum energy value
     private final int TOTAL_FRAMES = 8;
 
     // --- Variabel Entitas (Deklarasikan jika tidak di Entity) ---
-    public int worldX, worldY; // Player's position in the game world
-    public int speed;         // Player's movement speed
-    public String direction;  // Player's current direction ("up", "down", "left", "right")
-    public Rectangle solidArea; // Collision area for the player
+    private Rectangle solidArea; // Collision area for the player
     // -----------------------------------------------------------
 
     // Arrays untuk menyimpan 8 frame animasi untuk setiap arah
@@ -37,28 +34,23 @@ public class Player extends Entity {
     private BufferedImage[] left;
     private BufferedImage[] right;
 
-    // Variabel animasi
-    private int spriteCounter = 0;
-    private int spriteNum = 0;
-
     // --- Tambahkan skala visual player ---
     private final int visualScale = 4;
     private int playerVisualWidth;
     private int playerVisualHeight;
     // -------------------------------------
-
-
     public Player(GamePanel gp, KeyHandler keyH, MouseHandler mouseHandler) {
+        super(gp, 100, 100); // Panggil konstruktor Entity dengan posisi awal
         this.gp = gp;
         this.keyH = keyH;
         this.mouseHandler = mouseHandler;
         this.energy = 100; 
         this.inventory = new ArrayList<>();
-        solidArea = new Rectangle(0, 0, gp.tileSize, gp.tileSize);
+        solidArea = new Rectangle(0, 0, gp.getTileSize(), gp.getTileSize()); // Set solid area size to tile size
 
         // Hitung ukuran visual player berdasarkan skala
-        this.playerVisualWidth = gp.tileSize * visualScale; // 48 * 4 = 192 pixels
-        this.playerVisualHeight = gp.tileSize * visualScale; // 48 * 4 = 192 pixels
+        this.playerVisualWidth = gp.getTileSize() * visualScale; // 48 * 4 = 192 pixels
+        this.playerVisualHeight = gp.getTileSize() * visualScale; // 48 * 4 = 192 pixels
 
 
         // Inisialisasi array gambar
@@ -69,14 +61,12 @@ public class Player extends Entity {
 
         setDefaultValues();
         getPlayerImage();
-    }
-
-    public void setDefaultValues() {
-        worldX = 100; // Starting position in the game world (world coordinates)
-        worldY = 100;
-        speed = 4; // Movement speed in pixels per frame
-        direction = "down"; // default direction
-    }    public void getPlayerImage() {
+    }    public void setDefaultValues() {
+        setWorldX(100); // Starting position in the game world (world coordinates)
+        setWorldY(100);
+        setSpeed(4); // Movement speed in pixels per frame
+        setDirection("down"); // default direction
+    }public void getPlayerImage() {
         try {
             // Load images for each direction and frame
             // Using getClass().getResourceAsStream is generally better for deploying in a JAR
@@ -109,49 +99,47 @@ public class Player extends Entity {
              System.err.println("Resource not found: Check player image paths in RES folder. Make sure RES is in your classpath.");
              e.printStackTrace();
         }
-    }
-
-    public void update() {
+    }    public void update() {
         boolean moving = false;
 
         // Keyboard movement updates player's world position
         if (keyH.upPressed) {
-            direction = "up";
-            worldY -= speed; // Update worldY
+            setDirection("up");
+            setWorldY(getWorldY() - getSpeed()); // Update worldY
             moving = true;
         } else if (keyH.downPressed) { // Use else if for mutually exclusive movements
-            direction = "down";
-            worldY += speed; // Update worldY
+            setDirection("down");
+            setWorldY(getWorldY() + getSpeed()); // Update worldY
             moving = true;
         } else if (keyH.leftPressed) { // Use else if
-            direction = "left";
-            worldX -= speed; // Update worldX
+            setDirection("left");
+            setWorldX(getWorldX() - getSpeed()); // Update worldX
             moving = true;
         } else if (keyH.rightPressed) { // Use else if
-            direction = "right";
-            worldX += speed; // Update worldX
+            setDirection("right");
+            setWorldX(getWorldX() + getSpeed()); // Update worldX
             moving = true;
         }        // Ensure the player does not move out of bounds
-        if (worldX < 0) {
-            worldX = 0;
-        } else if (worldX > gp.maxWorldWidth - playerVisualWidth) {
-            worldX = gp.maxWorldWidth - playerVisualWidth;
+        if (getWorldX() < 0) {
+            setWorldX(0);
+        } else if (getWorldX() > gp.getMaxWorldWidth() - playerVisualWidth) {
+            setWorldX(gp.getMaxWorldWidth() - playerVisualWidth);
         }
 
-        if (worldY < 0) {
-            worldY = 0;
-        } else if (worldY > gp.maxWorldHeight - playerVisualHeight) {
-            worldY = gp.maxWorldHeight - playerVisualHeight;
-        }        if (mouseHandler.hasTarget) {
+        if (getWorldY() < 0) {
+            setWorldY(0);
+        } else if (getWorldY() > gp.getMaxWorldHeight() - playerVisualHeight) {
+            setWorldY(gp.getMaxWorldHeight() - playerVisualHeight);
+        }        if (mouseHandler.isHasTarget()) {
             moving = true; 
             
             // mouseHandler.targetX/Y sudah dalam koordinat dunia (world coordinates)
-            int targetWorldX = mouseHandler.targetX;
-            int targetWorldY = mouseHandler.targetY;
+            int targetWorldX = mouseHandler.getTargetX();
+            int targetWorldY = mouseHandler.getTargetY();
 
             // Calculate vector from player's center to the world target
-            int playerCenterX = worldX + playerVisualWidth / 2;
-            int playerCenterY = worldY + playerVisualHeight / 2;
+            int playerCenterX = getWorldX() + playerVisualWidth / 2;
+            int playerCenterY = getWorldY() + playerVisualHeight / 2;
             int dx = targetWorldX - playerCenterX;
             int dy = targetWorldY - playerCenterY;
 
@@ -162,84 +150,82 @@ public class Player extends Entity {
             if (distance > 0) { // Avoid division by zero if distance is 0
                 if (Math.abs(dx) > Math.abs(dy)) {
                     if (dx > 0) {
-                        direction = "right";
+                        setDirection("right");
                     } else {
-                        direction = "left";
+                        setDirection("left");
                     }
                 } else {
                     if (dy > 0) {
-                        direction = "down";
+                        setDirection("down");
                     } else {
-                        direction = "up";
+                        setDirection("up");
                     }
                 }
 
                 // If player is close to target, stop moving
-                if (distance < speed) {
+                if (distance < getSpeed()) {
                     // Position player precisely so that its center is at the center of the target tile
-                    worldX = targetWorldX - playerVisualWidth / 2;
-                    worldY = targetWorldY - playerVisualHeight / 2;
-                    mouseHandler.hasTarget = false; // Stop moving and remove target indicator
+                    setWorldX(targetWorldX - playerVisualWidth / 2);
+                    setWorldY(targetWorldY - playerVisualHeight / 2);
+                    mouseHandler.setHasTarget(false); // Stop moving and remove target indicator
                     moving = false; // Stop animation
                     System.out.println("Player reached target tile center at: " + targetWorldX + ", " + targetWorldY);                } else {
                     // Move player towards target in world coordinates
-                    double moveRatio = speed / distance;
-                    int newWorldX = worldX + (int)(dx * moveRatio);
-                    int newWorldY = worldY + (int)(dy * moveRatio);
+                    double moveRatio = getSpeed() / distance;
+                    int newWorldX = getWorldX() + (int)(dx * moveRatio);
+                    int newWorldY = getWorldY() + (int)(dy * moveRatio);
                     
                     // Check if new position would be out of bounds
                     boolean hitBoundary = false;
                     
                     // Check X boundaries
                     if (newWorldX < 0) {
-                        worldX = 0;
+                        setWorldX(0);
                         hitBoundary = true;
-                    } else if (newWorldX > gp.maxWorldWidth - playerVisualWidth) {
-                        worldX = gp.maxWorldWidth - playerVisualWidth;
+                    } else if (newWorldX > gp.getMaxWorldWidth() - playerVisualWidth) {
+                        setWorldX(gp.getMaxWorldWidth() - playerVisualWidth);
                         hitBoundary = true;
                     } else {
-                        worldX = newWorldX;
+                        setWorldX(newWorldX);
                     }
                     
                     // Check Y boundaries
                     if (newWorldY < 0) {
-                        worldY = 0;
+                        setWorldY(0);
                         hitBoundary = true;
-                    } else if (newWorldY > gp.maxWorldHeight - playerVisualHeight) {
-                        worldY = gp.maxWorldHeight - playerVisualHeight;
+                    } else if (newWorldY > gp.getMaxWorldHeight() - playerVisualHeight) {
+                        setWorldY(gp.getMaxWorldHeight() - playerVisualHeight);
                         hitBoundary = true;
                     } else {
-                        worldY = newWorldY;
+                        setWorldY(newWorldY);
                     }
                     
                     // If hit boundary, stop moving towards target
                     if (hitBoundary) {
-                        mouseHandler.hasTarget = false;
+                        mouseHandler.setHasTarget(false);
                         moving = false;
                         System.out.println("Hit boundary, stopped moving to target");
                     }
                 }
             } else {
                 // Player is exactly on the target
-                mouseHandler.hasTarget = false;
+                mouseHandler.setHasTarget(false);
                 moving = false;
             }
-        }
-
-        // Update animation only if moving
+        }        // Update animation only if moving
         if (moving) {
-            spriteCounter++;
+            incrementSpriteCounter();
             // Change frame every few updates (adjust '5' for animation speed)
             // A higher number makes the animation slower
-            if (spriteCounter > 8) { // Increased sprite counter threshold slightly for smoother look
-                spriteNum = (spriteNum + 1) % TOTAL_FRAMES;
-                spriteCounter = 0;
+            if (getSpriteCounter() > 8) { // Increased sprite counter threshold slightly for smoother look
+                setSpriteNum((getSpriteNum() + 1) % TOTAL_FRAMES);
+                setSpriteCounter(0);
             }
         } else {
              // Optional: Reset animation to the standing frame (e.g., frame 0) when not moving
              // This prevents the animation from continuing when the player is idle.
-             // spriteNum = 0;
-             // spriteCounter = 0; // Reset counter too
+             // setSpriteNum(0);
+             // setSpriteCounter(0); // Reset counter too
         }
     }
 
@@ -248,18 +234,18 @@ public class Player extends Entity {
         BufferedImage image = null;
 
         // Select the appropriate image based on direction and animation frame
-        switch (direction) {
+        switch (super.getDirection()) {
             case "up":
-                image = up[spriteNum];
+                image = up[super.getSpriteNum()];
                 break;
             case "down":
-                image = down[spriteNum];
+                image = down[super.getSpriteNum()];
                 break;
             case "left":
-                image = left[spriteNum];
+                image = left[super.getSpriteNum()];
                 break;
             case "right":
-                image = right[spriteNum];
+                image = right[super.getSpriteNum()];
                 break;
         }
 
@@ -270,21 +256,21 @@ public class Player extends Entity {
             // Fallback: Draw a white rectangle if image not found
             g2.setColor(Color.white);
             g2.fillRect(screenX, screenY, playerVisualWidth, playerVisualHeight);
-        }        if (mouseHandler.hasTarget) {
+        }        if (mouseHandler.isHasTarget()) {
             // Set transparent white color
             Color targetColor = new Color(255, 255, 255, 100); // RGBA format with alpha=100 (semitransparent white)
             g2.setColor(targetColor);
             
             // mouseHandler.targetX/Y sekarang dalam koordinat dunia, konversi ke screen coordinates
-            int targetWorldX = mouseHandler.targetX;
-            int targetWorldY = mouseHandler.targetY;
+            int targetWorldX = mouseHandler.getTargetX();
+            int targetWorldY = mouseHandler.getTargetY();
             
             // Convert world coordinates to screen coordinates
-            int targetScreenX = targetWorldX - gp.cameraX;
-            int targetScreenY = targetWorldY - gp.cameraY;
+            int targetScreenX = targetWorldX - gp.getCameraX();
+            int targetScreenY = targetWorldY - gp.getCameraY();
             
             // Draw a semi-transparent square centered on the target tile
-            int tileSize = gp.tileSize;
+            int tileSize = gp.getTileSize();
             g2.fillRect(targetScreenX - tileSize/2, targetScreenY - tileSize/2, tileSize, tileSize);
             
             // Add a white border with slightly higher opacity to make it more visible
@@ -309,11 +295,24 @@ public class Player extends Entity {
     }
     public void removeItemFromInventory(Item item) {
         inventory.remove(item);
-    }
-    public List<Item> getInventory() {
+    }    public List<Item> getInventory() {
         return inventory;
     }
     public void setInventory(List<Item> inventory) {
         this.inventory = inventory;
+    }
+    
+    // Getter for solidArea
+    public Rectangle getSolidArea() {
+        return solidArea;
+    }
+    
+    // Getter for player visual dimensions
+    public int getPlayerVisualWidth() {
+        return playerVisualWidth;
+    }
+    
+    public int getPlayerVisualHeight() {
+        return playerVisualHeight;
     }
 }

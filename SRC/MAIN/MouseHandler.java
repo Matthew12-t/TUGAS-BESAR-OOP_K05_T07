@@ -7,37 +7,61 @@ public class MouseHandler extends MouseAdapter {
     
     private GamePanel gamePanel;
     
-    public int targetX;
-    public int targetY;
-    public boolean hasTarget;
+    private int targetX;
+    private int targetY;
+    private boolean hasTarget;
     
     public MouseHandler(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
         this.hasTarget = false;
     }
-      @Override
+    
+    // Getters and Setters
+    public int getTargetX() {
+        return targetX;
+    }
+    
+    public void setTargetX(int targetX) {
+        this.targetX = targetX;
+    }
+    
+    public int getTargetY() {
+        return targetY;
+    }
+    
+    public void setTargetY(int targetY) {
+        this.targetY = targetY;
+    }
+    
+    public boolean isHasTarget() {
+        return hasTarget;
+    }
+    
+    public void setHasTarget(boolean hasTarget) {
+        this.hasTarget = hasTarget;
+    }      @Override
     public void mousePressed(MouseEvent e) { // Ubah dari mouseClicked ke mousePressed
         // Ambil posisi klik mouse (screen coordinates)
         int screenX = e.getX();
         int screenY = e.getY();
         
         // Convert to world coordinates
-        int worldX = screenX + gamePanel.cameraX;
-        int worldY = screenY + gamePanel.cameraY;
+        int worldX = screenX + gamePanel.getCameraX();
+        int worldY = screenY + gamePanel.getCameraY();
         
         // Snap to tile grid
-        int tileSize = gamePanel.tileSize;
+        int tileSize = gamePanel.getTileSize();
         worldX = (worldX / tileSize) * tileSize + (tileSize / 2);
         worldY = (worldY / tileSize) * tileSize + (tileSize / 2);
         
         // Simpan koordinat dunia (world coordinates)
-        targetX = worldX;
-        targetY = worldY;
+        setTargetX(worldX);
+        setTargetY(worldY);
         
-        hasTarget = true;
+        setHasTarget(true);
         
         // Debug info
         System.out.println("Mouse clicked at screen: " + screenX + ", " + screenY + 
-                          " | Target world position: " + targetX + ", " + targetY);
+                          " | Target world position: " + getTargetX() + ", " + getTargetY());
     }
 }

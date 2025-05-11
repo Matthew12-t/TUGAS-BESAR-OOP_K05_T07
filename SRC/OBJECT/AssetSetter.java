@@ -1,4 +1,4 @@
-package main;
+package SRC.OBJECT;
 
 import object.OBJ_Key;
 

@@ -13,35 +13,116 @@ import SRC.ENTITY.Player;
 
 public class GamePanel extends JPanel implements Runnable {
     
-    final int originalTileSize = 16; // 16x16 tile from source image
-    final int scale = 3;
-    final public int tileSize = originalTileSize * scale; // 48x48 tile displayed on screen
-    final int maxScreenCol = 16; // Number of tiles horizontally on screen
-    final int maxScreenRow = 12; // Number of tiles vertically on screen
-    final int screenWidth = tileSize * maxScreenCol; // 768 pixels
-    final int screenHeight = tileSize * maxScreenRow; // 576 pixels
-    final int FPS = 60;
+    private final int originalTileSize = 16; // 16x16 tile from source image
+    private final int scale = 3;
+    private final int tileSize = originalTileSize * scale; // 48x48 tile displayed on screen
+    private final int maxScreenCol = 16; // Number of tiles horizontally on screen
+    private final int maxScreenRow = 12; // Number of tiles vertically on screen
+    private final int screenWidth = tileSize * maxScreenCol; // 768 pixels
+    private final int screenHeight = tileSize * maxScreenRow; // 576 pixels
+    private final int FPS = 60;
 
     // WORLD SETTINGS
-    public final int maxWorldCol = 32;
-    public final int maxWorldRow = 32;
-    public final int maxWorldWidth = tileSize * maxWorldCol; // 32 * 48 = 1536 pixels
-    public final int maxWorldHeight = tileSize * maxWorldRow; // 32 * 48 = 1536 pixels
+    private final int maxWorldCol = 32;
+    private final int maxWorldRow = 32;
+    private final int maxWorldWidth = tileSize * maxWorldCol; // 32 * 48 = 1536 pixels
+    private final int maxWorldHeight = tileSize * maxWorldRow; // 32 * 48 = 1536 pixels
 
     // SYSTEM
-    KeyHandler keyHandler = new KeyHandler();
-    MouseHandler mouseHandler = new MouseHandler(this);
-    Thread gameThread;
+    private KeyHandler keyHandler = new KeyHandler();
+    private MouseHandler mouseHandler = new MouseHandler(this);
+    private Thread gameThread;
 
     // ENTITY
-    Player player = new Player(this, keyHandler, mouseHandler);
+    private Player player = new Player(this, keyHandler, mouseHandler);
 
     // CAMERA
-    public int cameraX = 0; 
-    public int cameraY = 0;
+    private int cameraX = 0; 
+    private int cameraY = 0;
 
     // RESOURCES 
-    Image grassTile;
+    private Image grassTile;
+    
+    // Getters and setters
+    public int getTileSize() {
+        return tileSize;
+    }
+    
+    public int getOriginalTileSize() {
+        return originalTileSize;
+    }
+    
+    public int getScale() {
+        return scale;
+    }
+    
+    public int getMaxScreenCol() {
+        return maxScreenCol;
+    }
+    
+    public int getMaxScreenRow() {
+        return maxScreenRow;
+    }
+    
+    public int getScreenWidth() {
+        return screenWidth;
+    }
+    
+    public int getScreenHeight() {
+        return screenHeight;
+    }
+    
+    public int getFPS() {
+        return FPS;
+    }
+    
+    public int getMaxWorldCol() {
+        return maxWorldCol;
+    }
+    
+    public int getMaxWorldRow() {
+        return maxWorldRow;
+    }
+    
+    public int getMaxWorldWidth() {
+        return maxWorldWidth;
+    }
+    
+    public int getMaxWorldHeight() {
+        return maxWorldHeight;
+    }
+    
+    public KeyHandler getKeyHandler() {
+        return keyHandler;
+    }
+    
+    public MouseHandler getMouseHandler() {
+        return mouseHandler;
+    }
+    
+    public Player getPlayer() {
+        return player;
+    }
+    
+    public int getCameraX() {
+        return cameraX;
+    }
+    
+    public void setCameraX(int cameraX) {
+        this.cameraX = cameraX;
+    }
+    
+    public int getCameraY() {
+        return cameraY;
+    }
+    
+    public void setCameraY(int cameraY) {
+        this.cameraY = cameraY;
+    }
+    
+    public Image getGrassTile() {
+        return grassTile;
+    }
 
     public GamePanel() {
         // Set the size of the game panel
@@ -111,8 +192,8 @@ public class GamePanel extends JPanel implements Runnable {
 
         // Update camera position to follow the player
         // Center the camera on the player's center
-        cameraX = player.worldX - screenWidth / 2 + player.solidArea.width / 2;
-        cameraY = player.worldY - screenHeight / 2 + player.solidArea.height / 2;
+        cameraX = player.getWorldX() - screenWidth / 2 + player.getSolidArea().width / 2;
+        cameraY = player.getWorldY() - screenHeight / 2 + player.getSolidArea().height / 2;
 
         // Clamp camera within world bounds
         if (cameraX < 0) {
@@ -177,8 +258,8 @@ public class GamePanel extends JPanel implements Runnable {
 
         // --- Draw Player ---
         // Calculate player's screen position (relative to camera)
-        int playerScreenX = player.worldX - cameraX;
-        int playerScreenY = player.worldY - cameraY;
+        int playerScreenX = player.getWorldX() - cameraX;
+        int playerScreenY = player.getWorldY() - cameraY;
 
         // Draw the player at their screen position
         player.draw(g2, playerScreenX, playerScreenY); 

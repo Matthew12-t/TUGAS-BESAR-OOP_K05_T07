@@ -1,4 +1,4 @@
-package object;
+package SRC.OBJECT;
 
 import java.io.IOException;
 
