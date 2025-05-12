@@ -46,19 +46,24 @@ public class Player extends Entity {
     private int playerVisualWidth;
     private int playerVisualHeight;
     // -------------------------------------
-
-
     public Player(GamePanel gp, KeyHandler keyH, MouseHandler mouseHandler) {
         this.gp = gp;
         this.keyH = keyH;
         this.mouseHandler = mouseHandler;
         this.energy = 100; 
         this.inventory = new ArrayList<>();
-        solidArea = new Rectangle(0, 0, gp.tileSize, gp.tileSize);
-
+        
         // Hitung ukuran visual player berdasarkan skala
         this.playerVisualWidth = gp.tileSize * visualScale; // 48 * 4 = 192 pixels
         this.playerVisualHeight = gp.tileSize * visualScale; // 48 * 4 = 192 pixels
+        
+        // Create a collision area at the center bottom of the player sprite (like feet position)
+        int collisionWidth = gp.tileSize; // Width of collision box
+        int collisionHeight = gp.tileSize; 
+        int collisionX = (playerVisualWidth - collisionWidth) / 2; 
+        int collisionY = ((playerVisualHeight - collisionHeight)/2) ; 
+        
+        solidArea = new Rectangle(collisionX, collisionY, collisionWidth, collisionHeight);
 
 
         // Inisialisasi array gambar
@@ -109,29 +114,38 @@ public class Player extends Entity {
              System.err.println("Resource not found: Check player image paths in RES folder. Make sure RES is in your classpath.");
              e.printStackTrace();
         }
-    }
-
-    public void update() {
+    }    public void update() {
         boolean moving = false;
+
+        // Store original position to revert to if collision occurs
+        int originalWorldX = worldX;
+        int originalWorldY = worldY;
 
         // Keyboard movement updates player's world position
         if (keyH.upPressed) {
             direction = "up";
-            worldY -= speed; // Update worldY
+            worldY -= speed; // Try to move up
             moving = true;
         } else if (keyH.downPressed) { // Use else if for mutually exclusive movements
             direction = "down";
-            worldY += speed; // Update worldY
+            worldY += speed; // Try to move down
             moving = true;
         } else if (keyH.leftPressed) { // Use else if
             direction = "left";
-            worldX -= speed; // Update worldX
+            worldX -= speed; // Try to move left
             moving = true;
         } else if (keyH.rightPressed) { // Use else if
             direction = "right";
-            worldX += speed; // Update worldX
+            worldX += speed; // Try to move right
             moving = true;
-        }        // Ensure the player does not move out of bounds
+        }        // Check collision with tiles - if collision, revert to original position
+        if (moving && gp.tileManager.checkRectangleCollision(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height)) {
+            worldX = originalWorldX;
+            worldY = originalWorldY;
+            moving = false; // Stop animation since we didn't actually move
+        }
+        
+        // Ensure the player does not move out of bounds
         if (worldX < 0) {
             worldX = 0;
         } else if (worldX > gp.maxWorldWidth - playerVisualWidth) {
@@ -144,6 +158,10 @@ public class Player extends Entity {
             worldY = gp.maxWorldHeight - playerVisualHeight;
         }        if (mouseHandler.hasTarget) {
             moving = true; 
+            
+            // Store original position to revert to if collision occurs
+            originalWorldX = worldX;
+            originalWorldY = worldY;
             
             // mouseHandler.targetX/Y sudah dalam koordinat dunia (world coordinates)
             int targetWorldX = mouseHandler.targetX;
@@ -176,27 +194,35 @@ public class Player extends Entity {
 
                 // If player is close to target, stop moving
                 if (distance < speed) {
-                    // Position player precisely so that its center is at the center of the target tile
-                    worldX = targetWorldX - playerVisualWidth / 2;
-                    worldY = targetWorldY - playerVisualHeight / 2;
+                    // Calculate the position if player centered at target
+                    int newWorldX = targetWorldX - playerVisualWidth / 2;
+                    int newWorldY = targetWorldY - playerVisualHeight / 2;
+                      // Check if this position would cause a collision
+                    if (!gp.tileManager.checkRectangleCollision(newWorldX + solidArea.x, newWorldY + solidArea.y, solidArea.width, solidArea.height)) {
+                        // No collision, set position 
+                        worldX = newWorldX;
+                        worldY = newWorldY;
+                    }
+                    
                     mouseHandler.hasTarget = false; // Stop moving and remove target indicator
                     moving = false; // Stop animation
-                    System.out.println("Player reached target tile center at: " + targetWorldX + ", " + targetWorldY);                } else {
+                    System.out.println("Player reached target tile center at: " + targetWorldX + ", " + targetWorldY);
+                } else {
                     // Move player towards target in world coordinates
                     double moveRatio = speed / distance;
                     int newWorldX = worldX + (int)(dx * moveRatio);
                     int newWorldY = worldY + (int)(dy * moveRatio);
                     
                     // Check if new position would be out of bounds
-                    boolean hitBoundary = false;
+                    boolean hitObstacle = false;
                     
                     // Check X boundaries
                     if (newWorldX < 0) {
                         worldX = 0;
-                        hitBoundary = true;
+                        hitObstacle = true;
                     } else if (newWorldX > gp.maxWorldWidth - playerVisualWidth) {
                         worldX = gp.maxWorldWidth - playerVisualWidth;
-                        hitBoundary = true;
+                        hitObstacle = true;
                     } else {
                         worldX = newWorldX;
                     }
@@ -204,19 +230,24 @@ public class Player extends Entity {
                     // Check Y boundaries
                     if (newWorldY < 0) {
                         worldY = 0;
-                        hitBoundary = true;
+                        hitObstacle = true;
                     } else if (newWorldY > gp.maxWorldHeight - playerVisualHeight) {
                         worldY = gp.maxWorldHeight - playerVisualHeight;
-                        hitBoundary = true;
+                        hitObstacle = true;
                     } else {
                         worldY = newWorldY;
+                    }                              // Check collision with tiles
+                    if (gp.tileManager.checkRectangleCollision(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height)) {
+                        worldX = originalWorldX; 
+                        worldY = originalWorldY;
+                        hitObstacle = true;
                     }
                     
-                    // If hit boundary, stop moving towards target
-                    if (hitBoundary) {
+                    // If hit obstacle, stop moving towards target
+                    if (hitObstacle) {
                         mouseHandler.hasTarget = false;
                         moving = false;
-                        System.out.println("Hit boundary, stopped moving to target");
+                        System.out.println("Hit obstacle, stopped moving to target");
                     }
                 }
             } else {
@@ -261,16 +292,19 @@ public class Player extends Entity {
             case "right":
                 image = right[spriteNum];
                 break;
-        }
-
-        // --- Gambar karakter menggunakan ukuran visual yang diskalakan ---
+        }        // --- Gambar karakter menggunakan ukuran visual yang diskalakan ---
         if (image != null) {
             g2.drawImage(image, screenX, screenY, playerVisualWidth, playerVisualHeight, null);
         } else {
             // Fallback: Draw a white rectangle if image not found
             g2.setColor(Color.white);
             g2.fillRect(screenX, screenY, playerVisualWidth, playerVisualHeight);
-        }        if (mouseHandler.hasTarget) {
+        }
+        
+        // Draw collision area (for debugging)
+        // g2.setColor(new Color(255, 0, 0, 128)); // Semi-transparent red
+        // g2.fillRect(screenX + solidArea.x, screenY + solidArea.y, solidArea.width, solidArea.height);
+        if (mouseHandler.hasTarget) {
             // Set transparent white color
             Color targetColor = new Color(255, 255, 255, 100); // RGBA format with alpha=100 (semitransparent white)
             g2.setColor(targetColor);

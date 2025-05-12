@@ -4,12 +4,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
-import java.io.File;
-import java.io.IOException;
-import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import SRC.ENTITY.Player;
+import SRC.TILE.TileManager;
 
 public class GamePanel extends JPanel implements Runnable {
     
@@ -32,6 +29,8 @@ public class GamePanel extends JPanel implements Runnable {
     KeyHandler keyHandler = new KeyHandler();
     MouseHandler mouseHandler = new MouseHandler(this);
     Thread gameThread;
+      // TILE
+    public TileManager tileManager = new TileManager(this);
 
     // ENTITY
     Player player = new Player(this, keyHandler, mouseHandler);
@@ -39,9 +38,6 @@ public class GamePanel extends JPanel implements Runnable {
     // CAMERA
     public int cameraX = 0; 
     public int cameraY = 0;
-
-    // RESOURCES 
-    Image grassTile;
 
     public GamePanel() {
         // Set the size of the game panel
@@ -51,21 +47,6 @@ public class GamePanel extends JPanel implements Runnable {
         this.addKeyListener(keyHandler);
         this.addMouseListener(mouseHandler);
         this.setFocusable(true); 
-
-        // Load resources        
-        try {
-             grassTile = ImageIO.read(getClass().getResourceAsStream("/RES/TILE/grass.png"));
-                if (grassTile == null) {
-                 grassTile = ImageIO.read(new File("RES/TILE/grass.png"));
-             }
-        } catch (IOException e) {
-             System.err.println("Error loading grass tile image: " + e.getMessage());
-             e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            System.err.println("Resource not found: /RES/TILE/grass.png. Check the path and if it's included in classpath.");
-            e.printStackTrace();
-        }
-
     }
 
     public void startGameThread() {
@@ -127,54 +108,15 @@ public class GamePanel extends JPanel implements Runnable {
         if (cameraY > maxWorldHeight - screenHeight) {
             cameraY = maxWorldHeight - screenHeight;
         }
-    }
-
-    @Override
+    }    @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D) g;
 
-        // --- Draw Map (Tiles) ---
-        // Determine the range of tiles to draw based on camera position
-        int startCol = cameraX / tileSize;
-        int startRow = cameraY / tileSize;
-        // Draw one extra tile row/column to cover partially visible tiles at edges
-        int endCol = (cameraX + screenWidth) / tileSize + 1;
-        int endRow = (cameraY + screenHeight) / tileSize + 1;
-
-        // Clamp drawing range to world bounds
-        if (endCol > maxWorldCol) {
-            endCol = maxWorldCol;
-        }
-        if (endRow > maxWorldRow) {
-            endRow = maxWorldRow;
-        }
-
-        // Draw visible tiles
-        for (int row = startRow; row < endRow; row++) {
-            for (int col = startCol; col < endCol; col++) {
-                // Calculate tile's world position
-                int worldX = col * tileSize;
-                int worldY = row * tileSize;
-
-                // Calculate tile's screen position (relative to camera view)
-                int screenX = worldX - cameraX;
-                int screenY = worldY - cameraY;
-
-                // Draw the tile if it's within the camera's view (optional, loop already handles this)
-                // if (screenX >= -tileSize && screenX < screenWidth && screenY >= -tileSize && screenY < screenHeight) {
-                     if (grassTile != null) {
-                         g2.drawImage(grassTile, screenX, screenY, tileSize, tileSize, null);
-                     } else {
-                         // Draw a fallback color if image not loaded
-                         g2.setColor(Color.GREEN);
-                         g2.fillRect(screenX, screenY, tileSize, tileSize);
-                     }
-                // }
-            }
-        }
-
+        // Draw the map using our TileManager
+        tileManager.draw(g2, this);
+        
         // --- Draw Player ---
         // Calculate player's screen position (relative to camera)
         int playerScreenX = player.worldX - cameraX;
@@ -182,6 +124,13 @@ public class GamePanel extends JPanel implements Runnable {
 
         // Draw the player at their screen position
         player.draw(g2, playerScreenX, playerScreenY); 
+        
         g2.dispose(); // Release system resources
+    }
+    public int getscreenWidth() {
+        return screenWidth;
+    }
+    public int getscreenHeight() {
+        return screenHeight;
     }
 }
