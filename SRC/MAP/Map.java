@@ -1,6 +1,10 @@
 package SRC.MAP;
 
 import java.awt.Graphics2D;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
 import SRC.MAIN.GamePanel;
 import SRC.OBJECT.OBJ_House;
 import SRC.OBJECT.OBJ_Pond;
@@ -396,5 +400,53 @@ public abstract class Map {
      */
     public boolean isValidPlacement(int col, int row) {
         return isValidPlacement(col, row, 1, 1);
+    }
+
+    /**
+     * Load map data from a text file
+     * Format file map.txt adalah matriks angka yang dipisahkan oleh spasi, di mana:
+     * 0 = Grass/Rumput (default)
+     * 1 = Water/Air
+     * 2 = House Area/Area Rumah
+     * Dan bisa ditambahkan kode tile lain sesuai kebutuhan game
+     * 
+     * @param filePath Path to the map file
+     * @return true if map was loaded successfully, false otherwise
+     */
+    public boolean loadMapFromFile(String filePath) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(filePath));
+            String line;
+            int row = 0;
+            
+            while ((line = br.readLine()) != null && row < maxRow) {
+                // Skip comments or empty lines
+                if (line.trim().startsWith("//") || line.trim().isEmpty()) {
+                    continue;
+                }
+                
+                // Split the line by spaces
+                String[] values = line.trim().split("\\s+");
+                
+                // Read values for each column
+                for (int col = 0; col < maxCol && col < values.length; col++) {
+                    try {
+                        int tileValue = Integer.parseInt(values[col]);
+                        mapTileData[col][row] = tileValue;
+                    } catch (NumberFormatException e) {
+                        System.err.println("Invalid tile value at row " + row + ", col " + col + ": " + values[col]);
+                    }
+                }
+                row++;
+            }
+            
+            br.close();
+            System.out.println("Map loaded successfully from " + filePath);
+            return true;
+            
+        } catch (IOException e) {
+            System.err.println("Error loading map from " + filePath + ": " + e.getMessage());
+            return false;
+        }
     }
 }
