@@ -16,16 +16,19 @@ import SRC.MAIN.KeyHandler;
 import SRC.MAIN.MouseHandler;
 
 public class Player extends Entity {
-    private GamePanel gp;
-    private KeyHandler keyH;
-    private MouseHandler mouseHandler;
+    GamePanel gp;
+    KeyHandler keyH;
+    MouseHandler mouseHandler;
     private int energy;
     private List<Item> inventory;
     private final int MAX_ENERGY = 100; // Maximum energy value
     private final int TOTAL_FRAMES = 8;
 
     // --- Variabel Entitas (Deklarasikan jika tidak di Entity) ---
-    private Rectangle solidArea; // Collision area for the player
+    public int worldX, worldY; // Player's position in the game world
+    public int speed;         // Player's movement speed
+    public String direction;  // Player's current direction ("up", "down", "left", "right")
+    public Rectangle solidArea; // Collision area for the player
     // -----------------------------------------------------------
 
     // Arrays untuk menyimpan 8 frame animasi untuk setiap arah
@@ -34,25 +37,33 @@ public class Player extends Entity {
     private BufferedImage[] left;
     private BufferedImage[] right;
 
+    // Variabel animasi
+    private int spriteCounter = 0;
+    private int spriteNum = 0;
+
     // --- Tambahkan skala visual player ---
     private final int visualScale = 4;
     private int playerVisualWidth;
     private int playerVisualHeight;
     // -------------------------------------
-
-    //contructor
     public Player(GamePanel gp, KeyHandler keyH, MouseHandler mouseHandler) {
-        super(gp, 100, 100); // Panggil konstruktor Entity dengan posisi awal
         this.gp = gp;
         this.keyH = keyH;
         this.mouseHandler = mouseHandler;
         this.energy = 100; 
         this.inventory = new ArrayList<>();
-        solidArea = new Rectangle(0, 0, gp.getTileSize(), gp.getTileSize()); // Set solid area size to tile size
-
+        
         // Hitung ukuran visual player berdasarkan skala
-        this.playerVisualWidth = gp.getTileSize() * visualScale; // 48 * 4 = 192 pixels
-        this.playerVisualHeight = gp.getTileSize() * visualScale; // 48 * 4 = 192 pixels
+        this.playerVisualWidth = gp.tileSize * visualScale; // 48 * 4 = 192 pixels
+        this.playerVisualHeight = gp.tileSize * visualScale; // 48 * 4 = 192 pixels
+        
+        // Create a collision area at the center bottom of the player sprite (like feet position)
+        int collisionWidth = gp.tileSize; // Width of collision box
+        int collisionHeight = gp.tileSize; 
+        int collisionX = (playerVisualWidth - collisionWidth) / 2; 
+        int collisionY = ((playerVisualHeight - collisionHeight)/2) ; 
+        
+        solidArea = new Rectangle(collisionX, collisionY, collisionWidth, collisionHeight);
 
 
         // Inisialisasi array gambar
@@ -64,90 +75,13 @@ public class Player extends Entity {
         setDefaultValues();
         getPlayerImage();
     }
-    
-    // --- Getter dan Setter untuk atribut baru ---
-        public int getEnergy() {
-        return energy;
-    }   
-    public void setEnergy(int energy) {
-        if (energy < 0) {
-            this.energy = 0; // Prevent negative energy
-        } else if (energy > MAX_ENERGY) {
-            this.energy = MAX_ENERGY; // Prevent exceeding max energy
-        } else {
-            this.energy = energy;
-        }
-    }
-    public void addItemToInventory(Item item) {
-        inventory.add(item);
-    }
-    public void removeItemFromInventory(Item item) {
-        inventory.remove(item);
-    }    public List<Item> getInventory() {
-        return inventory;
-    }
-    public void setInventory(List<Item> inventory) {
-        this.inventory = inventory;
-    }
-      // Getter for solidArea      
-    public Rectangle getSolidArea() {
-        return solidArea;
-    }
-      /**
-     * Check if player collides with any map objects or tiles
-     * @return true if collision detected
-     */
-    public boolean checkCollision() {
-        // Calculate the player's position in tile coordinates
-        int tileSize = gp.getTileSize();
-        int playerCol = getWorldX() / tileSize;
-        int playerRow = getWorldY() / tileSize;
-        
-        // Get the current map
-        SRC.MAP.Map currentMap = gp.getCurrentMap();
-        
-        // Check if the current tile has collision
-        if (currentMap.hasCollision(playerCol, playerRow)) {
-            return true;
-        }
-        
-        // Also check the tile's right/bottom edges if player is partially in multiple tiles
-        int playerRightCol = (getWorldX() + playerVisualWidth - 1) / tileSize;
-        int playerBottomRow = (getWorldY() + playerVisualHeight - 1) / tileSize;
-        
-        if (playerCol != playerRightCol && currentMap.hasCollision(playerRightCol, playerRow)) {
-            return true;
-        }
-        
-        if (playerRow != playerBottomRow && currentMap.hasCollision(playerCol, playerBottomRow)) {
-            return true;
-        }
-        
-        if (playerCol != playerRightCol && playerRow != playerBottomRow && 
-            currentMap.hasCollision(playerRightCol, playerBottomRow)) {
-            return true;
-        }
-        
-        return false;
-    }
-    
-    // Getter for player visual dimensions
-    public int getPlayerVisualWidth() {
-        return playerVisualWidth;
-    }
-    
-    public int getPlayerVisualHeight() {
-        return playerVisualHeight;
-    }
-    
+
     public void setDefaultValues() {
-        setWorldX(100); // Starting position in the game world (world coordinates)
-        setWorldY(100);
-        setSpeed(4); // Movement speed in pixels per frame
-        setDirection("down"); // default direction
-    }
-    
-    public void getPlayerImage() {
+        worldX = 100; // Starting position in the game world (world coordinates)
+        worldY = 100;
+        speed = 4; // Movement speed in pixels per frame
+        direction = "down"; // default direction
+    }    public void getPlayerImage() {
         try {
             // Load images for each direction and frame
             // Using getClass().getResourceAsStream is generally better for deploying in a JAR
@@ -180,60 +114,62 @@ public class Player extends Entity {
              System.err.println("Resource not found: Check player image paths in RES folder. Make sure RES is in your classpath.");
              e.printStackTrace();
         }
-    }
-      public void update() {
+    }    public void update() {
         boolean moving = false;
-        
-        // Store the player's original position in case a collision happens
-        int originalX = getWorldX();
-        int originalY = getWorldY();
+
+        // Store original position to revert to if collision occurs
+        int originalWorldX = worldX;
+        int originalWorldY = worldY;
 
         // Keyboard movement updates player's world position
         if (keyH.upPressed) {
-            setDirection("up");
-            setWorldY(getWorldY() - getSpeed()); // Update worldY
+            direction = "up";
+            worldY -= speed; // Try to move up
             moving = true;
         } else if (keyH.downPressed) { // Use else if for mutually exclusive movements
-            setDirection("down");
-            setWorldY(getWorldY() + getSpeed()); // Update worldY
+            direction = "down";
+            worldY += speed; // Try to move down
             moving = true;
         } else if (keyH.leftPressed) { // Use else if
-            setDirection("left");
-            setWorldX(getWorldX() - getSpeed()); // Update worldX
+            direction = "left";
+            worldX -= speed; // Try to move left
             moving = true;
         } else if (keyH.rightPressed) { // Use else if
-            setDirection("right");
-            setWorldX(getWorldX() + getSpeed()); // Update worldX
+            direction = "right";
+            worldX += speed; // Try to move right
             moving = true;
-        }
-          // Check for collision with map objects
-        if (checkCollision()) {
-            // If collision, revert to original position
-            setWorldX(originalX);
-            setWorldY(originalY);
+        }        // Check collision with tiles - if collision, revert to original position
+        if (moving && gp.tileManager.checkRectangleCollision(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height)) {
+            worldX = originalWorldX;
+            worldY = originalWorldY;
+            moving = false; // Stop animation since we didn't actually move
         }
         
         // Ensure the player does not move out of bounds
-        if (getWorldX() < 0) {
-            setWorldX(0);
-        } else if (getWorldX() > gp.getMaxWorldWidth() - playerVisualWidth) {
-            setWorldX(gp.getMaxWorldWidth() - playerVisualWidth);
-        }        if (getWorldY() < 0) {
-            setWorldY(0);
-        } else if (getWorldY() > gp.getMaxWorldHeight() - playerVisualHeight) {
-            setWorldY(gp.getMaxWorldHeight() - playerVisualHeight);
+        if (worldX < 0) {
+            worldX = 0;
+        } else if (worldX > gp.maxWorldWidth - playerVisualWidth) {
+            worldX = gp.maxWorldWidth - playerVisualWidth;
         }
-        
-        if (mouseHandler.isHasTarget()) {
+
+        if (worldY < 0) {
+            worldY = 0;
+        } else if (worldY > gp.maxWorldHeight - playerVisualHeight) {
+            worldY = gp.maxWorldHeight - playerVisualHeight;
+        }        if (mouseHandler.hasTarget) {
             moving = true; 
             
+            // Store original position to revert to if collision occurs
+            originalWorldX = worldX;
+            originalWorldY = worldY;
+            
             // mouseHandler.targetX/Y sudah dalam koordinat dunia (world coordinates)
-            int targetWorldX = mouseHandler.getTargetX();
-            int targetWorldY = mouseHandler.getTargetY();
+            int targetWorldX = mouseHandler.targetX;
+            int targetWorldY = mouseHandler.targetY;
 
             // Calculate vector from player's center to the world target
-            int playerCenterX = getWorldX() + playerVisualWidth / 2;
-            int playerCenterY = getWorldY() + playerVisualHeight / 2;
+            int playerCenterX = worldX + playerVisualWidth / 2;
+            int playerCenterY = worldY + playerVisualHeight / 2;
             int dx = targetWorldX - playerCenterX;
             int dy = targetWorldY - playerCenterY;
 
@@ -244,86 +180,97 @@ public class Player extends Entity {
             if (distance > 0) { // Avoid division by zero if distance is 0
                 if (Math.abs(dx) > Math.abs(dy)) {
                     if (dx > 0) {
-                        setDirection("right");
+                        direction = "right";
                     } else {
-                        setDirection("left");
+                        direction = "left";
                     }
                 } else {
                     if (dy > 0) {
-                        setDirection("down");
+                        direction = "down";
                     } else {
-                        setDirection("up");
+                        direction = "up";
                     }
                 }
 
                 // If player is close to target, stop moving
-                if (distance < getSpeed()) {
-                    // Position player precisely so that its center is at the center of the target tile
-                    setWorldX(targetWorldX - playerVisualWidth / 2);
-                    setWorldY(targetWorldY - playerVisualHeight / 2);
-                    mouseHandler.setHasTarget(false); // Stop moving and remove target indicator
+                if (distance < speed) {
+                    // Calculate the position if player centered at target
+                    int newWorldX = targetWorldX - playerVisualWidth / 2;
+                    int newWorldY = targetWorldY - playerVisualHeight / 2;
+                      // Check if this position would cause a collision
+                    if (!gp.tileManager.checkRectangleCollision(newWorldX + solidArea.x, newWorldY + solidArea.y, solidArea.width, solidArea.height)) {
+                        // No collision, set position 
+                        worldX = newWorldX;
+                        worldY = newWorldY;
+                    }
+                    
+                    mouseHandler.hasTarget = false; // Stop moving and remove target indicator
                     moving = false; // Stop animation
-                    System.out.println("Player reached target tile center at: " + targetWorldX + ", " + targetWorldY);                } else {
+                    System.out.println("Player reached target tile center at: " + targetWorldX + ", " + targetWorldY);
+                } else {
                     // Move player towards target in world coordinates
-                    double moveRatio = getSpeed() / distance;
-                    int newWorldX = getWorldX() + (int)(dx * moveRatio);
-                    int newWorldY = getWorldY() + (int)(dy * moveRatio);
+                    double moveRatio = speed / distance;
+                    int newWorldX = worldX + (int)(dx * moveRatio);
+                    int newWorldY = worldY + (int)(dy * moveRatio);
                     
                     // Check if new position would be out of bounds
-                    boolean hitBoundary = false;
+                    boolean hitObstacle = false;
                     
                     // Check X boundaries
                     if (newWorldX < 0) {
-                        setWorldX(0);
-                        hitBoundary = true;
-                    } else if (newWorldX > gp.getMaxWorldWidth() - playerVisualWidth) {
-                        setWorldX(gp.getMaxWorldWidth() - playerVisualWidth);
-                        hitBoundary = true;
+                        worldX = 0;
+                        hitObstacle = true;
+                    } else if (newWorldX > gp.maxWorldWidth - playerVisualWidth) {
+                        worldX = gp.maxWorldWidth - playerVisualWidth;
+                        hitObstacle = true;
                     } else {
-                        setWorldX(newWorldX);
+                        worldX = newWorldX;
                     }
                     
                     // Check Y boundaries
                     if (newWorldY < 0) {
-                        setWorldY(0);
-                        hitBoundary = true;
-                    } else if (newWorldY > gp.getMaxWorldHeight() - playerVisualHeight) {
-                        setWorldY(gp.getMaxWorldHeight() - playerVisualHeight);
-                        hitBoundary = true;
+                        worldY = 0;
+                        hitObstacle = true;
+                    } else if (newWorldY > gp.maxWorldHeight - playerVisualHeight) {
+                        worldY = gp.maxWorldHeight - playerVisualHeight;
+                        hitObstacle = true;
                     } else {
-                        setWorldY(newWorldY);
+                        worldY = newWorldY;
+                    }                              // Check collision with tiles
+                    if (gp.tileManager.checkRectangleCollision(worldX + solidArea.x, worldY + solidArea.y, solidArea.width, solidArea.height)) {
+                        worldX = originalWorldX; 
+                        worldY = originalWorldY;
+                        hitObstacle = true;
                     }
                     
-                    // If hit boundary, stop moving towards target
-                    if (hitBoundary) {
-                        mouseHandler.setHasTarget(false);
+                    // If hit obstacle, stop moving towards target
+                    if (hitObstacle) {
+                        mouseHandler.hasTarget = false;
                         moving = false;
-                        System.out.println("Hit boundary, stopped moving to target");
+                        System.out.println("Hit obstacle, stopped moving to target");
                     }
                 }
-            } 
-            
-            else {
+            } else {
                 // Player is exactly on the target
-                mouseHandler.setHasTarget(false);
+                mouseHandler.hasTarget = false;
                 moving = false;
             }
-        } 
-        
+        }
+
         // Update animation only if moving
         if (moving) {
-            incrementSpriteCounter();
+            spriteCounter++;
             // Change frame every few updates (adjust '5' for animation speed)
             // A higher number makes the animation slower
-            if (getSpriteCounter() > 8) { // Increased sprite counter threshold slightly for smoother look
-                setSpriteNum((getSpriteNum() + 1) % TOTAL_FRAMES);
-                setSpriteCounter(0);
+            if (spriteCounter > 8) { // Increased sprite counter threshold slightly for smoother look
+                spriteNum = (spriteNum + 1) % TOTAL_FRAMES;
+                spriteCounter = 0;
             }
         } else {
              // Optional: Reset animation to the standing frame (e.g., frame 0) when not moving
              // This prevents the animation from continuing when the player is idle.
-            setSpriteNum(0);
-            setSpriteCounter(0); // Reset counter too
+             // spriteNum = 0;
+             // spriteCounter = 0; // Reset counter too
         }
     }
 
@@ -332,48 +279,75 @@ public class Player extends Entity {
         BufferedImage image = null;
 
         // Select the appropriate image based on direction and animation frame
-        switch (super.getDirection()) {
+        switch (direction) {
             case "up":
-                image = up[super.getSpriteNum()];
+                image = up[spriteNum];
                 break;
             case "down":
-                image = down[super.getSpriteNum()];
+                image = down[spriteNum];
                 break;
             case "left":
-                image = left[super.getSpriteNum()];
+                image = left[spriteNum];
                 break;
             case "right":
-                image = right[super.getSpriteNum()];
+                image = right[spriteNum];
                 break;
-        }
-
-        // --- Gambar karakter menggunakan ukuran visual yang diskalakan ---
+        }        // --- Gambar karakter menggunakan ukuran visual yang diskalakan ---
         if (image != null) {
             g2.drawImage(image, screenX, screenY, playerVisualWidth, playerVisualHeight, null);
         } else {
             // Fallback: Draw a white rectangle if image not found
             g2.setColor(Color.white);
             g2.fillRect(screenX, screenY, playerVisualWidth, playerVisualHeight);
-        }        if (mouseHandler.isHasTarget()) {
+        }
+        
+        // Draw collision area (for debugging)
+        // g2.setColor(new Color(255, 0, 0, 128)); // Semi-transparent red
+        // g2.fillRect(screenX + solidArea.x, screenY + solidArea.y, solidArea.width, solidArea.height);
+        if (mouseHandler.hasTarget) {
             // Set transparent white color
             Color targetColor = new Color(255, 255, 255, 100); // RGBA format with alpha=100 (semitransparent white)
             g2.setColor(targetColor);
             
             // mouseHandler.targetX/Y sekarang dalam koordinat dunia, konversi ke screen coordinates
-            int targetWorldX = mouseHandler.getTargetX();
-            int targetWorldY = mouseHandler.getTargetY();
+            int targetWorldX = mouseHandler.targetX;
+            int targetWorldY = mouseHandler.targetY;
             
             // Convert world coordinates to screen coordinates
-            int targetScreenX = targetWorldX - gp.getCameraX();
-            int targetScreenY = targetWorldY - gp.getCameraY();
+            int targetScreenX = targetWorldX - gp.cameraX;
+            int targetScreenY = targetWorldY - gp.cameraY;
             
             // Draw a semi-transparent square centered on the target tile
-            int tileSize = gp.getTileSize();
+            int tileSize = gp.tileSize;
             g2.fillRect(targetScreenX - tileSize/2, targetScreenY - tileSize/2, tileSize, tileSize);
             
             // Add a white border with slightly higher opacity to make it more visible
             g2.setColor(new Color(255, 255, 255, 150));
             g2.drawRect(targetScreenX - tileSize/2, targetScreenY - tileSize/2, tileSize, tileSize);
         }
+    }
+    public int getEnergy() {
+        return energy;
+    }   
+    public void setEnergy(int energy) {
+        if (energy < 0) {
+            this.energy = 0; // Prevent negative energy
+        } else if (energy > MAX_ENERGY) {
+            this.energy = MAX_ENERGY; // Prevent exceeding max energy
+        } else {
+            this.energy = energy;
+        }
+    }
+    public void addItemToInventory(Item item) {
+        inventory.add(item);
+    }
+    public void removeItemFromInventory(Item item) {
+        inventory.remove(item);
+    }
+    public List<Item> getInventory() {
+        return inventory;
+    }
+    public void setInventory(List<Item> inventory) {
+        this.inventory = inventory;
     }
 }
