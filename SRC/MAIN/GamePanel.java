@@ -4,12 +4,12 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
-import java.io.File;
-import java.io.IOException;
-import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import SRC.ENTITY.Player;
+import SRC.MAP.FarmMap;
+import SRC.MAP.Map;
+import SRC.MAP.WorldMap;
+import SRC.OBJECT.SuperObject;
 
 public class GamePanel extends JPanel implements Runnable {
     
@@ -20,28 +20,26 @@ public class GamePanel extends JPanel implements Runnable {
     private final int maxScreenRow = 12; // Number of tiles vertically on screen
     private final int screenWidth = tileSize * maxScreenCol; // 768 pixels
     private final int screenHeight = tileSize * maxScreenRow; // 576 pixels
-    private final int FPS = 60;
-
-    // WORLD SETTINGS
+    private final int FPS = 60;    // WORLD SETTINGS
+    // Default world dimensions (for WorldMap)
     private final int maxWorldCol = 32;
     private final int maxWorldRow = 32;
-    private final int maxWorldWidth = tileSize * maxWorldCol; // 32 * 48 = 1536 pixels
-    private final int maxWorldHeight = tileSize * maxWorldRow; // 32 * 48 = 1536 pixels
-
+    
     // SYSTEM
-    private KeyHandler keyHandler = new KeyHandler();
+    private KeyHandler keyHandler = new KeyHandler(this);
     private MouseHandler mouseHandler = new MouseHandler(this);
     private Thread gameThread;
 
     // ENTITY
     private Player player = new Player(this, keyHandler, mouseHandler);
+      // MAP
+    private Map currentMap; // Current active map
+    private Map worldMap;   // World map instance
+    private Map farmMap;    // Farm map instance
 
     // CAMERA
     private int cameraX = 0; 
     private int cameraY = 0;
-
-    // RESOURCES 
-    private Image grassTile;
     
     // Getters and setters
     public int getTileSize() {
@@ -83,13 +81,22 @@ public class GamePanel extends JPanel implements Runnable {
     public int getMaxWorldRow() {
         return maxWorldRow;
     }
-    
-    public int getMaxWorldWidth() {
-        return maxWorldWidth;
+      public int getMaxWorldWidth() {
+        // Get width based on the active map
+        if (currentMap.getMapName().equals("Farm Map")) {
+            return tileSize * FarmMap.FARM_COLS;
+        } else {
+            return tileSize * maxWorldCol;
+        }
     }
     
     public int getMaxWorldHeight() {
-        return maxWorldHeight;
+        // Get height based on the active map
+        if (currentMap.getMapName().equals("Farm Map")) {
+            return tileSize * FarmMap.FARM_ROWS;
+        } else {
+            return tileSize * maxWorldRow;
+        }
     }
     
     public KeyHandler getKeyHandler() {
@@ -111,49 +118,70 @@ public class GamePanel extends JPanel implements Runnable {
     public void setCameraX(int cameraX) {
         this.cameraX = cameraX;
     }
-    
-    public int getCameraY() {
+      public int getCameraY() {
         return cameraY;
     }
-    
-    public void setCameraY(int cameraY) {
+      public void setCameraY(int cameraY) {
         this.cameraY = cameraY;
     }
     
-    public Image getGrassTile() {
-        return grassTile;
+    /**
+     * Get the current active map
+     * @return The currently active map
+     */
+    public Map getCurrentMap() {
+        return currentMap;
     }
-
-    public GamePanel() {
+      /**
+     * Switch to world map
+     */
+    public void switchToWorldMap() {
+        farmMap.setActive(false);
+        worldMap.setActive(true);
+        this.currentMap = worldMap;
+    }
+    
+    /**
+     * Switch to farm map
+     */
+    public void switchToFarmMap() {
+        worldMap.setActive(false);
+        farmMap.setActive(true);
+        this.currentMap = farmMap;    }
+    
+    /**
+     * Get objects from the current map
+     * @return Array of objects on the current map
+     */
+    public SuperObject[] getCurrentObjects() {
+        return currentMap.getObjects();
+    }
+      public GamePanel() {
         // Set the size of the game panel
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.black);
         this.setDoubleBuffered(true); 
         this.addKeyListener(keyHandler);
         this.addMouseListener(mouseHandler);
-        this.setFocusable(true); 
-
-        // Load resources        
-        try {
-             grassTile = ImageIO.read(getClass().getResourceAsStream("/RES/TILE/grass.png"));
-                if (grassTile == null) {
-                 grassTile = ImageIO.read(new File("RES/TILE/grass.png"));
-             }
-        } catch (IOException e) {
-             System.err.println("Error loading grass tile image: " + e.getMessage());
-             e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            System.err.println("Resource not found: /RES/TILE/grass.png. Check the path and if it's included in classpath.");
-            e.printStackTrace();
-        }
-
+        this.setFocusable(true);
+          // Initialize maps
+        this.worldMap = new WorldMap(this);
+        this.farmMap = new FarmMap(this);
+        
+        // Setup initial objects in maps
+        this.worldMap.setupInitialObjects();
+        this.farmMap.setupInitialObjects();
+        
+        // Set world map as the default current map
+        this.worldMap.setActive(true);
+        this.farmMap.setActive(false);
+        this.currentMap = worldMap;
     }
 
     public void startGameThread() {
         gameThread = new Thread(this);
-        gameThread.start();
-    }
-
+        gameThread.start();    }
+    
     @Override
     public void run(){
         double drawInterval = 1000000000.0 / FPS; // Time in nanoseconds per frame
@@ -178,23 +206,24 @@ public class GamePanel extends JPanel implements Runnable {
                 drawCount++;
             }
 
-            // Optional: Display FPS
+            // Display FPS
             if(timer >= 1000000000) {
-                // System.out.println("FPS: " + drawCount); // Uncomment to see FPS in console
+                System.out.println("FPS: " + drawCount); // Show FPS in console
                 drawCount = 0;
                 timer = 0;
-            }
-        }
+            }        }
     }
-
-    public void update() {
-        player.update(); // Update player's world position
-
+    
+    public void update() {        player.update(); // Update player's world position
+        
+        // Check for map transitions
+        checkMapTransition();
+        
         // Update camera position to follow the player
         // Center the camera on the player's center
-        cameraX = player.getWorldX() - screenWidth / 2 + player.getSolidArea().width / 2;
-        cameraY = player.getWorldY() - screenHeight / 2 + player.getSolidArea().height / 2;
-
+        cameraX = player.getWorldX() - screenWidth / 2 + player.getPlayerVisualWidth() / 2;
+        cameraY = player.getWorldY() - screenHeight / 2 + player.getPlayerVisualHeight() / 2;
+        
         // Clamp camera within world bounds
         if (cameraX < 0) {
             cameraX = 0;
@@ -202,59 +231,63 @@ public class GamePanel extends JPanel implements Runnable {
         if (cameraY < 0) {
             cameraY = 0;
         }
-        if (cameraX > maxWorldWidth - screenWidth) {
-            cameraX = maxWorldWidth - screenWidth;
+        if (cameraX > getMaxWorldWidth() - screenWidth) {
+            cameraX = getMaxWorldWidth() - screenWidth;
         }
-        if (cameraY > maxWorldHeight - screenHeight) {
-            cameraY = maxWorldHeight - screenHeight;
+        if (cameraY > getMaxWorldHeight() - screenHeight) {
+            cameraY = getMaxWorldHeight() - screenHeight;
         }
     }
-
+    
+    /**
+     * Check if player has reached a map transition point
+     */    private void checkMapTransition() {
+        // Get player's position in tile coordinates
+        int playerCol = player.getWorldX() / tileSize;
+        // int playerRow = player.getWorldY() / tileSize; // Commented out as currently not used
+        
+        // If in FarmMap and at the rightmost column
+        if (currentMap.getMapName().equals("Farm Map") && playerCol >= FarmMap.FARM_COLS - 1) {
+            switchMap(worldMap);
+            // Position player at the leftmost side of WorldMap
+            player.setWorldX(tileSize * 1); // Position in the second column
+            player.setWorldY(player.getWorldY()); // Keep same row position
+        }
+        // If in WorldMap, check for farm map entrance (can be placed at specific positions)
+        else if (currentMap.getMapName().equals("World Map")) {
+            // For example, transition to farm if player is at the leftmost column
+            if (playerCol == 0) {
+                switchMap(farmMap);
+                // Position player at the rightmost side of FarmMap minus 2 (to avoid triggering transition immediately)
+                player.setWorldX(tileSize * (FarmMap.FARM_COLS - 2));
+                player.setWorldY(player.getWorldY()); // Keep same row position
+            }
+        }
+    }
+    
+    /**
+     * Switch to a different map
+     * @param newMap The map to switch to
+     */
+    public void switchMap(Map newMap) {
+        // Deactivate current map
+        currentMap.setActive(false);
+        
+        // Set new map as active and current
+        newMap.setActive(true);
+        currentMap = newMap;
+        
+        System.out.println("Switched to map: " + newMap.getMapName());
+    }
+    
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D) g;
 
-        // --- Draw Map (Tiles) ---
-        // Determine the range of tiles to draw based on camera position
-        int startCol = cameraX / tileSize;
-        int startRow = cameraY / tileSize;
-        // Draw one extra tile row/column to cover partially visible tiles at edges
-        int endCol = (cameraX + screenWidth) / tileSize + 1;
-        int endRow = (cameraY + screenHeight) / tileSize + 1;
-
-        // Clamp drawing range to world bounds
-        if (endCol > maxWorldCol) {
-            endCol = maxWorldCol;
-        }
-        if (endRow > maxWorldRow) {
-            endRow = maxWorldRow;
-        }
-
-        // Draw visible tiles
-        for (int row = startRow; row < endRow; row++) {
-            for (int col = startCol; col < endCol; col++) {
-                // Calculate tile's world position
-                int worldX = col * tileSize;
-                int worldY = row * tileSize;
-
-                // Calculate tile's screen position (relative to camera view)
-                int screenX = worldX - cameraX;
-                int screenY = worldY - cameraY;
-
-                // Draw the tile if it's within the camera's view (optional, loop already handles this)
-                // if (screenX >= -tileSize && screenX < screenWidth && screenY >= -tileSize && screenY < screenHeight) {
-                     if (grassTile != null) {
-                         g2.drawImage(grassTile, screenX, screenY, tileSize, tileSize, null);
-                     } else {
-                         // Draw a fallback color if image not loaded
-                         g2.setColor(Color.GREEN);
-                         g2.fillRect(screenX, screenY, tileSize, tileSize);
-                     }
-                // }
-            }
-        }
+        // Draw the current map (tiles and objects)
+        currentMap.draw(g2);
 
         // --- Draw Player ---
         // Calculate player's screen position (relative to camera)
@@ -263,6 +296,7 @@ public class GamePanel extends JPanel implements Runnable {
 
         // Draw the player at their screen position
         player.draw(g2, playerScreenX, playerScreenY); 
+        
         g2.dispose(); // Release system resources
     }
 }

@@ -36,12 +36,31 @@ public class MouseHandler extends MouseAdapter {
     public boolean isHasTarget() {
         return hasTarget;
     }
-    
-    public void setHasTarget(boolean hasTarget) {
+      public void setHasTarget(boolean hasTarget) {
         this.hasTarget = hasTarget;
-    }      @Override
-    public void mousePressed(MouseEvent e) { // Ubah dari mouseClicked ke mousePressed
-        // Ambil posisi klik mouse (screen coordinates)
+    }
+    
+    private boolean isPlacingHouse = false; // Flag to track if we're in house placement mode
+    
+    /**
+     * Enable or disable house placement mode
+     * @param placingHouse true to enable house placement mode
+     */
+    public void setPlacingHouse(boolean placingHouse) {
+        this.isPlacingHouse = placingHouse;
+    }
+    
+    /**
+     * Check if we're currently in house placement mode
+     * @return true if in house placement mode
+     */
+    public boolean isPlacingHouse() {
+        return isPlacingHouse;
+    }
+    
+    @Override
+    public void mousePressed(MouseEvent e) {
+        // Get mouse click position (screen coordinates)
         int screenX = e.getX();
         int screenY = e.getY();
         
@@ -51,17 +70,35 @@ public class MouseHandler extends MouseAdapter {
         
         // Snap to tile grid
         int tileSize = gamePanel.getTileSize();
-        worldX = (worldX / tileSize) * tileSize + (tileSize / 2);
-        worldY = (worldY / tileSize) * tileSize + (tileSize / 2);
+        int col = worldX / tileSize;
+        int row = worldY / tileSize;
         
-        // Simpan koordinat dunia (world coordinates)
-        setTargetX(worldX);
-        setTargetY(worldY);
+        // Calculate centered world coordinates for target
+        int centeredWorldX = col * tileSize + (tileSize / 2);
+        int centeredWorldY = row * tileSize + (tileSize / 2);
         
+        // Save world coordinates
+        setTargetX(centeredWorldX);
+        setTargetY(centeredWorldY);
         setHasTarget(true);
         
         // Debug info
         System.out.println("Mouse clicked at screen: " + screenX + ", " + screenY + 
-                          " | Target world position: " + getTargetX() + ", " + getTargetY());
+                           " | Target tile: " + col + ", " + row +
+                           " | Target world position: " + getTargetX() + ", " + getTargetY());
+          // Handle object placement if in placement mode
+        if (isPlacingHouse) {
+            // Get current map and use its deployment methods
+            if (gamePanel.getCurrentMap().isValidPlacement(col, row)) {
+                boolean success = gamePanel.getCurrentMap().deployHouse(col, row);
+                if (success) {
+                    System.out.println("House placed successfully at tile: " + col + ", " + row);
+                } else {
+                    System.out.println("Failed to place house at tile: " + col + ", " + row);
+                }
+            } else {
+                System.out.println("Invalid placement location at tile: " + col + ", " + row);
+            }
+        }
     }
 }

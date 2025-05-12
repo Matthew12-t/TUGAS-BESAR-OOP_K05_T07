@@ -4,15 +4,15 @@ import SRC.TILES.Tile;
 import SRC.MAIN.GamePanel;
 
 public abstract class Entity {
-    protected Tile position;
-    protected int speed;
+    private Tile position;
+    private int speed;
     
     // Direction
-    protected String direction;
+    private String direction;
     
     // Animation variables
-    protected int spriteCounter = 0;
-    protected int spriteNum = 0;
+    private int spriteCounter = 0;
+    private int spriteNum = 0;
     
     // Constructor
     public Entity(GamePanel gp, int worldX, int worldY) {
@@ -22,7 +22,8 @@ public abstract class Entity {
     }
     
     // Abstract method that must be implemented by subclasses
-    public abstract void update();
+    public abstract void update(); //semua pergerakan yang dilakukan oleh entity ada di sini
+
       // Getters and Setters
     public int getWorldX() {
         return position.getWorldX();

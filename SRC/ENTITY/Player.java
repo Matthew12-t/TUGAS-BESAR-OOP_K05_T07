@@ -39,6 +39,8 @@ public class Player extends Entity {
     private int playerVisualWidth;
     private int playerVisualHeight;
     // -------------------------------------
+
+    //contructor
     public Player(GamePanel gp, KeyHandler keyH, MouseHandler mouseHandler) {
         super(gp, 100, 100); // Panggil konstruktor Entity dengan posisi awal
         this.gp = gp;
@@ -61,12 +63,91 @@ public class Player extends Entity {
 
         setDefaultValues();
         getPlayerImage();
-    }    public void setDefaultValues() {
+    }
+    
+    // --- Getter dan Setter untuk atribut baru ---
+        public int getEnergy() {
+        return energy;
+    }   
+    public void setEnergy(int energy) {
+        if (energy < 0) {
+            this.energy = 0; // Prevent negative energy
+        } else if (energy > MAX_ENERGY) {
+            this.energy = MAX_ENERGY; // Prevent exceeding max energy
+        } else {
+            this.energy = energy;
+        }
+    }
+    public void addItemToInventory(Item item) {
+        inventory.add(item);
+    }
+    public void removeItemFromInventory(Item item) {
+        inventory.remove(item);
+    }    public List<Item> getInventory() {
+        return inventory;
+    }
+    public void setInventory(List<Item> inventory) {
+        this.inventory = inventory;
+    }
+      // Getter for solidArea      
+    public Rectangle getSolidArea() {
+        return solidArea;
+    }
+      /**
+     * Check if player collides with any map objects or tiles
+     * @return true if collision detected
+     */
+    public boolean checkCollision() {
+        // Calculate the player's position in tile coordinates
+        int tileSize = gp.getTileSize();
+        int playerCol = getWorldX() / tileSize;
+        int playerRow = getWorldY() / tileSize;
+        
+        // Get the current map
+        SRC.MAP.Map currentMap = gp.getCurrentMap();
+        
+        // Check if the current tile has collision
+        if (currentMap.hasCollision(playerCol, playerRow)) {
+            return true;
+        }
+        
+        // Also check the tile's right/bottom edges if player is partially in multiple tiles
+        int playerRightCol = (getWorldX() + playerVisualWidth - 1) / tileSize;
+        int playerBottomRow = (getWorldY() + playerVisualHeight - 1) / tileSize;
+        
+        if (playerCol != playerRightCol && currentMap.hasCollision(playerRightCol, playerRow)) {
+            return true;
+        }
+        
+        if (playerRow != playerBottomRow && currentMap.hasCollision(playerCol, playerBottomRow)) {
+            return true;
+        }
+        
+        if (playerCol != playerRightCol && playerRow != playerBottomRow && 
+            currentMap.hasCollision(playerRightCol, playerBottomRow)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    // Getter for player visual dimensions
+    public int getPlayerVisualWidth() {
+        return playerVisualWidth;
+    }
+    
+    public int getPlayerVisualHeight() {
+        return playerVisualHeight;
+    }
+    
+    public void setDefaultValues() {
         setWorldX(100); // Starting position in the game world (world coordinates)
         setWorldY(100);
         setSpeed(4); // Movement speed in pixels per frame
         setDirection("down"); // default direction
-    }public void getPlayerImage() {
+    }
+    
+    public void getPlayerImage() {
         try {
             // Load images for each direction and frame
             // Using getClass().getResourceAsStream is generally better for deploying in a JAR
@@ -99,8 +180,13 @@ public class Player extends Entity {
              System.err.println("Resource not found: Check player image paths in RES folder. Make sure RES is in your classpath.");
              e.printStackTrace();
         }
-    }    public void update() {
+    }
+      public void update() {
         boolean moving = false;
+        
+        // Store the player's original position in case a collision happens
+        int originalX = getWorldX();
+        int originalY = getWorldY();
 
         // Keyboard movement updates player's world position
         if (keyH.upPressed) {
@@ -119,18 +205,26 @@ public class Player extends Entity {
             setDirection("right");
             setWorldX(getWorldX() + getSpeed()); // Update worldX
             moving = true;
-        }        // Ensure the player does not move out of bounds
+        }
+          // Check for collision with map objects
+        if (checkCollision()) {
+            // If collision, revert to original position
+            setWorldX(originalX);
+            setWorldY(originalY);
+        }
+        
+        // Ensure the player does not move out of bounds
         if (getWorldX() < 0) {
             setWorldX(0);
         } else if (getWorldX() > gp.getMaxWorldWidth() - playerVisualWidth) {
             setWorldX(gp.getMaxWorldWidth() - playerVisualWidth);
-        }
-
-        if (getWorldY() < 0) {
+        }        if (getWorldY() < 0) {
             setWorldY(0);
         } else if (getWorldY() > gp.getMaxWorldHeight() - playerVisualHeight) {
             setWorldY(gp.getMaxWorldHeight() - playerVisualHeight);
-        }        if (mouseHandler.isHasTarget()) {
+        }
+        
+        if (mouseHandler.isHasTarget()) {
             moving = true; 
             
             // mouseHandler.targetX/Y sudah dalam koordinat dunia (world coordinates)
@@ -207,12 +301,16 @@ public class Player extends Entity {
                         System.out.println("Hit boundary, stopped moving to target");
                     }
                 }
-            } else {
+            } 
+            
+            else {
                 // Player is exactly on the target
                 mouseHandler.setHasTarget(false);
                 moving = false;
             }
-        }        // Update animation only if moving
+        } 
+        
+        // Update animation only if moving
         if (moving) {
             incrementSpriteCounter();
             // Change frame every few updates (adjust '5' for animation speed)
@@ -224,8 +322,8 @@ public class Player extends Entity {
         } else {
              // Optional: Reset animation to the standing frame (e.g., frame 0) when not moving
              // This prevents the animation from continuing when the player is idle.
-             // setSpriteNum(0);
-             // setSpriteCounter(0); // Reset counter too
+            setSpriteNum(0);
+            setSpriteCounter(0); // Reset counter too
         }
     }
 
@@ -277,42 +375,5 @@ public class Player extends Entity {
             g2.setColor(new Color(255, 255, 255, 150));
             g2.drawRect(targetScreenX - tileSize/2, targetScreenY - tileSize/2, tileSize, tileSize);
         }
-    }
-    public int getEnergy() {
-        return energy;
-    }   
-    public void setEnergy(int energy) {
-        if (energy < 0) {
-            this.energy = 0; // Prevent negative energy
-        } else if (energy > MAX_ENERGY) {
-            this.energy = MAX_ENERGY; // Prevent exceeding max energy
-        } else {
-            this.energy = energy;
-        }
-    }
-    public void addItemToInventory(Item item) {
-        inventory.add(item);
-    }
-    public void removeItemFromInventory(Item item) {
-        inventory.remove(item);
-    }    public List<Item> getInventory() {
-        return inventory;
-    }
-    public void setInventory(List<Item> inventory) {
-        this.inventory = inventory;
-    }
-    
-    // Getter for solidArea
-    public Rectangle getSolidArea() {
-        return solidArea;
-    }
-    
-    // Getter for player visual dimensions
-    public int getPlayerVisualWidth() {
-        return playerVisualWidth;
-    }
-    
-    public int getPlayerVisualHeight() {
-        return playerVisualHeight;
     }
 }
