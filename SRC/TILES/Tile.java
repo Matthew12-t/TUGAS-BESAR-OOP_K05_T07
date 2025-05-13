@@ -35,6 +35,7 @@ public class Tile {
     public static final int TILE_TILLABLE = 2; // Tillable land (.)
     public static final int TILE_TILLED = 3;   // Tilled land (t)
     public static final int TILE_PLANTED = 4;  // Planted land (l)
+    public static final int TILE_TELEPORT = 5; // Teleport tile
     
     // Resource untuk tile
     private static Image grassTile;
@@ -219,10 +220,15 @@ public class Tile {
             case TILE_PLANTED:
                 drawPlantedTile(g2, screenX, screenY, tileSize);
                 break;
-            default:
-                // Default ke grass tile
+            case TILE_TELEPORT:
+                // Draw teleport tile as magenta rectangle (placeholder)
+                // g2.setColor(java.awt.Color.MAGENTA);
+                // g2.fillRect(screenX, screenY, tileSize, tileSize);
                 drawGrassTile(g2, screenX, screenY, tileSize);
                 break;
+            default:
+                // Default to grass
+                drawGrassTile(g2, screenX, screenY, tileSize);
         }
     }
     

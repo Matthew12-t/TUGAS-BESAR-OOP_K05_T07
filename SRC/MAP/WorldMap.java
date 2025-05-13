@@ -23,27 +23,25 @@ public class WorldMap extends Map {
     protected void initializeMap() {
         // Start with default initialization (all grass)
         super.initializeMap();
-          // Coba untuk membaca data map dari file
         boolean loadSuccess = loadMapFromFile("RES/map.txt");
         System.out.println("Attempting to load map file from: RES/map.txt");
-        
         // Jika gagal membaca file, buat map secara manual (backup)
         if (!loadSuccess) {
             System.out.println("Falling back to default map generation");
-            // Add some water features (tile type 1)
-            // For example: a lake in the middle
             int centerX = maxCol / 2;
             int centerY = maxRow / 2;
             int lakeSize = 5;
-            
             for (int col = centerX - lakeSize; col <= centerX + lakeSize; col++) {
                 for (int row = centerY - lakeSize; row <= centerY + lakeSize; row++) {
-                    // Create a circular-ish lake
                     if (Math.sqrt(Math.pow(col - centerX, 2) + Math.pow(row - centerY, 2)) <= lakeSize) {
                         setTile(col, row, 1); // Water tile
                     }
                 }
             }
+        }
+        // Tambahkan tile teleport di ujung kiri untuk ke FarmMap
+        for (int row = 0; row < maxRow; row++) {
+            setTile(0, row, SRC.TILES.Tile.TILE_TELEPORT);
         }
     }
       /**

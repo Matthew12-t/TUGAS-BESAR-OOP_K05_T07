@@ -9,8 +9,8 @@ import SRC.TILES.Tile;
  * FarmMap class represents a farming area map in the game
  */
 public class FarmMap extends Map {    // Size of the farm (smaller than the world map)
-    public static final int FARM_COLS = 16;
-    public static final int FARM_ROWS = 16;
+    public static final int FARM_COLS = 32;
+    public static final int FARM_ROWS = 32;
     
     // Farmland tracking
     private boolean[][] tilled; // Tracks which tiles are tilled/farmable
@@ -32,27 +32,28 @@ public class FarmMap extends Map {    // Size of the farm (smaller than the worl
     protected void initializeMap() {
         // Start with default initialization (all grass)
         super.initializeMap();
-        
+        boolean loadSuccess = loadMapFromFile("RES/map.txt");
         // Tambahkan kolam kecil di pojok
         for (int col = 1; col <= 3; col++) {
             for (int row = 1; row <= 3; row++) {
                 setTile(col, row, Tile.TILE_WATER); // Water tile
             }
         }
-        
         // Tambahkan area untuk tillable land (lahan yang siap diolah)
         for (int col = 5; col <= 10; col++) {
             for (int row = 5; row <= 10; row++) {
                 setTile(col, row, Tile.TILE_TILLABLE); // Tillable land
             }
         }
-        
         // Tambahkan contoh tilled land (lahan yang sudah diolah)
         setTile(5, 5, Tile.TILE_TILLED);
         setTile(6, 5, Tile.TILE_TILLED);
-        
         // Tambahkan contoh planted land (lahan yang sudah ditanami)
         setTile(5, 6, Tile.TILE_PLANTED);
+        // Tambahkan tile teleport di ujung kanan untuk ke WorldMap
+        for (int row = 0; row < FARM_ROWS; row++) {
+            setTile(FARM_COLS - 4, row, Tile.TILE_TELEPORT);
+        }
     }
     /**
      * Method khusus untuk menempatkan farmhouse
@@ -90,8 +91,27 @@ public class FarmMap extends Map {    // Size of the farm (smaller than the worl
      * Set up initial objects in the farm map
      */    @Override
     public void setupInitialObjects() {
-        // Add the initial farm house using proper deployment
-        objects[0] = new OBJ_House(gp, FARM_COLS - 3, FARM_ROWS - 3);
+        for (int col = 0; col < maxCol; col++) {
+            for (int row = 0; row < maxRow; row++) {
+                int tileType = getTile(col, row);
+                
+                // Jika tile bertipe 2, letakkan rumah di sana
+                if (tileType == 2) {
+                    // Periksa apakah ini adalah pojok kiri atas dari kelompok tile bertipe 2
+                    // untuk memastikan rumah hanya diletakkan satu kali per area
+                    boolean isTopLeft = true;
+                    
+                    // Periksa tetangga di kiri dan atas (jika ada)
+                    if (col > 0 && getTile(col-1, row) == 2) isTopLeft = false;
+                    if (row > 0 && getTile(col, row-1) == 2) isTopLeft = false;
+                    
+                    // Jika ini adalah pojok kiri atas, letakkan rumah
+                    if (isTopLeft) {
+                        deployHouse(col, row);
+                    }
+                }
+            }
+        }
     }
       /**
      * Tills a specific tile to make it farmable

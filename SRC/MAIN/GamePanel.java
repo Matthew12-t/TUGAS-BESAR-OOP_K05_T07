@@ -214,55 +214,48 @@ public class GamePanel extends JPanel implements Runnable {
             }        }
     }
     
-    public void update() {        player.update(); // Update player's world position
-        
-        // Check for map transitions
-        checkMapTransition();
-        
-        // Update camera position to follow the player
-        // Center the camera on the player's center
-        cameraX = player.getWorldX() - screenWidth / 2 + player.getPlayerVisualWidth() / 2;
-        cameraY = player.getWorldY() - screenHeight / 2 + player.getPlayerVisualHeight() / 2;
-        
-        // Clamp camera within world bounds
-        if (cameraX < 0) {
-            cameraX = 0;
+    /**
+     * Teleport player to another map by name, keeping logic transition as before
+     * @param targetMapName Nama map tujuan ("Farm Map" atau "World Map")
+     */
+    public void teleportToMap(String targetMapName) {
+        if (currentMap.getMapName().equals(targetMapName)) {
+            // Sudah di map tujuan, tidak perlu teleport
+            return;
         }
-        if (cameraY < 0) {
-            cameraY = 0;
-        }
-        if (cameraX > getMaxWorldWidth() - screenWidth) {
-            cameraX = getMaxWorldWidth() - screenWidth;
-        }
-        if (cameraY > getMaxWorldHeight() - screenHeight) {
-            cameraY = getMaxWorldHeight() - screenHeight;
+        if (targetMapName.equals("World Map")) {
+            switchMap(worldMap);
+            // Pindahkan player ke posisi default masuk dari farm
+            player.setWorldX(tileSize * 1); // Kolom ke-2
+            // Y tetap
+        } else if (targetMapName.equals("Farm Map")) {
+            switchMap(farmMap);
+            // Pindahkan player ke posisi default masuk dari world
+            player.setWorldX(tileSize * (FarmMap.FARM_COLS - 4));
+            // Y tetap
         }
     }
-    
-    /**
-     * Check if player has reached a map transition point
-     */    private void checkMapTransition() {
-        // Get player's position in tile coordinates
+
+    public void update() {
+        player.update(); // Update player's world position
+        // Check for teleport tile
         int playerCol = player.getWorldX() / tileSize;
-        // int playerRow = player.getWorldY() / tileSize; // Commented out as currently not used
-        
-        // If in FarmMap and at the rightmost column
-        if (currentMap.getMapName().equals("Farm Map") && playerCol >= FarmMap.FARM_COLS - 1) {
-            switchMap(worldMap);
-            // Position player at the leftmost side of WorldMap
-            player.setWorldX(tileSize * 1); // Position in the second column
-            player.setWorldY(player.getWorldY()); // Keep same row position
-        }
-        // If in WorldMap, check for farm map entrance (can be placed at specific positions)
-        else if (currentMap.getMapName().equals("World Map")) {
-            // For example, transition to farm if player is at the leftmost column
-            if (playerCol == 0) {
-                switchMap(farmMap);
-                // Position player at the rightmost side of FarmMap minus 2 (to avoid triggering transition immediately)
-                player.setWorldX(tileSize * (FarmMap.FARM_COLS - 2));
-                player.setWorldY(player.getWorldY()); // Keep same row position
+        int playerRow = player.getWorldY() / tileSize;
+        int tileType = currentMap.getTile(playerCol, playerRow);
+        if (tileType == SRC.TILES.Tile.TILE_TELEPORT) {
+            if (currentMap.getMapName().equals("Farm Map")) {
+                teleportToMap("World Map");
+            } else if (currentMap.getMapName().equals("World Map")) {
+                teleportToMap("Farm Map");
             }
         }
+        // Update camera position to follow the player
+        cameraX = player.getWorldX() - screenWidth / 2 + player.getPlayerVisualWidth() / 2;
+        cameraY = player.getWorldY() - screenHeight / 2 + player.getPlayerVisualHeight() / 2;
+        if (cameraX < 0) cameraX = 0;
+        if (cameraY < 0) cameraY = 0;
+        if (cameraX > getMaxWorldWidth() - screenWidth) cameraX = getMaxWorldWidth() - screenWidth;
+        if (cameraY > getMaxWorldHeight() - screenHeight) cameraY = getMaxWorldHeight() - screenHeight;
     }
     
     /**

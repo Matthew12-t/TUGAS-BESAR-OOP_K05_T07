@@ -85,7 +85,7 @@ public class MouseHandler extends MouseAdapter {
         // Debug info
         System.out.println("Mouse clicked at screen: " + screenX + ", " + screenY + 
                            " | Target tile: " + col + ", " + row +
-                           " | Target world position: " + getTargetX() + ", " + getTargetY());
+                           " | Target world position: " + getTargetX() + ", " + getTargetY() + " map: " + gamePanel.getCurrentMap().getMapName());
           // Handle object placement if in placement mode
         if (isPlacingHouse) {
             // Get current map and use its deployment methods
