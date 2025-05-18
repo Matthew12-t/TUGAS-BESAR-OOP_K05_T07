@@ -188,7 +188,7 @@ public class GamePanel extends JPanel implements Runnable {
         this.worldMap = new WorldMap(this);
         this.farmMap = new FarmMap(this);
         this.houseMap = new HouseMap(this);
-        this.currentMap = houseMap;
+        this.currentMap = farmMap;
         
         // Setup initial objects in maps
         if(currentMap == farmMap){
@@ -274,9 +274,14 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void update() {
         player.update(); // Update player's world position
-        // Check for teleport tile
-        int playerCol = player.getWorldX() / tileSize;
-        int playerRow = player.getWorldY() / tileSize;        int tileType = currentMap.getTile(playerCol, playerRow);
+        // Hitung posisi tengah player
+        int playerCenterX = player.getWorldX() + player.getPlayerVisualWidth() / 2;
+        int playerCenterY = player.getWorldY() + player.getPlayerVisualHeight() / 2;
+
+        // Check for teleport tile berdasarkan posisi tengah player
+        int playerCol = playerCenterX / tileSize;
+        int playerRow = playerCenterY / tileSize;
+        int tileType = currentMap.getTile(playerCol, playerRow);
         if (tileType == SRC.TILES.Tile.TILE_TELEPORT) {
             if (currentMap.getMapName().equals("Farm Map")) {
                 teleportToMap("World Map");

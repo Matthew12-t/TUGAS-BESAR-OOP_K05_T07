@@ -57,8 +57,8 @@ public class FarmMap extends Map {
         // Tambahkan contoh planted land (lahan yang sudah ditanami)
         setTile(5, 6, Tile.TILE_PLANTED);
         // Tambahkan tile teleport di ujung kanan untuk ke WorldMap
-        for (int row = 0; row < FARM_ROWS - 2; row++) {
-            setTile(FARM_COLS - 1, row, Tile.TILE_TELEPORT);
+        for (int row = 0; row < FARM_ROWS; row++) {
+            setTile(FARM_COLS-1 , row, Tile.TILE_TELEPORT);
         }
     }
     
