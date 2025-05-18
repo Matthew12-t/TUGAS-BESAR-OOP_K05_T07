@@ -44,11 +44,7 @@ public class FarmMap extends Map {
         super.initializeMap();
         boolean loadSuccess = loadMapFromFile("RES/map.txt");
         // Tambahkan kolam kecil di pojok
-        for (int col = 1; col <= 3; col++) {
-            for (int row = 1; row <= 3; row++) {
-                setTile(col, row, Tile.TILE_WATER); // Water tile
-            }
-        }
+        
         // Tambahkan area untuk tillable land (lahan yang siap diolah)
         for (int col = 5; col <= 10; col++) {
             for (int row = 5; row <= 10; row++) {
