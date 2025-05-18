@@ -173,8 +173,12 @@ public class GamePanel extends JPanel implements Runnable {
         this.currentMap = farmMap;
         
         // Setup initial objects in maps
-        this.worldMap.setupInitialObjects();
-        this.farmMap.setupInitialObjects();
+        if(currentMap == farmMap){
+            this.farmMap.setupInitialObjects();
+        }
+        else{
+            this.worldMap.setupInitialObjects();
+        }
         
         // Set world map as the default current map
         this.farmMap.setActive(true);
