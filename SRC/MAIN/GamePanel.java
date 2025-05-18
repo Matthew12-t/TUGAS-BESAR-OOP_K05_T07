@@ -9,6 +9,7 @@ import SRC.ENTITY.Player;
 import SRC.MAP.FarmMap;
 import SRC.MAP.Map;
 import SRC.MAP.WorldMap;
+import SRC.MAP.HouseMap;
 import SRC.OBJECT.SuperObject;
 
 public class GamePanel extends JPanel implements Runnable {
@@ -37,6 +38,7 @@ public class GamePanel extends JPanel implements Runnable {
     private Map worldMap;   // World map instance
     private Map farmMap;    // Farm map instance
     private Map currentMap; // Default to farm map
+    private Map houseMap;   // House map instance
 
     // CAMERA
     private int cameraX = 0; 
@@ -82,10 +84,12 @@ public class GamePanel extends JPanel implements Runnable {
     public int getMaxWorldRow() {
         return maxWorldRow;
     }
-      public int getMaxWorldWidth() {
+    public int getMaxWorldWidth() {
         // Get width based on the active map
         if (currentMap.getMapName().equals("Farm Map")) {
             return tileSize * FarmMap.FARM_COLS;
+        } else if (currentMap.getMapName().equals("House Map")) {
+            return tileSize * HouseMap.HOUSE_COLS;
         } else {
             return tileSize * maxWorldCol;
         }
@@ -95,6 +99,8 @@ public class GamePanel extends JPanel implements Runnable {
         // Get height based on the active map
         if (currentMap.getMapName().equals("Farm Map")) {
             return tileSize * FarmMap.FARM_ROWS;
+        } else if (currentMap.getMapName().equals("House Map")) {
+            return tileSize * HouseMap.HOUSE_ROWS;
         } else {
             return tileSize * maxWorldRow;
         }
@@ -135,20 +141,31 @@ public class GamePanel extends JPanel implements Runnable {
     }
       /**
      * Switch to world map
-     */
-    public void switchToWorldMap() {
+     */    public void switchToWorldMap() {
         farmMap.setActive(false);
+        houseMap.setActive(false);
         worldMap.setActive(true);
         this.currentMap = worldMap;
     }
     
     /**
      * Switch to farm map
-     */
-    public void switchToFarmMap() {
+     */    public void switchToFarmMap() {
         worldMap.setActive(false);
+        houseMap.setActive(false);
         farmMap.setActive(true);
-        this.currentMap = farmMap;    }
+        this.currentMap = farmMap;
+    }
+    
+    /**
+     * Switch to house map
+     */
+    public void switchToHouseMap() {
+        worldMap.setActive(false);
+        farmMap.setActive(false);
+        houseMap.setActive(true);
+        this.currentMap = houseMap;
+    }
     
     /**
      * Get objects from the current map
@@ -170,19 +187,26 @@ public class GamePanel extends JPanel implements Runnable {
           // Initialize maps
         this.worldMap = new WorldMap(this);
         this.farmMap = new FarmMap(this);
-        this.currentMap = farmMap;
+        this.houseMap = new HouseMap(this);
+        this.currentMap = houseMap;
         
         // Setup initial objects in maps
         if(currentMap == farmMap){
             this.farmMap.setupInitialObjects();
         }
+        else if (currentMap == worldMap){
+            this.worldMap.setupInitialObjects();
+        }
+        else if (currentMap == houseMap){
+            this.houseMap.setupInitialObjects();
+        }
         else{
             this.worldMap.setupInitialObjects();
         }
-        
-        // Set world map as the default current map
-        this.farmMap.setActive(true);
+          // Set house map as the active map (since it's the current map)
+        this.farmMap.setActive(false);
         this.worldMap.setActive(false);
+        this.houseMap.setActive(true);
     }
 
     public void startGameThread() {
@@ -224,8 +248,7 @@ public class GamePanel extends JPanel implements Runnable {
     /**
      * Teleport player to another map by name, keeping logic transition as before
      * @param targetMapName Nama map tujuan ("Farm Map" atau "World Map")
-     */
-    public void teleportToMap(String targetMapName) {
+     */    public void teleportToMap(String targetMapName) {
         if (currentMap.getMapName().equals(targetMapName)) {
             // Sudah di map tujuan, tidak perlu teleport
             return;
@@ -240,6 +263,12 @@ public class GamePanel extends JPanel implements Runnable {
             // Pindahkan player ke posisi default masuk dari world
             player.setWorldX(tileSize * (FarmMap.FARM_COLS - 4));
             // Y tetap
+        } else if (targetMapName.equals("House Map")) {
+            switchMap(houseMap);
+            // Pindahkan player ke posisi default di tengah pintu masuk
+            int doorStart = (HouseMap.HOUSE_COLS / 2) - 1; // Center of the door
+            player.setWorldX(tileSize * doorStart);
+            player.setWorldY(tileSize * (HouseMap.HOUSE_ROWS - 2)); // One tile above the door
         }
     }
 
@@ -247,12 +276,14 @@ public class GamePanel extends JPanel implements Runnable {
         player.update(); // Update player's world position
         // Check for teleport tile
         int playerCol = player.getWorldX() / tileSize;
-        int playerRow = player.getWorldY() / tileSize;
-        int tileType = currentMap.getTile(playerCol, playerRow);
+        int playerRow = player.getWorldY() / tileSize;        int tileType = currentMap.getTile(playerCol, playerRow);
         if (tileType == SRC.TILES.Tile.TILE_TELEPORT) {
             if (currentMap.getMapName().equals("Farm Map")) {
                 teleportToMap("World Map");
             } else if (currentMap.getMapName().equals("World Map")) {
+                teleportToMap("Farm Map");
+            } else if (currentMap.getMapName().equals("House Map")) {
+                // When stepping on teleport tile in house, go to world map
                 teleportToMap("Farm Map");
             }
         }

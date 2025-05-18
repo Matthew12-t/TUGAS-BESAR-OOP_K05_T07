@@ -1,0 +1,51 @@
+package SRC.OBJECT;
+
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+import SRC.MAIN.GamePanel;
+import java.awt.image.BufferedImage;
+import java.awt.Graphics2D;
+
+public class OBJ_Table extends SuperObject {
+    // Ukuran meja dalam jumlah tile
+    private int tableWidth = 2;  // Lebar meja (jumlah kolom)
+    private int tableHeight = 2; // Tinggi meja (jumlah baris)
+
+    public OBJ_Table(GamePanel gp, int col, int row) {
+        super(gp, col, row);
+        setName("table");
+        setCollision(true);
+        try {
+            BufferedImage image = ImageIO.read(getClass().getResourceAsStream("/RES/OBJECT/table.png"));
+            if (image == null) {
+                image = ImageIO.read(new File("RES/OBJECT/table.png"));
+            }
+            setImage(image);
+        } catch (IOException | IllegalArgumentException e) {
+            System.err.println("table image not found");
+        }
+    }
+    public void draw(Graphics2D g2, GamePanel gp) {
+        // Hitung posisi layar berdasarkan posisi kamera
+        int worldX = getPosition().getWorldX();
+        int worldY = getPosition().getWorldY();
+        int screenX = worldX - gp.getCameraX();
+        int screenY = worldY - gp.getCameraY();
+
+        // Hanya render jika objek berada dalam area layar yang terlihat
+        if(worldX + (tableWidth * gp.getTileSize()) > gp.getCameraX() &&
+           worldX - gp.getTileSize() < gp.getCameraX() + gp.getScreenWidth() &&
+           worldY + (tableHeight * gp.getTileSize()) > gp.getCameraY() &&
+           worldY - gp.getTileSize() < gp.getCameraY() + gp.getScreenHeight()) {
+
+            g2.drawImage(getImage(), screenX, screenY, gp.getTileSize() * tableWidth, gp.getTileSize() * tableHeight, null);
+        }
+    }
+    public int gettableWidth() {
+        return tableWidth;
+    }
+    public int gettableHeight() {
+        return tableHeight;
+    }
+}

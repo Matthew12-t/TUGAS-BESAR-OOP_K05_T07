@@ -200,10 +200,11 @@ public abstract class Map {
      * @return true if the position has collision
      */
     public boolean hasCollision(int col, int row) {
-        // Check if the tile itself has collision
+        // Cek tile collision
         if (col >= 0 && col < maxCol && row >= 0 && row < maxRow) {
             int tileType = mapTileData[col][row];
-            if (tileType == 1) { // Assuming tile type 1 is water or another collision tile
+            // Tambahkan wall sebagai collision
+            if (tileType == 1 || tileType == SRC.TILES.Tile.TILE_WALL) {
                 return true;
             }
         }
