@@ -259,7 +259,8 @@ public abstract class Map {
      * @param col Column position in the grid
      * @param row Row position in the grid
      * @return true if house was successfully placed, false otherwise
-     */    public boolean deployHouse(int col, int row) {
+     */    
+    public boolean isdeployHouse(int col, int row) {
         // Buat objek house sementara untuk mendapatkan dimensinya
         SRC.OBJECT.OBJ_House tempHouse = new SRC.OBJECT.OBJ_House(gp, col, row);
         int houseWidth = tempHouse.getHouseWidth();

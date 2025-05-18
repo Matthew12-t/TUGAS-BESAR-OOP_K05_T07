@@ -33,9 +33,10 @@ public class GamePanel extends JPanel implements Runnable {
     // ENTITY
     private Player player = new Player(this, keyHandler, mouseHandler);
       // MAP
-    private Map currentMap; // Current active map
+     // Current active map
     private Map worldMap;   // World map instance
     private Map farmMap;    // Farm map instance
+    private Map currentMap; // Default to farm map
 
     // CAMERA
     private int cameraX = 0; 
@@ -156,7 +157,8 @@ public class GamePanel extends JPanel implements Runnable {
     public SuperObject[] getCurrentObjects() {
         return currentMap.getObjects();
     }
-      public GamePanel() {
+    
+    public GamePanel() {
         // Set the size of the game panel
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.black);
@@ -164,18 +166,19 @@ public class GamePanel extends JPanel implements Runnable {
         this.addKeyListener(keyHandler);
         this.addMouseListener(mouseHandler);
         this.setFocusable(true);
+
           // Initialize maps
         this.worldMap = new WorldMap(this);
         this.farmMap = new FarmMap(this);
+        this.currentMap = farmMap;
         
         // Setup initial objects in maps
         this.worldMap.setupInitialObjects();
         this.farmMap.setupInitialObjects();
         
         // Set world map as the default current map
-        this.worldMap.setActive(true);
-        this.farmMap.setActive(false);
-        this.currentMap = worldMap;
+        this.farmMap.setActive(true);
+        this.worldMap.setActive(false);
     }
 
     public void startGameThread() {

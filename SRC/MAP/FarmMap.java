@@ -3,17 +3,22 @@ package SRC.MAP;
 import java.awt.Graphics2D;
 import SRC.MAIN.GamePanel;
 import SRC.OBJECT.OBJ_House;
+import SRC.OBJECT.ObjectDeployer;
 import SRC.TILES.Tile;
 
 /**
  * FarmMap class represents a farming area map in the game
  */
-public class FarmMap extends Map {    // Size of the farm (smaller than the world map)
+public class FarmMap extends Map {
+    // Size of the farm (smaller than the world map)
     public static final int FARM_COLS = 32;
     public static final int FARM_ROWS = 32;
     
     // Farmland tracking
     private boolean[][] tilled; // Tracks which tiles are tilled/farmable
+    
+    // Object deployer for placing objects on the map
+    private ObjectDeployer objDeployer;
     
     /**
      * Constructor for the FarmMap
@@ -25,7 +30,12 @@ public class FarmMap extends Map {    // Size of the farm (smaller than the worl
         
         // Initialize tilled land tracker
         tilled = new boolean[FARM_COLS][FARM_ROWS];
-    }    /**
+        
+        // Initialize object deployer
+        objDeployer = new ObjectDeployer(gp);
+    }
+    
+    /**
      * Initialize the farm map dengan berbagai jenis tile
      */
     @Override
@@ -52,68 +62,57 @@ public class FarmMap extends Map {    // Size of the farm (smaller than the worl
         setTile(5, 6, Tile.TILE_PLANTED);
         // Tambahkan tile teleport di ujung kanan untuk ke WorldMap
         for (int row = 0; row < FARM_ROWS; row++) {
-            setTile(FARM_COLS - 4, row, Tile.TILE_TELEPORT);
+            setTile(FARM_COLS - 1, row, Tile.TILE_TELEPORT);
         }
-    }
-    /**
-     * Method khusus untuk menempatkan farmhouse
-     * Di farm map hanya diizinkan satu rumah
-     * @param col Kolom untuk menempatkan rumah
-     * @param row Baris untuk menempatkan rumah
-     * @return true jika berhasil ditempatkan
-     */
-    public boolean deployFarmHouse(int col, int row) {
-        // Cek apakah sudah ada rumah di farm
-        boolean houseExists = false;
-        for (int i = 0; i < objects.length; i++) {
-            if (objects[i] != null && objects[i] instanceof OBJ_House) {
-                houseExists = true;
-                break;
-            }
-        }
-        
-        // Jika sudah ada rumah, hapus rumah yang lama
-        if (houseExists) {
-            for (int i = 0; i < objects.length; i++) {
-                if (objects[i] != null && objects[i] instanceof OBJ_House) {
-                    objects[i] = null;
-                    System.out.println("Existing house removed from Farm Map");
-                    break;
-                }
-            }
-        }
-        
-        // Gunakan metode dari parent class untuk menempatkan rumah baru
-        return super.deployHouse(col, row);
     }
     
     /**
      * Set up initial objects in the farm map
-     */    @Override
+     */
+    @Override
     public void setupInitialObjects() {
-        for (int col = 0; col < maxCol; col++) {
-            for (int row = 0; row < maxRow; row++) {
-                int tileType = getTile(col, row);
-                
-                // Jika tile bertipe 2, letakkan rumah di sana
-                if (tileType == 2) {
-                    // Periksa apakah ini adalah pojok kiri atas dari kelompok tile bertipe 2
-                    // untuk memastikan rumah hanya diletakkan satu kali per area
-                    boolean isTopLeft = true;
-                    
-                    // Periksa tetangga di kiri dan atas (jika ada)
-                    if (col > 0 && getTile(col-1, row) == 2) isTopLeft = false;
-                    if (row > 0 && getTile(col, row-1) == 2) isTopLeft = false;
-                    
-                    // Jika ini adalah pojok kiri atas, letakkan rumah
-                    if (isTopLeft) {
-                        deployHouse(col, row);
-                    }
-                }
+        // Add 1 house at a random valid position
+        int attempts = 0;
+        boolean houseDeployed = false;
+
+        while (!houseDeployed && attempts < 100) {
+            // Random position for house, avoiding edges
+            int houseCol = 5 + (int) (Math.random() * (FARM_COLS - 15)); // Leave space for house (6x6) and shipping bin
+            int houseRow = 5 + (int) (Math.random() * (FARM_ROWS - 10));
+
+            // Try to place house
+            if (isValidPlacement(houseCol, houseRow)) {
+                objDeployer.deployHouse(houseCol, houseRow);
+                houseDeployed = true;
+
+                // Place shipping bin 2 tiles to the right of the house
+                // House is 6x6, so move 8 tiles right (6 + 2 gap)
+                objDeployer.deployShippingBin(houseCol + 8, houseRow);
             }
+
+            attempts++;
+        }
+
+        // Add 2-3 ponds at random valid positions
+        boolean pondDeployed = false;
+        attempts = 0; // Reset attempts counter for pond placement
+
+        while (!pondDeployed && attempts < 100) { // Add maximum attempts limit
+            // Random position for pond
+            int pondCol = 2 + (int) (Math.random() * (FARM_COLS - 6)); // Leave space for pond (4x3)
+            int pondRow = 2 + (int) (Math.random() * (FARM_ROWS - 5));
+
+            // Try to place pond
+            if (isValidPlacement(pondCol, pondRow)) {
+                objDeployer.deployPond(pondCol, pondRow);
+                pondDeployed = true; // Set to true after successful deployment
+            }
+
+            attempts++;
         }
     }
-      /**
+    
+    /**
      * Tills a specific tile to make it farmable
      * @param col Column in the map grid
      * @param row Row in the map grid
@@ -153,7 +152,8 @@ public class FarmMap extends Map {    // Size of the farm (smaller than the worl
         }
         return false;
     }
-      /**
+    
+    /**
      * Menanam seed di tilled land
      * @param col Column in the map grid
      * @param row Row in the map grid

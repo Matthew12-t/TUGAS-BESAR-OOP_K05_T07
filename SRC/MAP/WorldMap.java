@@ -2,11 +2,16 @@ package SRC.MAP;
 
 import SRC.MAIN.GamePanel;
 import SRC.OBJECT.OBJ_House;
+import SRC.OBJECT.ObjectDeployer;
+import SRC.TILES.Tile;
 
 /**
  * WorldMap class represents the main world map in the game
  */
 public class WorldMap extends Map {
+    
+    // Object deployer for placing objects on the map
+    private ObjectDeployer objDeployer;
     
     /**
      * Constructor for the WorldMap
@@ -15,7 +20,11 @@ public class WorldMap extends Map {
     public WorldMap(GamePanel gp) {
         // Use the game panel's world dimensions, allow up to 20 objects on world map
         super(gp, "World Map", gp.getMaxWorldCol(), gp.getMaxWorldRow(), 20);
+        
+        // Initialize object deployer
+        objDeployer = new ObjectDeployer(gp);
     }
+    
     /**
      * Initialize the world map with specific terrain features
      */
@@ -34,17 +43,18 @@ public class WorldMap extends Map {
             for (int col = centerX - lakeSize; col <= centerX + lakeSize; col++) {
                 for (int row = centerY - lakeSize; row <= centerY + lakeSize; row++) {
                     if (Math.sqrt(Math.pow(col - centerX, 2) + Math.pow(row - centerY, 2)) <= lakeSize) {
-                        setTile(col, row, 1); // Water tile
+                        setTile(col, row, Tile.TILE_WATER); // Water tile
                     }
                 }
             }
         }
         // Tambahkan tile teleport di ujung kiri untuk ke FarmMap
         for (int row = 0; row < maxRow; row++) {
-            setTile(0, row, SRC.TILES.Tile.TILE_TELEPORT);
+            setTile(0, row, Tile.TILE_TELEPORT);
         }
     }
-      /**
+    
+    /**
      * Setup initial objects in the world map
      */
     @Override
@@ -67,7 +77,7 @@ public class WorldMap extends Map {
                     
                     // Jika ini adalah pojok kiri atas, letakkan rumah
                     if (isTopLeft) {
-                        deployHouse(col, row);
+                        objDeployer.deployHouse(col, row);
                     }
                 }
             }
@@ -84,10 +94,41 @@ public class WorldMap extends Map {
         
         if (!houseExists) {
             System.out.println("No houses were placed based on map data, using default placements");
-            deployHouse(5, 5);
-            deployHouse(15, 8);
-            deployHouse(25, 20);
-            deployHouse(10, 25);
+            objDeployer.deployHouse(5, 5);
+            objDeployer.deployHouse(15, 8);
+            objDeployer.deployHouse(25, 20);
+            objDeployer.deployHouse(10, 25);
+        }
+        
+        // Deploy beberapa kolam secara acak
+        int numPonds = 3 + (int)(Math.random() * 3); // 3-5 kolam
+        int attempts = 0;
+        int pondsDeployed = 0;
+        
+        while (pondsDeployed < numPonds && attempts < 100) {
+            int pondCol = 5 + (int)(Math.random() * (maxCol - 10));
+            int pondRow = 5 + (int)(Math.random() * (maxRow - 10));
+            
+            // Pastikan tidak menempatkan kolam di air
+            if (getTile(pondCol, pondRow) != Tile.TILE_WATER && isValidPlacement(pondCol, pondRow)) {
+                objDeployer.deployPond(pondCol, pondRow);
+                pondsDeployed++;
+            }
+            
+            attempts++;
+        }
+        
+        // Deploy shipping bin di dekat rumah
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] != null && objects[i] instanceof OBJ_House) {
+                int houseCol = objects[i].getPosition().getCol();
+                int houseRow = objects[i].getPosition().getRow();
+                
+                // Coba tempatkan shipping bin di sebelah kanan rumah dengan jarak 2 tiles
+                if (isValidPlacement(houseCol + 8, houseRow)) {
+                    objDeployer.deployShippingBin(houseCol + 8, houseRow);
+                }
+            }
         }
     }
     

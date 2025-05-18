@@ -33,10 +33,10 @@ public class OBJ_Pond extends SuperObject {
         // Load the pond image from resource folder
         try {
             // Menggunakan gambar water.png yang sudah ada di RES/TILE/
-            BufferedImage image = ImageIO.read(getClass().getResourceAsStream("/RES/TILE/water.png"));
+            BufferedImage image = ImageIO.read(getClass().getResourceAsStream("/RES/OBJECT/pond.png"));
             if (image == null) {
                 // Try with File if resource stream doesn't work
-                image = ImageIO.read(new File("RES/TILE/water.png"));
+                image = ImageIO.read(new File("RES/OBJECT/pond.png"));
             }
             setImage(image);
             System.out.println("Pond image loaded successfully!");

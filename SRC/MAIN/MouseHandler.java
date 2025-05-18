@@ -86,19 +86,5 @@ public class MouseHandler extends MouseAdapter {
         System.out.println("Mouse clicked at screen: " + screenX + ", " + screenY + 
                            " | Target tile: " + col + ", " + row +
                            " | Target world position: " + getTargetX() + ", " + getTargetY() + " map: " + gamePanel.getCurrentMap().getMapName());
-          // Handle object placement if in placement mode
-        if (isPlacingHouse) {
-            // Get current map and use its deployment methods
-            if (gamePanel.getCurrentMap().isValidPlacement(col, row)) {
-                boolean success = gamePanel.getCurrentMap().deployHouse(col, row);
-                if (success) {
-                    System.out.println("House placed successfully at tile: " + col + ", " + row);
-                } else {
-                    System.out.println("Failed to place house at tile: " + col + ", " + row);
-                }
-            } else {
-                System.out.println("Invalid placement location at tile: " + col + ", " + row);
-            }
-        }
     }
 }
