@@ -193,59 +193,89 @@ public abstract class Map {
      */
     public boolean isActive() {
         return isActive;
-    }    /**
-     * Check if a position has collision (cannot be walked through)
+    }    
+
+    /**
+     * /**
+     * Get collision bounds at a position if any
+     * 
+     * @param col Column in the map grid
+     * @param row Row in the map grid
+     * @return int[] containing [leftBound, rightBound, topBound, bottomBound], null
+     *         if no collision
+     */
+
+    /**
+     * Get collision bounds at a position if any
+     * 
+     * @param col Column in the map grid
+     * @param row Row in the map grid
+     * @return int[] containing [leftBound, rightBound, topBound, bottomBound], null
+     *         if no collision
+     */
+    public int[] getCollisionBounds(int col, int row) {
+        // Check if the tile itself has collision (water tile)
+        if (col >= 0 && col < maxCol && row >= 0 && row < maxRow) {
+            int tileType = mapTileData[col][row];
+            if (tileType == 1) { // Water tile
+                // For water tiles, return its own bounds
+                return new int[] { col, col + 1, row, row + 1 };
+            }
+        }
+
+        // Check if there's an object with collision at this position
+        for (SuperObject obj : objects) {
+            if (obj != null) {
+                Tile objPosition = obj.getPosition();
+                int objCol = objPosition.getCol();
+                int objRow = objPosition.getRow();
+
+                // Get object dimensions and bounds
+                int width = 1; // Default width
+                int height = 1; // Default height
+
+                // Single instanceof check for any SuperObject
+                if (obj instanceof SuperObject) {
+                    // Determine dimensions based on object type
+                    if (obj instanceof OBJ_House) {
+                        width = ((OBJ_House) obj).getHouseWidth();
+                        height = ((OBJ_House) obj).getHouseHeight();
+                    } else if (obj instanceof OBJ_Pond) {
+                        width = ((OBJ_Pond) obj).getPondWidth();
+                        height = ((OBJ_Pond) obj).getPondHeight();
+                    } else if (obj instanceof OBJ_ShippingBin) {
+                        width = ((OBJ_ShippingBin) obj).getBinWidth();
+                        height = ((OBJ_ShippingBin) obj).getBinHeight();
+                    }
+
+                    // Calculate bounds
+                    int leftBound = objCol;
+                    int rightBound = objCol + width;
+                    int topBound = objRow;
+                    int bottomBound = objRow + height;
+
+                    // Check if position is within bounds
+                    if (col >= leftBound && col < rightBound &&
+                            row >= topBound && row < bottomBound) {
+                        return new int[] { leftBound, rightBound, topBound, bottomBound };
+                    }
+                }
+            }
+        }
+
+        // No collision found
+        return null;
+    }
+
+    /**
+     * Check if a position has collision (backward compatibility)
+     * 
      * @param col Column in the map grid
      * @param row Row in the map grid
      * @return true if the position has collision
      */
     public boolean hasCollision(int col, int row) {
-        // Check if the tile itself has collision
-        if (col >= 0 && col < maxCol && row >= 0 && row < maxRow) {
-            int tileType = mapTileData[col][row];
-            if (tileType == 1) { // Assuming tile type 1 is water or another collision tile
-                return true;
-            }
-        }
-          // Check if there's an object with collision at this position
-        for (SuperObject obj : objects) {
-            if (obj != null && obj.hasCollision()) {
-                Tile objPosition = obj.getPosition();
-                int objCol = objPosition.getCol();
-                int objRow = objPosition.getRow();
-                
-                // Check if position is in the area of a House
-                if (obj instanceof OBJ_House) {
-                    OBJ_House house = (OBJ_House) obj;
-                    if (col >= objCol && col < objCol + house.getHouseWidth() && 
-                        row >= objRow && row < objRow + house.getHouseHeight()) {
-                        return true;
-                    }
-                }
-                // Check if position is in the area of a Pond
-                else if (obj instanceof OBJ_Pond) {
-                    OBJ_Pond pond = (OBJ_Pond) obj;
-                    if (col >= objCol && col < objCol + pond.getPondWidth() && 
-                        row >= objRow && row < objRow + pond.getPondHeight()) {
-                        return true;
-                    }
-                }
-                // Check if position is in the area of a ShippingBin
-                else if (obj instanceof OBJ_ShippingBin) {
-                    OBJ_ShippingBin bin = (OBJ_ShippingBin) obj;
-                    if (col >= objCol && col < objCol + bin.getBinWidth() && 
-                        row >= objRow && row < objRow + bin.getBinHeight()) {
-                        return true;
-                    }
-                }
-                // For other objects, check only the exact position
-                else if (objCol == col && objRow == row) {
-                    return true;
-                }
-            }
-        }
-        
-        return false;
+        return getCollisionBounds(col, row) != null;
     }
     
     /**

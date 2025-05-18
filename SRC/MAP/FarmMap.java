@@ -57,7 +57,7 @@ public class FarmMap extends Map {
         // Tambahkan contoh planted land (lahan yang sudah ditanami)
         setTile(5, 6, Tile.TILE_PLANTED);
         // Tambahkan tile teleport di ujung kanan untuk ke WorldMap
-        for (int row = 0; row < FARM_ROWS; row++) {
+        for (int row = 0; row < FARM_ROWS - 2; row++) {
             setTile(FARM_COLS - 1, row, Tile.TILE_TELEPORT);
         }
     }
@@ -83,7 +83,7 @@ public class FarmMap extends Map {
 
                 // Place shipping bin 2 tiles to the right of the house
                 // House is 6x6, so move 8 tiles right (6 + 2 gap)
-                objDeployer.deployShippingBin(houseCol + 8, houseRow);
+                objDeployer.deployShippingBin(houseCol + 8, houseRow + 3);
             }
 
             attempts++;

@@ -28,16 +28,14 @@ public class OBJ_ShippingBin extends SuperObject {
         super(gp, col, row);
         setName("Shipping Bin");
         
-        // Shipping bin memiliki collision
-        setCollision(true);
         
         // Load the shipping bin image or create a temporary one
         try {
             // Coba gunakan house image jika ada
-            BufferedImage image = ImageIO.read(getClass().getResourceAsStream("/RES/OBJECT/house.png"));
+            BufferedImage image = ImageIO.read(getClass().getResourceAsStream("/RES/OBJECT/shippingbin.png"));
             if (image == null) {
                 // Try with File if resource stream doesn't work
-                image = ImageIO.read(new File("RES/OBJECT/house.png"));
+                image = ImageIO.read(new File("RES/OBJECT/shippingbin.png"));
             }
             setImage(image);
             System.out.println("Shipping bin image loaded successfully!");        } catch (IOException e) {
@@ -77,9 +75,6 @@ public class OBJ_ShippingBin extends SuperObject {
                         gp.getTileSize() * binWidth, 
                         gp.getTileSize() * binHeight, null);
             
-            // Tambahkan teks untuk identifikasi (opsional)
-            g2.setColor(Color.WHITE);
-            g2.drawString("Ship", screenX + 10, screenY + 20);
         }
     }
     

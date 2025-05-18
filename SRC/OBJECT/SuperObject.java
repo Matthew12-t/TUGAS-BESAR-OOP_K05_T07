@@ -12,7 +12,6 @@ import SRC.TILES.Tile;
 public class SuperObject {    
     private BufferedImage image;
     private String name;
-    private boolean collision = false;
     private Tile position;
     
     // Constructor
@@ -53,15 +52,8 @@ public class SuperObject {
     public void setName(String name) {
         this.name = name;
     }
-    
-    public boolean hasCollision() {
-        return collision;
-    }
-    
-    public void setCollision(boolean collision) {
-        this.collision = collision;
-    }
-      public int getWorldX() {
+
+    public int getWorldX() {
         return position.getWorldX();
     }
     

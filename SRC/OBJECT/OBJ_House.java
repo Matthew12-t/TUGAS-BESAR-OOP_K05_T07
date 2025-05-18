@@ -28,9 +28,6 @@ public class OBJ_House extends SuperObject {
         super(gp, col, row);
         setName("House");
         
-        // Default: Houses have collision
-        setCollision(true);
-        
         // Load the house image from resource folder
         try {
             BufferedImage image = ImageIO.read(getClass().getResourceAsStream("/RES/OBJECT/house.png"));

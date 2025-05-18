@@ -27,8 +27,6 @@ public class OBJ_Pond extends SuperObject {
         super(gp, col, row);
         setName("Pond");
         
-        // Kolam memiliki collision
-        setCollision(true);
         
         // Load the pond image from resource folder
         try {
