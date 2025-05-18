@@ -36,6 +36,8 @@ public class Tile {
     public static final int TILE_TILLED = 3;   // Tilled land (t)
     public static final int TILE_PLANTED = 4;  // Planted land (l)
     public static final int TILE_TELEPORT = 5; // Teleport tile
+    public static final int TILE_FLOOR = 6; // lantai
+    public static final int TILE_WALL = 7;  // tembok
     
     // Resource untuk tile
     private static Image grassTile;
@@ -43,6 +45,8 @@ public class Tile {
     private static Image tillableTile;
     private static Image tilledTile;
     private static Image plantedTile;
+    private static Image floorTile;
+    private static Image wallTile;
     
     // Static initializer untuk memuat resource
     static {
@@ -63,6 +67,17 @@ public class Tile {
             waterTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/water.png"));
             if (waterTile == null) {
                 waterTile = ImageIO.read(new File("RES/TILE/water.png"));
+            }
+            
+            // Load Floor Tile
+            floorTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/lantai.png"));
+            if (floorTile == null) {
+                floorTile = ImageIO.read(new File("RES/TILE/lantai.png"));
+            }
+            // Load Wall Tile
+            wallTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/tembok.png"));
+            if (wallTile == null) {
+                wallTile = ImageIO.read(new File("RES/TILE/tembok.png"));
             }
             
             // Untuk saat ini, kita gunakan grass sebagai fallback untuk tile yang belum punya gambar
@@ -196,6 +211,38 @@ public class Tile {
     }
     
     /**
+     * Menggambar floor tile pada posisi layar tertentu
+     * @param g2 Graphics context untuk menggambar
+     * @param screenX Posisi X pada layar
+     * @param screenY Posisi Y pada layar
+     * @param tileSize Ukuran tile yang akan digambar
+     */
+    public static void drawFloorTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        if (floorTile != null) {
+            g2.drawImage(floorTile, screenX, screenY, tileSize, tileSize, null);
+        } else {
+            g2.setColor(java.awt.Color.red);
+            g2.fillRect(screenX, screenY, tileSize, tileSize);
+        }
+    }
+    
+    /**
+     * Menggambar wall tile pada posisi layar tertentu
+     * @param g2 Graphics context untuk menggambar
+     * @param screenX Posisi X pada layar
+     * @param screenY Posisi Y pada layar
+     * @param tileSize Ukuran tile yang akan digambar
+     */
+    public static void drawWallTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        if (wallTile != null) {
+            g2.drawImage(wallTile, screenX, screenY, tileSize, tileSize, null);
+        } else {
+            g2.setColor(java.awt.Color.black);
+            g2.fillRect(screenX, screenY, tileSize, tileSize);
+        }
+    }
+    
+    /**
      * Menggambar tile sesuai dengan tipe yang diberikan
      * @param g2 Graphics context untuk menggambar
      * @param screenX Posisi X pada layar
@@ -225,6 +272,12 @@ public class Tile {
                 // g2.setColor(java.awt.Color.MAGENTA);
                 // g2.fillRect(screenX, screenY, tileSize, tileSize);
                 drawGrassTile(g2, screenX, screenY, tileSize);
+                break;
+            case TILE_FLOOR:
+                drawFloorTile(g2, screenX, screenY, tileSize);
+                break;
+            case TILE_WALL:
+                drawWallTile(g2, screenX, screenY, tileSize);
                 break;
             default:
                 // Default to grass

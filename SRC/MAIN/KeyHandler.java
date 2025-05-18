@@ -47,10 +47,13 @@ public class KeyHandler implements KeyListener {
             if(code == KeyEvent.VK_1) {
                 gamePanel.switchToWorldMap();
                 System.out.println("Switched to World Map");
-            }
-            if(code == KeyEvent.VK_2) {
+            }            if(code == KeyEvent.VK_2) {
                 gamePanel.switchToFarmMap();
                 System.out.println("Switched to Farm Map");
+            }
+            if(code == KeyEvent.VK_3) {
+                gamePanel.switchToHouseMap();
+                System.out.println("Switched to House Map");
             }
             
             // Object placement mode
