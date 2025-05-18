@@ -14,6 +14,7 @@ public class OBJ_Bed extends SuperObject {
     public OBJ_Bed(GamePanel gp, int col, int row) {
         super(gp, col, row);
         setName("Bed");
+        getPosition().setCollision(true); // Bed cannot be passed through
         try {
             BufferedImage image = ImageIO.read(getClass().getResourceAsStream("/RES/OBJECT/bed.png"));
             if (image == null) {

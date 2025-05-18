@@ -14,6 +14,7 @@ public class OBJ_Chair extends SuperObject {
     public OBJ_Chair(GamePanel gp, int col, int row) {
         super(gp, col, row);
         setName("chair");
+        getPosition().setCollision(true); // Chair cannot be passed through
         try {
             BufferedImage image = ImageIO.read(getClass().getResourceAsStream("/RES/OBJECT/chair.png"));
             if (image == null) {

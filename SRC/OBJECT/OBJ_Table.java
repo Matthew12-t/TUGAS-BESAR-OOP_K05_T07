@@ -15,6 +15,7 @@ public class OBJ_Table extends SuperObject {
     public OBJ_Table(GamePanel gp, int col, int row) {
         super(gp, col, row);
         setName("table");
+        getPosition().setCollision(true); // Table cannot be passed through
         try {
             BufferedImage image = ImageIO.read(getClass().getResourceAsStream("/RES/OBJECT/table.png"));
             if (image == null) {

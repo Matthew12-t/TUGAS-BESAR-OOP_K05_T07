@@ -20,6 +20,13 @@ public class FarmMap extends Map {
     // Object deployer for placing objects on the map
     private ObjectDeployer objDeployer;
     
+    // Koordinat teleport ke HouseMap
+    private int teleportToHouseCol = -1;
+    private int teleportToHouseRow = -1;
+    // Koordinat depan rumah (untuk spawn setelah keluar dari HouseMap)
+    private int depanRumahCol = -1;
+    private int depanRumahRow = -1;
+    
     /**
      * Constructor for the FarmMap
      * @param gp GamePanel reference
@@ -75,7 +82,13 @@ public class FarmMap extends Map {
             // Random position for house, avoiding edges
             int houseCol = 5 + (int) (Math.random() * (FARM_COLS - 15)); // Leave space for house (6x6) and shipping bin
             int houseRow = 5 + (int) (Math.random() * (FARM_ROWS - 10));
-
+            setTile(houseCol + 3, houseRow +6, Tile.TILE_TELEPORT); // Set tile as tillable for house placement
+            // Simpan koordinat teleport ke HouseMap
+            teleportToHouseCol = houseCol + 3;
+            teleportToHouseRow = houseRow + 6;
+            // Simpan koordinat depan rumah (1 tile di bawah pintu rumah)
+            depanRumahCol = teleportToHouseCol ;
+            depanRumahRow = teleportToHouseRow + 1;
             // Try to place house
             if (isValidPlacement(houseCol, houseRow)) {
                 objDeployer.deployHouse(houseCol, houseRow);
@@ -183,5 +196,21 @@ public class FarmMap extends Map {
         
         // Gunakan metode dari Tile untuk menggambar tile sesuai tipenya
         Tile.drawTileByType(g2, screenX, screenY, gp.getTileSize(), tileType);
+    }
+
+    public int getTeleportToHouseCol() {
+        return teleportToHouseCol;
+    }
+
+    public int getTeleportToHouseRow() {
+        return teleportToHouseRow;
+    }
+
+    public int getDepanRumahCol() {
+        return depanRumahCol;
+    }
+
+    public int getDepanRumahRow() {
+        return depanRumahRow;
     }
 }

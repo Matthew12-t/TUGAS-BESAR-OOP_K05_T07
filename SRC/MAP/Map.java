@@ -214,11 +214,11 @@ public abstract class Map {
      *         if no collision
      */
     public int[] getCollisionBounds(int col, int row) {
-        // Check if the tile itself has collision (water tile)
+        // Check if the tile itself has collision (water tile or wall tile)
         if (col >= 0 && col < maxCol && row >= 0 && row < maxRow) {
             int tileType = mapTileData[col][row];
-            if (tileType == 1) { // Water tile
-                // For water tiles, return its own bounds
+            if (tileType == 1 || tileType == 7) { // Water or Wall tile
+                // For water or wall tiles, return its own bounds
                 return new int[] { col, col + 1, row, row + 1 };
             }
         }
@@ -234,31 +234,37 @@ public abstract class Map {
                 int width = 1; // Default width
                 int height = 1; // Default height
 
-                // Single instanceof check for any SuperObject
-                if (obj instanceof SuperObject) {
-                    // Determine dimensions based on object type
-                    if (obj instanceof OBJ_House) {
-                        width = ((OBJ_House) obj).getHouseWidth();
-                        height = ((OBJ_House) obj).getHouseHeight();
-                    } else if (obj instanceof OBJ_Pond) {
-                        width = ((OBJ_Pond) obj).getPondWidth();
-                        height = ((OBJ_Pond) obj).getPondHeight();
-                    } else if (obj instanceof OBJ_ShippingBin) {
-                        width = ((OBJ_ShippingBin) obj).getBinWidth();
-                        height = ((OBJ_ShippingBin) obj).getBinHeight();
-                    }
+                // Tentukan dimensi berdasarkan tipe objek
+                if (obj instanceof OBJ_House) {
+                    width = ((OBJ_House) obj).getHouseWidth();
+                    height = ((OBJ_House) obj).getHouseHeight();
+                } else if (obj instanceof OBJ_Pond) {
+                    width = ((OBJ_Pond) obj).getPondWidth();
+                    height = ((OBJ_Pond) obj).getPondHeight();
+                } else if (obj instanceof OBJ_ShippingBin) {
+                    width = ((OBJ_ShippingBin) obj).getBinWidth();
+                    height = ((OBJ_ShippingBin) obj).getBinHeight();
+                } else if (obj instanceof SRC.OBJECT.OBJ_Table) {
+                    width = ((SRC.OBJECT.OBJ_Table) obj).gettableWidth();
+                    height = ((SRC.OBJECT.OBJ_Table) obj).gettableHeight();
+                } else if (obj instanceof SRC.OBJECT.OBJ_Bed) {
+                    width = ((SRC.OBJECT.OBJ_Bed) obj).getBedWidth();
+                    height = ((SRC.OBJECT.OBJ_Bed) obj).getBedHeight();
+                } else if (obj instanceof SRC.OBJECT.OBJ_Chair) {
+                    width = ((SRC.OBJECT.OBJ_Chair) obj).getchairWidth();
+                    height = ((SRC.OBJECT.OBJ_Chair) obj).getchairHeight();
+                }
 
-                    // Calculate bounds
-                    int leftBound = objCol;
-                    int rightBound = objCol + width;
-                    int topBound = objRow;
-                    int bottomBound = objRow + height;
+                // Calculate bounds
+                int leftBound = objCol;
+                int rightBound = objCol + width;
+                int topBound = objRow;
+                int bottomBound = objRow + height;
 
-                    // Check if position is within bounds
-                    if (col >= leftBound && col < rightBound &&
-                            row >= topBound && row < bottomBound) {
-                        return new int[] { leftBound, rightBound, topBound, bottomBound };
-                    }
+                // Check if position is within bounds
+                if (col >= leftBound && col < rightBound &&
+                        row >= topBound && row < bottomBound) {
+                    return new int[] { leftBound, rightBound, topBound, bottomBound };
                 }
             }
         }

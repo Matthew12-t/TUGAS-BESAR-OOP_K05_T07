@@ -25,7 +25,9 @@ public class GamePanel extends JPanel implements Runnable {
     // Default world dimensions (for WorldMap)
     private final int maxWorldCol = 32;
     private final int maxWorldRow = 32;
-    
+    private boolean isInitializedFarmMap = false; // Flag to check if farm map is initialized
+    private boolean isInitializedHouseMap = false; // Flag to check if house map is initialized
+    private boolean isInitializedWorldMap = false; // Flag to check if world map is initialized
     // SYSTEM
     private KeyHandler keyHandler = new KeyHandler(this);
     private MouseHandler mouseHandler = new MouseHandler(this);
@@ -166,7 +168,24 @@ public class GamePanel extends JPanel implements Runnable {
         houseMap.setActive(true);
         this.currentMap = houseMap;
     }
-    
+    public void setIsInitializedFarmMap(boolean isInitialized) {
+        this.isInitializedFarmMap = isInitialized;
+    }
+    public boolean isInitializedFarmMap() {
+        return isInitializedFarmMap;
+    }
+    public void setIsInitializedHouseMap(boolean isInitialized) {
+        this.isInitializedHouseMap = isInitialized;
+    }
+    public boolean isInitializedHouseMap() {
+        return isInitializedHouseMap;
+    }
+    public void setIsInitializedWorldMap(boolean isInitialized) {
+        this.isInitializedWorldMap = isInitialized;
+    }
+    public boolean isInitializedWorldMap() {
+        return isInitializedWorldMap;
+    }
     /**
      * Get objects from the current map
      * @return Array of objects on the current map
@@ -188,7 +207,8 @@ public class GamePanel extends JPanel implements Runnable {
         this.worldMap = new WorldMap(this);
         this.farmMap = new FarmMap(this);
         this.houseMap = new HouseMap(this);
-        this.currentMap = farmMap;
+        this.currentMap = houseMap;
+        setIsInitializedHouseMap(true);
         
         // Setup initial objects in maps
         if(currentMap == farmMap){
@@ -255,20 +275,45 @@ public class GamePanel extends JPanel implements Runnable {
         }
         if (targetMapName.equals("World Map")) {
             switchMap(worldMap);
+            if (!isInitializedWorldMap) {
+                worldMap.setupInitialObjects();
+                isInitializedWorldMap = true;
+            }
             // Pindahkan player ke posisi default masuk dari farm
             player.setWorldX(tileSize * 1); // Kolom ke-2
             // Y tetap
         } else if (targetMapName.equals("Farm Map")) {
-            switchMap(farmMap);
-            // Pindahkan player ke posisi default masuk dari world
-            player.setWorldX(tileSize * (FarmMap.FARM_COLS - 4));
-            // Y tetap
+            // Jika teleport dari HouseMap, posisikan player di depan rumah
+            if (currentMap.getMapName().equals("House Map")) {
+                //farmMap.setupInitialObjects();
+                switchMap(farmMap);
+                if (!isInitializedFarmMap) {
+                    farmMap.setupInitialObjects();
+                    isInitializedFarmMap = true;
+                }
+                FarmMap farmMapRef = (FarmMap) farmMap;
+                player.setWorldX(tileSize * farmMapRef.getDepanRumahCol());
+                player.setWorldY(tileSize * farmMapRef.getDepanRumahRow());
+            } else {
+                switchMap(farmMap);
+                if (!isInitializedFarmMap) {
+                    farmMap.setupInitialObjects();
+                    isInitializedFarmMap = true;
+                }
+                // Pindahkan player ke posisi default masuk dari world
+                player.setWorldX(tileSize * (FarmMap.FARM_COLS - 4));
+                // Y tetap
+            }
         } else if (targetMapName.equals("House Map")) {
             switchMap(houseMap);
+            if (!isInitializedHouseMap) {
+                houseMap.setupInitialObjects();
+                isInitializedHouseMap = true;
+            }
             // Pindahkan player ke posisi default di tengah pintu masuk
             int doorStart = (HouseMap.HOUSE_COLS / 2) - 1; // Center of the door
             player.setWorldX(tileSize * doorStart);
-            player.setWorldY(tileSize * (HouseMap.HOUSE_ROWS - 2)); // One tile above the door
+            player.setWorldY(tileSize * (HouseMap.HOUSE_ROWS - 5)); // One tile above the door
         }
     }
 
@@ -284,11 +329,17 @@ public class GamePanel extends JPanel implements Runnable {
         int tileType = currentMap.getTile(playerCol, playerRow);
         if (tileType == SRC.TILES.Tile.TILE_TELEPORT) {
             if (currentMap.getMapName().equals("Farm Map")) {
-                teleportToMap("World Map");
+                FarmMap farmMapRef = (FarmMap) farmMap;
+                // Teleport ke HouseMap jika di bawah rumah
+                if (playerCol == farmMapRef.getTeleportToHouseCol() && playerRow == farmMapRef.getTeleportToHouseRow()) {
+                    teleportToMap("House Map");
+                } else if (playerCol == FarmMap.FARM_COLS - 1) {
+                    teleportToMap("World Map");
+                }
             } else if (currentMap.getMapName().equals("World Map")) {
                 teleportToMap("Farm Map");
             } else if (currentMap.getMapName().equals("House Map")) {
-                // When stepping on teleport tile in house, go to world map
+                // When stepping on teleport tile in house, go to farm map
                 teleportToMap("Farm Map");
             }
         }
