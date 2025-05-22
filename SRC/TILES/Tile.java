@@ -25,7 +25,7 @@ public class Tile {
     // Properti tile
     private boolean collision = false;
     private BufferedImage image;
-    private String type = "";
+    private int type;
       // Area solid untuk collision detection
     private Rectangle solidArea;
     
@@ -35,18 +35,133 @@ public class Tile {
     public static final int TILE_TILLABLE = 2; // Tillable land (.)
     public static final int TILE_TILLED = 3;   // Tilled land (t)
     public static final int TILE_PLANTED = 4;  // Planted land (l)
-    public static final int TILE_TELEPORT = 5; // Teleport tile
+    public static final int TILE_TELEPORT = 5; // teleport    
     public static final int TILE_FLOOR = 6; // lantai
     public static final int TILE_WALL = 7;  // tembok
-    
+    public static final int TILE_PATH = 8;
+
     // Resource untuk tile
     private static Image grassTile;
     private static Image waterTile;
+    private static Image pathTile;
     private static Image tillableTile;
     private static Image tilledTile;
     private static Image plantedTile;
     private static Image floorTile;
     private static Image wallTile;
+
+    
+    public Tile(GamePanel gp, int col, int row) {
+        this.col = col;
+        this.row = row;
+        this.worldX = col * gp.getTileSize();
+        this.worldY = row * gp.getTileSize();
+        this.solidArea = new Rectangle(0, 0, gp.getTileSize(), gp.getTileSize());
+    }
+    
+    
+    // Getter dan Setter
+    public int getWorldX() {
+        return worldX;
+    }
+    
+    public void setWorldX(int worldX) {
+        this.worldX = worldX;
+        this.col = worldX / solidArea.width;
+    }
+    
+    public int getWorldY() {
+        return worldY;
+    }
+    
+    public void setWorldY(int worldY) {
+        this.worldY = worldY;
+        this.row = worldY / solidArea.height;
+    }
+    
+    public int getCol() {
+        return col;
+    }
+    
+    public void setCol(GamePanel gp, int col) {
+        this.col = col;
+        this.worldX = col * gp.getTileSize();
+    }
+    
+    public int getRow() {
+        return row;
+    }
+    
+    public void setRow(GamePanel gp, int row) {
+        this.row = row;
+        this.worldY = row * gp.getTileSize();
+    }
+    
+    public boolean hasCollision() {
+        return collision;
+    }
+    
+    public void setCollision(boolean collision) {
+        this.collision = collision;
+    }
+    
+    public BufferedImage getImage() {
+        return image;
+    }
+    
+    public void setImage(BufferedImage image) {
+        this.image = image;
+    }
+      public int getType() {
+        return type;
+    }
+    
+    public void setType(int type) {
+        this.type = type;
+    }
+    
+    public Rectangle getSolidArea() {
+        return solidArea;
+    }
+    
+    /**
+     * Mengecek apakah tile ini sama dengan tile lain
+     * @param other Tile lain yang akan dibandingkan
+     * @return true jika pointrid (col, row) sama
+     */    
+    public boolean equals(Tile other) {
+        return this.col == other.col && this.row == other.row;
+    }
+    
+    /**
+     * Menghitung jarak Manhattan antara tile ini dengan tile lain
+     * @param other Tile lain
+     * @return Jarak Manhattan (jumlah langkah horizontal dan vertikal)
+     */
+    public int distanceTo(Tile other) {
+        return Math.abs(this.col - other.col) + Math.abs(this.row - other.row);
+    }
+    
+    /**
+     * Mendapatkan posisi tengah tile dalam koordinat dunia
+     * @return Array berisi [centerX, centerY]
+     */
+    public int[] getCenter() {
+        int centerX = worldX + solidArea.width / 2;
+        int centerY = worldY + solidArea.height / 2;
+        return new int[]{centerX, centerY};
+    }
+    
+    /**
+     * Mengecek apakah suatu koordinat dunia terletak di dalam tile ini
+     * @param x Koordinat X dunia
+     * @param y Koordinat Y dunia
+     * @return true jika koordinat berada dalam tile
+     */
+    public boolean contains(int x, int y) {
+        return x >= worldX && x < worldX + solidArea.width &&
+               y >= worldY && y < worldY + solidArea.height;
+    }
     
     // Static initializer untuk memuat resource
     static {
@@ -79,6 +194,11 @@ public class Tile {
             if (wallTile == null) {
                 wallTile = ImageIO.read(new File("RES/TILE/tembok.png"));
             }
+            // Load Path Tile
+            pathTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/path.png"));
+            if (pathTile == null) {
+                pathTile = ImageIO.read(new File("RES/TILE/path.png"));
+            }
             
             // Untuk saat ini, kita gunakan grass sebagai fallback untuk tile yang belum punya gambar
             tillableTile = grassTile;
@@ -94,38 +214,13 @@ public class Tile {
             e.printStackTrace();
         }
     }
-      /**
-     * Menggambar grass tile pada posisi layar tertentu
-     * @param g2 Graphics context untuk menggambar
-     * @param screenX Posisi X pada layar
-     * @param screenY Posisi Y pada layar
-     * @param tileSize Ukuran tile yang akan digambar
-     */
+
     public static void drawGrassTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
-        if (grassTile != null) {
-            g2.drawImage(grassTile, screenX, screenY, tileSize, tileSize, null);
-        } else {
-            // Fallback jika gambar tidak terload
-            g2.setColor(java.awt.Color.GREEN);
-            g2.fillRect(screenX, screenY, tileSize, tileSize);
-        }
+        g2.drawImage(grassTile, screenX, screenY, tileSize, tileSize, null);
     }
     
-    /**
-     * Menggambar water tile pada posisi layar tertentu
-     * @param g2 Graphics context untuk menggambar
-     * @param screenX Posisi X pada layar
-     * @param screenY Posisi Y pada layar
-     * @param tileSize Ukuran tile yang akan digambar
-     */
     public static void drawWaterTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
-        if (waterTile != null) {
-            g2.drawImage(waterTile, screenX, screenY, tileSize, tileSize, null);
-        } else {
-            // Fallback jika gambar tidak terload
-            g2.setColor(java.awt.Color.BLUE);
-            g2.fillRect(screenX, screenY, tileSize, tileSize);
-        }
+        g2.drawImage(waterTile, screenX, screenY, tileSize, tileSize, null);
     }
     
     /**
@@ -204,41 +299,96 @@ public class Tile {
             // Tambahkan tanaman (l)
             g2.setColor(new java.awt.Color(0, 153, 0)); // Bright green
             int plantWidth = tileSize / 5;
-            int plantHeight = tileSize / 3;            g2.fillRect(screenX + (tileSize/2) - (plantWidth/2), 
+            int plantHeight = tileSize / 3;            
+            g2.fillRect(screenX + (tileSize/2) - (plantWidth/2), 
                        screenY + (tileSize/3), 
                        plantWidth, plantHeight);
         }
     }
     
-    /**
-     * Menggambar floor tile pada posisi layar tertentu
-     * @param g2 Graphics context untuk menggambar
-     * @param screenX Posisi X pada layar
-     * @param screenY Posisi Y pada layar
-     * @param tileSize Ukuran tile yang akan digambar
-     */
     public static void drawFloorTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
-        if (floorTile != null) {
-            g2.drawImage(floorTile, screenX, screenY, tileSize, tileSize, null);
-        } else {
-            g2.setColor(java.awt.Color.red);
-            g2.fillRect(screenX, screenY, tileSize, tileSize);
-        }
+        g2.drawImage(floorTile, screenX, screenY, tileSize, tileSize, null);
+    }
+    
+    public static void drawWallTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(wallTile, screenX, screenY, tileSize, tileSize, null);
+
     }
     
     /**
-     * Menggambar wall tile pada posisi layar tertentu
+     * Menggambar teleport tile pada posisi layar tertentu
      * @param g2 Graphics context untuk menggambar
      * @param screenX Posisi X pada layar
      * @param screenY Posisi Y pada layar
      * @param tileSize Ukuran tile yang akan digambar
      */
-    public static void drawWallTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
-        if (wallTile != null) {
-            g2.drawImage(wallTile, screenX, screenY, tileSize, tileSize, null);
+    public static void makeTeleportTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        // Draw grass as base layer
+        drawGrassTile(g2, screenX, screenY, tileSize);
+        
+        // Draw magenta circle to indicate teleport point
+        g2.setColor(java.awt.Color.MAGENTA);
+        int circleSize = (int)(tileSize * 0.6);
+        int circleX = screenX + (tileSize - circleSize) / 2;
+        int circleY = screenY + (tileSize - circleSize) / 2;
+        g2.fillOval(circleX, circleY, circleSize, circleSize);
+        
+        // Draw white arrow indicators
+        g2.setColor(java.awt.Color.WHITE);
+        int arrowSize = tileSize / 4;
+        
+        // Draw four arrows pointing inward to indicate teleport
+        // Top arrow
+        int[] xPointsTop = {screenX + tileSize/2, screenX + tileSize/2 - arrowSize/2, screenX + tileSize/2 + arrowSize/2};
+        int[] yPointsTop = {screenY + tileSize/4, screenY + tileSize/4 + arrowSize, screenY + tileSize/4 + arrowSize};
+        g2.fillPolygon(xPointsTop, yPointsTop, 3);
+        
+        // Bottom arrow
+        int[] xPointsBottom = {screenX + tileSize/2, screenX + tileSize/2 - arrowSize/2, screenX + tileSize/2 + arrowSize/2};
+        int[] yPointsBottom = {screenY + tileSize*3/4, screenY + tileSize*3/4 - arrowSize, screenY + tileSize*3/4 - arrowSize};
+        g2.fillPolygon(xPointsBottom, yPointsBottom, 3);
+        
+        // Left arrow
+        int[] xPointsLeft = {screenX + tileSize/4, screenX + tileSize/4 + arrowSize, screenX + tileSize/4 + arrowSize};
+        int[] yPointsLeft = {screenY + tileSize/2, screenY + tileSize/2 - arrowSize/2, screenY + tileSize/2 + arrowSize/2};
+        g2.fillPolygon(xPointsLeft, yPointsLeft, 3);
+        
+        // Right arrow
+        int[] xPointsRight = {screenX + tileSize*3/4, screenX + tileSize*3/4 - arrowSize, screenX + tileSize*3/4 - arrowSize};
+        int[] yPointsRight = {screenY + tileSize/2, screenY + tileSize/2 - arrowSize/2, screenY + tileSize/2 + arrowSize/2};
+        g2.fillPolygon(xPointsRight, yPointsRight, 3);
+    }
+    
+    /**
+     * Menggambar path tile pada posisi layar tertentu
+     * @param g2 Graphics context untuk menggambar
+     * @param screenX Posisi X pada layar
+     * @param screenY Posisi Y pada layar
+     * @param tileSize Ukuran tile yang akan digambar
+     */
+    public static void drawPathTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        if (pathTile != null) {
+            g2.drawImage(pathTile, screenX, screenY, tileSize, tileSize, null);
         } else {
-            g2.setColor(java.awt.Color.black);
+            // Fallback jika gambar tidak terload
+            g2.setColor(new java.awt.Color(210, 180, 140)); // Tan/sand color
             g2.fillRect(screenX, screenY, tileSize, tileSize);
+            
+            // Add path texture with lines
+            g2.setColor(new java.awt.Color(180, 150, 110)); // Slightly darker tan
+            int lineGap = tileSize / 8;
+            
+            // Horizontal lines
+            for (int i = 1; i < 8; i += 2) {
+                g2.drawLine(screenX, screenY + i * lineGap, 
+                           screenX + tileSize, screenY + i * lineGap);
+            }
+            
+            // Vertical lines
+            for (int i = 1; i < 8; i += 2) {
+                g2.drawLine(screenX + i * lineGap, screenY, 
+                           screenX + i * lineGap, screenY + tileSize);
+            }
         }
     }
     
@@ -249,8 +399,7 @@ public class Tile {
      * @param screenY Posisi Y pada layar
      * @param tileSize Ukuran tile yang akan digambar
      * @param tileType Tipe tile yang akan digambar
-     */
-    public static void drawTileByType(Graphics2D g2, int screenX, int screenY, int tileSize, int tileType) {
+     */    public static void drawTileByType(Graphics2D g2, int screenX, int screenY, int tileSize, int tileType) {
         switch (tileType) {
             case TILE_GRASS:
                 drawGrassTile(g2, screenX, screenY, tileSize);
@@ -268,10 +417,7 @@ public class Tile {
                 drawPlantedTile(g2, screenX, screenY, tileSize);
                 break;
             case TILE_TELEPORT:
-                // Draw teleport tile as magenta rectangle (placeholder)
-                // g2.setColor(java.awt.Color.MAGENTA);
-                // g2.fillRect(screenX, screenY, tileSize, tileSize);
-                drawGrassTile(g2, screenX, screenY, tileSize);
+                makeTeleportTile(g2, screenX, screenY, tileSize);
                 break;
             case TILE_FLOOR:
                 drawFloorTile(g2, screenX, screenY, tileSize);
@@ -279,142 +425,13 @@ public class Tile {
             case TILE_WALL:
                 drawWallTile(g2, screenX, screenY, tileSize);
                 break;
+            case TILE_PATH:
+                drawPathTile(g2, screenX, screenY, tileSize);
+                break;
             default:
-                // Default to grass
                 drawGrassTile(g2, screenX, screenY, tileSize);
+                break;
         }
-    }
-    
-    /**
-     * Konstruktor untuk membuat Tile baru berdasarkan kolom dan baris
-     * @param gp GamePanel untuk mendapatkan ukuran tile
-     * @param col Kolom dalam grid
-     * @param row Baris dalam grid
-     */
-    public Tile(GamePanel gp, int col, int row) {
-        this.col = col;
-        this.row = row;
-        this.worldX = col * gp.getTileSize();
-        this.worldY = row * gp.getTileSize();
-        this.solidArea = new Rectangle(0, 0, gp.getTileSize(), gp.getTileSize());
-    }
-    
-    /**
-     * Konstruktor untuk membuat Tile baru berdasarkan koordinat dunia
-     * @param gp GamePanel untuk mendapatkan ukuran tile
-     * @param worldX Posisi X dalam koordinat dunia (pixel)
-     * @param worldY Posisi Y dalam koordinat dunia (pixel)
-     */
-    public Tile(GamePanel gp, int worldX, int worldY, boolean isWorldPos) {
-        this.worldX = worldX;
-        this.worldY = worldY;
-        this.col = worldX / gp.getTileSize();
-        this.row = worldY / gp.getTileSize();
-        this.solidArea = new Rectangle(0, 0, gp.getTileSize(), gp.getTileSize());
-    }
-    
-    // Getter dan Setter
-    public int getWorldX() {
-        return worldX;
-    }
-    
-    public void setWorldX(int worldX) {
-        this.worldX = worldX;
-        this.col = worldX / solidArea.width;
-    }
-    
-    public int getWorldY() {
-        return worldY;
-    }
-    
-    public void setWorldY(int worldY) {
-        this.worldY = worldY;
-        this.row = worldY / solidArea.height;
-    }
-    
-    public int getCol() {
-        return col;
-    }
-    
-    public void setCol(GamePanel gp, int col) {
-        this.col = col;
-        this.worldX = col * gp.getTileSize();
-    }
-    
-    public int getRow() {
-        return row;
-    }
-    
-    public void setRow(GamePanel gp, int row) {
-        this.row = row;
-        this.worldY = row * gp.getTileSize();
-    }
-    
-    public boolean hasCollision() {
-        return collision;
-    }
-    
-    public void setCollision(boolean collision) {
-        this.collision = collision;
-    }
-    
-    public BufferedImage getImage() {
-        return image;
-    }
-    
-    public void setImage(BufferedImage image) {
-        this.image = image;
-    }
-    
-    public String getType() {
-        return type;
-    }
-    
-    public void setType(String type) {
-        this.type = type;
-    }
-    
-    public Rectangle getSolidArea() {
-        return solidArea;
-    }
-    
-    /**
-     * Mengecek apakah tile ini sama dengan tile lain
-     * @param other Tile lain yang akan dibandingkan
-     * @return true jika posisi grid (col, row) sama
-     */
-    public boolean equals(Tile other) {
-        return this.col == other.col && this.row == other.row;
-    }
-    
-    /**
-     * Menghitung jarak Manhattan antara tile ini dengan tile lain
-     * @param other Tile lain
-     * @return Jarak Manhattan (jumlah langkah horizontal dan vertikal)
-     */
-    public int distanceTo(Tile other) {
-        return Math.abs(this.col - other.col) + Math.abs(this.row - other.row);
-    }
-    
-    /**
-     * Mendapatkan posisi tengah tile dalam koordinat dunia
-     * @return Array berisi [centerX, centerY]
-     */
-    public int[] getCenter() {
-        int centerX = worldX + solidArea.width / 2;
-        int centerY = worldY + solidArea.height / 2;
-        return new int[]{centerX, centerY};
-    }
-    
-    /**
-     * Mengecek apakah suatu koordinat dunia terletak di dalam tile ini
-     * @param x Koordinat X dunia
-     * @param y Koordinat Y dunia
-     * @return true jika koordinat berada dalam tile
-     */
-    public boolean contains(int x, int y) {
-        return x >= worldX && x < worldX + solidArea.width &&
-               y >= worldY && y < worldY + solidArea.height;
     }
     
     /**

@@ -40,7 +40,8 @@ public class OBJ_House extends SuperObject {
         } catch (IOException e) {
             System.err.println("Error loading house image: " + e.getMessage());
             e.printStackTrace();
-        } catch (IllegalArgumentException e) {            System.err.println("House image resource not found. Check the path.");
+        } catch (IllegalArgumentException e) {            
+            System.err.println("House image resource not found. Check the path.");
             e.printStackTrace();
         }
     }

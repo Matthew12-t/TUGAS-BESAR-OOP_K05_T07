@@ -43,14 +43,14 @@ public class WorldMap extends Map {
             for (int col = centerX - lakeSize; col <= centerX + lakeSize; col++) {
                 for (int row = centerY - lakeSize; row <= centerY + lakeSize; row++) {
                     if (Math.sqrt(Math.pow(col - centerX, 2) + Math.pow(row - centerY, 2)) <= lakeSize) {
-                        setTile(col, row, Tile.TILE_WATER); // Water tile
+                        setTileInMap(col, row, Tile.TILE_WATER); // Water tile
                     }
                 }
             }
         }
         // Tambahkan tile teleport di ujung kiri untuk ke FarmMap
         for (int row = 0; row < maxRow; row++) {
-            setTile(0, row, Tile.TILE_TELEPORT);
+            setTileInMap(0, row, Tile.TILE_TELEPORT);
         }
     }
     

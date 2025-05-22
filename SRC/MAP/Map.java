@@ -145,7 +145,7 @@ public abstract class Map {
      * @param row Row in the map grid
      * @param tileType Type of tile to set
      */
-    public void setTile(int col, int row, int tileType) {
+    public void setTileInMap(int col, int row, int tileType) {
         if (col >= 0 && col < maxCol && row >= 0 && row < maxRow) {
             mapTileData[col][row] = tileType;
         }
@@ -285,104 +285,6 @@ public abstract class Map {
     }
     
     /**
-     * Set up initial objects in the map
-     * This should be implemented by subclasses to place their initial objects
-     */
-    public abstract void setupInitialObjects();
-    
-    /**
-     * Deploy a house object at a specific position in this map
-     * @param col Column position in the grid
-     * @param row Row position in the grid
-     * @return true if house was successfully placed, false otherwise
-     */    
-    public boolean isdeployHouse(int col, int row) {
-        // Buat objek house sementara untuk mendapatkan dimensinya
-        SRC.OBJECT.OBJ_House tempHouse = new SRC.OBJECT.OBJ_House(gp, col, row);
-        int houseWidth = tempHouse.getHouseWidth();
-        int houseHeight = tempHouse.getHouseHeight();
-        
-        // Check if the position is valid for placement considering house dimensions
-        if (!isValidPlacement(col, row, houseWidth, houseHeight)) {
-            return false;
-        }
-        
-        // Find the first available slot in the objects array
-        for (int i = 0; i < objects.length; i++) {
-            if (objects[i] == null) {
-                // Use the already created house
-                objects[i] = tempHouse;
-                System.out.println("House deployed at " + col + "," + row + " with size " + houseWidth + "x" + houseHeight);
-                return true;
-            }
-        }
-          System.out.println("Failed to deploy house: no free object slots");
-        return false;
-    }
-    
-    /**
-     * Deploy a fishing pond object at a specific position in this map
-     * @param col Column position in the grid
-     * @param row Row position in the grid
-     * @return true if pond was successfully placed, false otherwise
-     */
-    public boolean deployPond(int col, int row) {
-        // Buat objek pond sementara untuk mendapatkan dimensinya
-        SRC.OBJECT.OBJ_Pond tempPond = new SRC.OBJECT.OBJ_Pond(gp, col, row);
-        int pondWidth = tempPond.getPondWidth();
-        int pondHeight = tempPond.getPondHeight();
-        
-        // Check if the position is valid for placement considering pond dimensions
-        if (!isValidPlacement(col, row, pondWidth, pondHeight)) {
-            return false;
-        }
-        
-        // Find the first available slot in the objects array
-        for (int i = 0; i < objects.length; i++) {
-            if (objects[i] == null) {
-                // Use the already created pond
-                objects[i] = tempPond;
-                System.out.println("Pond deployed at " + col + "," + row + " with size " + pondWidth + "x" + pondHeight);
-                return true;
-            }
-        }
-        
-        System.out.println("Failed to deploy pond: no free object slots");
-        return false;
-    }
-    
-    /**
-     * Deploy a shipping bin object at a specific position in this map
-     * @param col Column position in the grid
-     * @param row Row position in the grid
-     * @return true if shipping bin was successfully placed, false otherwise
-     */
-    public boolean deployShippingBin(int col, int row) {
-        // Buat objek shipping bin sementara untuk mendapatkan dimensinya
-        SRC.OBJECT.OBJ_ShippingBin tempBin = new SRC.OBJECT.OBJ_ShippingBin(gp, col, row);
-        int binWidth = tempBin.getBinWidth();
-        int binHeight = tempBin.getBinHeight();
-        
-        // Check if the position is valid for placement considering shipping bin dimensions
-        if (!isValidPlacement(col, row, binWidth, binHeight)) {
-            return false;
-        }
-        
-        // Find the first available slot in the objects array
-        for (int i = 0; i < objects.length; i++) {
-            if (objects[i] == null) {
-                // Use the already created shipping bin
-                objects[i] = tempBin;
-                System.out.println("Shipping Bin deployed at " + col + "," + row + " with size " + binWidth + "x" + binHeight);
-                return true;
-            }
-        }
-        
-        System.out.println("Failed to deploy shipping bin: no free object slots");
-        return false;
-    }
-    
-    /**
      * Remove an object at a specific position in this map
      * @param col Column position in the grid
      * @param row Row position in the grid
@@ -486,4 +388,10 @@ public abstract class Map {
             return false;
         }
     }
+
+    /**
+     * Set up initial objects in the map
+     * This should be implemented by subclasses to place their initial objects
+     */
+    public abstract void setupInitialObjects();
 }

@@ -143,7 +143,8 @@ public class GamePanel extends JPanel implements Runnable {
     }
       /**
      * Switch to world map
-     */    public void switchToWorldMap() {
+     */    
+    public void switchToWorldMap() {
         farmMap.setActive(false);
         houseMap.setActive(false);
         worldMap.setActive(true);
@@ -152,7 +153,8 @@ public class GamePanel extends JPanel implements Runnable {
     
     /**
      * Switch to farm map
-     */    public void switchToFarmMap() {
+     */    
+    public void switchToFarmMap() {
         worldMap.setActive(false);
         houseMap.setActive(false);
         farmMap.setActive(true);
@@ -268,11 +270,16 @@ public class GamePanel extends JPanel implements Runnable {
     /**
      * Teleport player to another map by name, keeping logic transition as before
      * @param targetMapName Nama map tujuan ("Farm Map" atau "World Map")
-     */    public void teleportToMap(String targetMapName) {
+     */      
+    public void teleportToMap(String targetMapName) {
         if (currentMap.getMapName().equals(targetMapName)) {
             // Sudah di map tujuan, tidak perlu teleport
             return;
         }
+        
+        // Reset mouse target to prevent continued walking after teleporting
+        mouseHandler.setHasTarget(false);
+        
         if (targetMapName.equals("World Map")) {
             switchMap(worldMap);
             if (!isInitializedWorldMap) {
@@ -331,7 +338,7 @@ public class GamePanel extends JPanel implements Runnable {
             if (currentMap.getMapName().equals("Farm Map")) {
                 FarmMap farmMapRef = (FarmMap) farmMap;
                 // Teleport ke HouseMap jika di bawah rumah
-                if (playerCol == farmMapRef.getTeleportToHouseCol() && playerRow == farmMapRef.getTeleportToHouseRow()) {
+                if (playerCol == farmMapRef.getTeleportToHouseCol() && playerRow == farmMapRef.getTeleportToHouseRow() || playerCol == farmMapRef.getTeleportToHouseCol()+1 &&playerRow == farmMapRef.getTeleportToHouseRow()) {
                     teleportToMap("House Map");
                 } else if (playerCol == FarmMap.FARM_COLS - 1) {
                     teleportToMap("World Map");

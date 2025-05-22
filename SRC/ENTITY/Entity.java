@@ -16,7 +16,7 @@ public abstract class Entity {
     
     // Constructor
     public Entity(GamePanel gp, int worldX, int worldY) {
-        this.position = new Tile(gp, worldX, worldY, true);
+        this.position = new Tile(gp, worldX, worldY);
         this.speed = 0;
         this.direction = "down";
     }

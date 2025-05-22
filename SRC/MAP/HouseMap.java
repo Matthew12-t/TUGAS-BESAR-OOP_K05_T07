@@ -32,22 +32,22 @@ public class HouseMap extends Map {
         // Set all tiles to lantai (floor)
         for (int col = 0; col < HOUSE_COLS; col++) {
             for (int row = 0; row < HOUSE_ROWS; row++) {
-                setTile(col, row, SRC.TILES.Tile.TILE_FLOOR);
+                setTileInMap(col, row, SRC.TILES.Tile.TILE_FLOOR);
             }
         }
         // Set border (tepi) to tembok (wall)
         for (int i = 0; i < HOUSE_COLS; i++) {
-            setTile(i, 0, SRC.TILES.Tile.TILE_WALL); // atas
-            setTile(i, HOUSE_ROWS-1, SRC.TILES.Tile.TILE_WALL); // bawah
+            setTileInMap(i, 0, SRC.TILES.Tile.TILE_WALL); // atas
+            setTileInMap(i, HOUSE_ROWS-1, SRC.TILES.Tile.TILE_WALL); // bawah
         }
         for (int j = 0; j < HOUSE_ROWS; j++) {
-            setTile(0, j, SRC.TILES.Tile.TILE_WALL); // kiri
-            setTile(HOUSE_COLS-1, j, SRC.TILES.Tile.TILE_WALL); // kanan
+            setTileInMap(0, j, SRC.TILES.Tile.TILE_WALL); // kiri
+            setTileInMap(HOUSE_COLS-1, j, SRC.TILES.Tile.TILE_WALL); // kanan
         }        // Buat 4 tile pintu di tengah bawah
         int doorStart = (HOUSE_COLS / 2) - 2; // 10 jika 24 kolom
         int doorEnd = doorStart + 4; // 14 (exclusive)
         for (int i = doorStart; i < doorEnd; i++) {
-            setTile(i, HOUSE_ROWS-1, SRC.TILES.Tile.TILE_TELEPORT); // Makes door tiles teleport tiles
+            setTileInMap(i, HOUSE_ROWS-1, SRC.TILES.Tile.TILE_TELEPORT); // Makes door tiles teleport tiles
         }
         
     }

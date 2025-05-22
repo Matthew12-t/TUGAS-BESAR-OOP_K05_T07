@@ -301,25 +301,16 @@ public class Player extends Entity {
                     
                     // Apply movement
                     setWorldX(newWorldX);
-                    setWorldY(newWorldY);
-                    
-                    // Check for collision after movement
+                    setWorldY(newWorldY);                    // Check for collision after movement
                     if (checkCollision()) {
-                        // Try moving on X-axis only
+                        // Revert to original position
+                        setWorldX(moveOriginalX);
                         setWorldY(moveOriginalY);
-                        if (checkCollision()) {
-                            // X-only movement caused collision too, try Y-only
-                            setWorldX(moveOriginalX);
-                            setWorldY(newWorldY);
-                            
-                            if (checkCollision()) {
-                                // Both X and Y cause collision, stay in place
-                                setWorldX(moveOriginalX);
-                                setWorldY(moveOriginalY);
-                                mouseHandler.setHasTarget(false); // Cancel target if stuck
-                                moving = false;
-                            }
-                        }
+                        
+                        // Cancel mouse target immediately when collision is detected
+                        mouseHandler.setHasTarget(false);
+                        moving = false;
+                        System.out.println("Collision detected, stopped moving to target");
                     }
                     
                     // Check if new position would be out of bounds

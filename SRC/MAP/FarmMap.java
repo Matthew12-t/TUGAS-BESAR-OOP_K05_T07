@@ -21,24 +21,22 @@ public class FarmMap extends Map {
     private ObjectDeployer objDeployer;
     
     // Koordinat teleport ke HouseMap
-    private int teleportToHouseCol = -1;
-    private int teleportToHouseRow = -1;
+    private int teleportToHouseCol = -2;
+    private int teleportToHouseRow = -2;
     // Koordinat depan rumah (untuk spawn setelah keluar dari HouseMap)
     private int depanRumahCol = -1;
     private int depanRumahRow = -1;
+    private boolean foundHouse = false;
+
+    boolean loadSuccess = loadMapFromFile("RES/MAP_TXT/farmmap.txt");
     
     /**
      * Constructor for the FarmMap
      * @param gp GamePanel reference
      */
     public FarmMap(GamePanel gp) {
-        // Farm map is smaller than world map, allows up to 10 objects
         super(gp, "Farm Map", FARM_COLS, FARM_ROWS, 10);
-        
-        // Initialize tilled land tracker
         tilled = new boolean[FARM_COLS][FARM_ROWS];
-        
-        // Initialize object deployer
         objDeployer = new ObjectDeployer(gp);
     }
     
@@ -49,76 +47,118 @@ public class FarmMap extends Map {
     protected void initializeMap() {
         // Start with default initialization (all grass)
         super.initializeMap();
-        boolean loadSuccess = loadMapFromFile("RES/map.txt");
         // Tambahkan kolam kecil di pojok
         
         // Tambahkan area untuk tillable land (lahan yang siap diolah)
         for (int col = 5; col <= 10; col++) {
             for (int row = 5; row <= 10; row++) {
-                setTile(col, row, Tile.TILE_TILLABLE); // Tillable land
+                setTileInMap(col, row, Tile.TILE_TILLABLE); // Tillable land
             }
-        }
-        // Tambahkan contoh tilled land (lahan yang sudah diolah)
-        setTile(5, 5, Tile.TILE_TILLED);
-        setTile(6, 5, Tile.TILE_TILLED);
-        // Tambahkan contoh planted land (lahan yang sudah ditanami)
-        setTile(5, 6, Tile.TILE_PLANTED);
-        // Tambahkan tile teleport di ujung kanan untuk ke WorldMap
-        for (int row = 0; row < FARM_ROWS; row++) {
-            setTile(FARM_COLS-1 , row, Tile.TILE_TELEPORT);
         }
     }
     
     /**
-     * Set up initial objects in the farm map
+     * Set up initial objects in the farm map based on farmmap.txt
      */
     @Override
     public void setupInitialObjects() {
-        // Add 1 house at a random valid position
-        int attempts = 0;
-        boolean houseDeployed = false;
+        // Jika file berhasil dimuat, gunakan data dari file
+        if (loadSuccess) {
+            System.out.println("Setting up objects from farmmap.txt...");
 
-        while (!houseDeployed && attempts < 100) {
-            // Random position for house, avoiding edges
-            int houseCol = 5 + (int) (Math.random() * (FARM_COLS - 15)); // Leave space for house (6x6) and shipping bin
-            int houseRow = 5 + (int) (Math.random() * (FARM_ROWS - 10));
-            setTile(houseCol + 3, houseRow +6, Tile.TILE_TELEPORT); // Set tile as tillable for house placement
-            // Simpan koordinat teleport ke HouseMap
-            teleportToHouseCol = houseCol + 3;
-            teleportToHouseRow = houseRow + 6;
-            // Simpan koordinat depan rumah (1 tile di bawah pintu rumah)
-            depanRumahCol = teleportToHouseCol ;
-            depanRumahRow = teleportToHouseRow + 1;
-            // Try to place house
-            if (isValidPlacement(houseCol, houseRow)) {
-                objDeployer.deployHouse(houseCol, houseRow);
-                houseDeployed = true;
+            // Cari posisi house (h) di file
+            for (int row = 0; row < FARM_ROWS; row++) {
+                for (int col = 0; col < FARM_COLS; col++) {
+                    int tileValue = getTile(col, row);
 
-                // Place shipping bin 2 tiles to the right of the house
-                // House is 6x6, so move 8 tiles right (6 + 2 gap)
-                objDeployer.deployShippingBin(houseCol + 8, houseRow + 3);
+                    // Ubah path tile (8) sesuai dengan file
+                    if (tileValue == 8) {
+                        setTileInMap(col, row, Tile.TILE_PATH);
+                    }
+                    else if(tileValue ==5){
+                        setTileInMap(col, row, Tile.TILE_TELEPORT);
+                    }
+
+                    // Periksa karakter dari file asli
+                    char mapChar = getMapFileChar(col, row);
+
+                    // Di dalam metode setupInitialObjects()
+                    if (mapChar == 'h' && !foundHouse) {
+                        System.out.println("Deploying house at " + col + "," + row);
+                        objDeployer.deployHouse(col, row);
+                        foundHouse = true; // Flag untuk mencegah rumah di-deploy lebih dari sekali
+
+                        // Cari posisi bawah tengah rumah untuk teleport
+                        int houseLeftCol = col;
+                        int houseWidth = 6; // Ukuran rumah dari file (6 kolom)
+                        int houseHeight = 6; // Ukuran rumah dari file (6 baris)
+
+                        // Hitung posisi tengah rumah dan posisi bawah (untuk depan rumah)
+                        int houseCenterCol = houseLeftCol + (houseWidth / 2) - 1; // Tengah rumah
+                        int houseBottomRow = row + houseHeight - 1; // Baris terbawah rumah
+
+                        // Set teleport di tengah depan rumah
+                        teleportToHouseCol = houseCenterCol;
+                        teleportToHouseRow = houseBottomRow + 1; // Satu tile di bawah rumah
+                        setTileInMap(teleportToHouseCol, teleportToHouseRow, Tile.TILE_TELEPORT);
+                        setTileInMap(teleportToHouseCol+1, teleportToHouseRow, Tile.TILE_TELEPORT);
+
+                        // Set spawn point
+                        depanRumahCol = teleportToHouseCol;
+                        depanRumahRow = teleportToHouseRow ; // Satu tile di bawah teleport
+                    } else if (mapChar == 'h') {
+                        // Untuk 'h' berikutnya, hanya deploy house tanpa mengatur teleport
+                        objDeployer.deployHouse(col, row);
+                    } 
+                    else if (mapChar == 's') {
+                            objDeployer.deployShippingBin(col, row);
+                        
+                    } else if (mapChar == 'p') {
+                            objDeployer.deployPond(col, row);
+                    } else if (mapChar == 't') {
+                        // Set tile sebagai tillable land
+                        setTileInMap(col, row, Tile.TILE_TILLABLE);
+                    }
+                }
+            }
+        } else {
+            System.out.println("Failed to load map file, no objects deployed");
+        }
+    }
+
+    /**
+     * Mendapatkan karakter asli dari file map pada posisi tertentu
+     */
+    private char getMapFileChar(int col, int row) {
+        try {
+            java.io.BufferedReader reader = new java.io.BufferedReader(
+                    new java.io.FileReader("RES/MAP_TXT/farmmap.txt"));
+
+            String line;
+            int currentRow = 0;
+
+            // Skip to the target row
+            while ((line = reader.readLine()) != null && currentRow < row) {
+                if (!line.trim().startsWith("//") && !line.trim().isEmpty()) {
+                    currentRow++;
+                }
             }
 
-            attempts++;
-        }
-
-        // Add 2-3 ponds at random valid positions
-        boolean pondDeployed = false;
-        attempts = 0; // Reset attempts counter for pond placement
-
-        while (!pondDeployed && attempts < 100) { // Add maximum attempts limit
-            // Random position for pond
-            int pondCol = 2 + (int) (Math.random() * (FARM_COLS - 6)); // Leave space for pond (4x3)
-            int pondRow = 2 + (int) (Math.random() * (FARM_ROWS - 5));
-
-            // Try to place pond
-            if (isValidPlacement(pondCol, pondRow)) {
-                objDeployer.deployPond(pondCol, pondRow);
-                pondDeployed = true; // Set to true after successful deployment
+            // If we found the row
+            if (line != null && !line.trim().startsWith("//")) {
+                String[] values = line.trim().split("\\s+");
+                if (col < values.length) {
+                    reader.close();
+                    return values[col].charAt(0);
+                }
             }
 
-            attempts++;
+            reader.close();
+        } catch (Exception e) {
+            System.err.println("Error reading map file character: " + e.getMessage());
         }
+
+        return '0'; // Default to grass (0)
     }
     
     /**
@@ -142,7 +182,7 @@ public class FarmMap extends Map {
             }
             
             // Set tile as tilled land
-            setTile(col, row, Tile.TILE_TILLED);
+            setTileInMap(col, row, Tile.TILE_TILLED);
             tilled[col][row] = true;
             return true;
         }
@@ -178,24 +218,10 @@ public class FarmMap extends Map {
             }
             
             // Set tile sebagai planted land
-            setTile(col, row, Tile.TILE_PLANTED);
+            setTileInMap(col, row, Tile.TILE_PLANTED);
             return true;
         }
         return false;
-    }
-    
-    /**
-     * Draw custom tiles for the farm map
-     * Overrides the parent method to also draw tilled soil
-     */
-    @Override
-    protected void drawTile(Graphics2D g2, int col, int row, int tileType) {
-        // Draw the tile using drawTileByType method
-        int screenX = col * gp.getTileSize() - gp.getCameraX();
-        int screenY = row * gp.getTileSize() - gp.getCameraY();
-        
-        // Gunakan metode dari Tile untuk menggambar tile sesuai tipenya
-        Tile.drawTileByType(g2, screenX, screenY, gp.getTileSize(), tileType);
     }
 
     public int getTeleportToHouseCol() {
