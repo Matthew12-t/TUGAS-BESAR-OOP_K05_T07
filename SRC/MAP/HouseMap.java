@@ -25,31 +25,54 @@ public class HouseMap extends Map {
     }
 
     /**
-     * Initialize the house map with various types of tiles
+     * Initialize the house map with various types of tiles and objects from housemap.txt
      */
     @Override
     protected void initializeMap() {
-        // Set all tiles to lantai (floor)
-        for (int col = 0; col < HOUSE_COLS; col++) {
-            for (int row = 0; row < HOUSE_ROWS; row++) {
-                setTileInMap(col, row, SRC.TILES.Tile.TILE_FLOOR);
+        // Read housemap.txt and set tiles accordingly
+        try {
+            java.io.BufferedReader reader = new java.io.BufferedReader(
+                new java.io.FileReader("RES/MAP_TXT/housemap.txt"));
+            String line;
+            int row = 0;
+            while ((line = reader.readLine()) != null && row < HOUSE_ROWS) {
+                if (line.trim().startsWith("//") || line.trim().isEmpty()) {
+                    continue;
+                }
+                String[] values = line.trim().split("\\s+");
+                for (int col = 0; col < values.length && col < HOUSE_COLS; col++) {
+                    char ch = values[col].charAt(0);
+                    switch (ch) {
+                        case 'w':
+                            setTileInMap(col, row, SRC.TILES.Tile.TILE_WALL);
+                            break;
+                        case 'b':
+                        case 'c':
+                        case 't':
+                            setTileInMap(col, row, SRC.TILES.Tile.TILE_FLOOR);
+                            break;
+                        default:
+                            setTileInMap(col, row, SRC.TILES.Tile.TILE_FLOOR);
+                            break;
+                    }
+                }
+                row++;
+            }
+            reader.close();
+        } catch (Exception e) {
+            System.err.println("Error loading housemap.txt: " + e.getMessage());
+            // fallback: all floor
+            for (int col = 0; col < HOUSE_COLS; col++) {
+                for (int row = 0; row < HOUSE_ROWS; row++) {
+                    setTileInMap(col, row, SRC.TILES.Tile.TILE_FLOOR);
+                }
             }
         }
-        // Set border (tepi) to tembok (wall)
-        for (int i = 0; i < HOUSE_COLS; i++) {
-            setTileInMap(i, 0, SRC.TILES.Tile.TILE_WALL); // atas
-            setTileInMap(i, HOUSE_ROWS-1, SRC.TILES.Tile.TILE_WALL); // bawah
-        }
-        for (int j = 0; j < HOUSE_ROWS; j++) {
-            setTileInMap(0, j, SRC.TILES.Tile.TILE_WALL); // kiri
-            setTileInMap(HOUSE_COLS-1, j, SRC.TILES.Tile.TILE_WALL); // kanan
-        }        // Buat 4 tile pintu di tengah bawah
-        int doorStart = (HOUSE_COLS / 2) - 2; // 10 jika 24 kolom
-        int doorEnd = doorStart + 4; // 14 (exclusive)
-        for (int i = doorStart; i < doorEnd; i++) {
-            setTileInMap(i, HOUSE_ROWS-1, SRC.TILES.Tile.TILE_TELEPORT); // Makes door tiles teleport tiles
-        }
-        
+        // Add teleport tile in the middle of the last row
+        int mid1 = (HOUSE_COLS / 2) - 1;
+        int mid2 = (HOUSE_COLS / 2);
+        setTileInMap(mid1, HOUSE_ROWS - 1, SRC.TILES.Tile.TILE_TELEPORT);
+        setTileInMap(mid2, HOUSE_ROWS - 1, SRC.TILES.Tile.TILE_TELEPORT);
     }
 
     /**
@@ -62,17 +85,42 @@ public class HouseMap extends Map {
     }
     
     /**
-     * Set up initial objects in the house map (bed and table)
+     * Set up initial objects in the house map (bed, table, chair) from housemap.txt
      */
     @Override
     public void setupInitialObjects() {
-        // Deploy bed di pojok kiri atas (misal 2,2)
-        objDeployer.deployBed(21, 19);
-        // Deploy table di tengah ruangan (misal 11, 8)
-        objDeployer.deployTable(18, 21);
-        // Deploy house di tengah ruangan (misal 11, 8)
-        objDeployer.deployChair(20, 22);
-
+        try {
+            java.io.BufferedReader reader = new java.io.BufferedReader(
+                new java.io.FileReader("RES/MAP_TXT/housemap.txt"));
+            String line;
+            int row = 0;
+            while ((line = reader.readLine()) != null && row < HOUSE_ROWS) {
+                if (line.trim().startsWith("//") || line.trim().isEmpty()) {
+                    continue;
+                }
+                String[] values = line.trim().split("\\s+");
+                for (int col = 0; col < values.length && col < HOUSE_COLS; col++) {
+                    char ch = values[col].charAt(0);
+                    switch (ch) {
+                        case 'b':
+                            objDeployer.deployBed(col, row);
+                            break;
+                        case 'c':
+                            objDeployer.deployChair(col, row);
+                            break;
+                        case 't':
+                            objDeployer.deployTable(col, row);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                row++;
+            }
+            reader.close();
+        } catch (Exception e) {
+            System.err.println("Error deploying objects from housemap.txt: " + e.getMessage());
+        }
     }
 }
 
