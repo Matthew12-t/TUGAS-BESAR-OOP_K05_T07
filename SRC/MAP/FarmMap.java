@@ -1,8 +1,6 @@
 package SRC.MAP;
 
-import java.awt.Graphics2D;
 import SRC.MAIN.GamePanel;
-import SRC.OBJECT.OBJ_House;
 import SRC.OBJECT.ObjectDeployer;
 import SRC.TILES.Tile;
 
@@ -80,7 +78,7 @@ public class FarmMap extends Map {
                     }
 
                     // Periksa karakter dari file asli
-                    char mapChar = getMapFileChar(col, row);
+                    char mapChar = super.getMapFileChar(col, row, "RES/MAP_TXT/farmmap.txt");
 
                     // Di dalam metode setupInitialObjects()
                     if (mapChar == 'h' && !foundHouse) {
@@ -126,40 +124,6 @@ public class FarmMap extends Map {
         }
     }
 
-    /**
-     * Mendapatkan karakter asli dari file map pada posisi tertentu
-     */
-    private char getMapFileChar(int col, int row) {
-        try {
-            java.io.BufferedReader reader = new java.io.BufferedReader(
-                    new java.io.FileReader("RES/MAP_TXT/farmmap.txt"));
-
-            String line;
-            int currentRow = 0;
-
-            // Skip to the target row
-            while ((line = reader.readLine()) != null && currentRow < row) {
-                if (!line.trim().startsWith("//") && !line.trim().isEmpty()) {
-                    currentRow++;
-                }
-            }
-
-            // If we found the row
-            if (line != null && !line.trim().startsWith("//")) {
-                String[] values = line.trim().split("\\s+");
-                if (col < values.length) {
-                    reader.close();
-                    return values[col].charAt(0);
-                }
-            }
-
-            reader.close();
-        } catch (Exception e) {
-            System.err.println("Error reading map file character: " + e.getMessage());
-        }
-
-        return '0'; // Default to grass (0)
-    }
     
     /**
      * Tills a specific tile to make it farmable

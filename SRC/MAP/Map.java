@@ -389,6 +389,40 @@ public abstract class Map {
         }
     }
 
+        /**
+     * Mendapatkan karakter asli dari file map pada posisi tertentu
+     */
+    public char getMapFileChar(int col, int row,String path) {
+        try {
+            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(path));
+
+            String line;
+            int currentRow = 0;
+
+            // Skip to the target row
+            while ((line = reader.readLine()) != null && currentRow < row) {
+                if (!line.trim().startsWith("//") && !line.trim().isEmpty()) {
+                    currentRow++;
+                }
+            }
+
+            // If we found the row
+            if (line != null && !line.trim().startsWith("//")) {
+                String[] values = line.trim().split("\\s+");
+                if (col < values.length) {
+                    reader.close();
+                    return values[col].charAt(0);
+                }
+            }
+
+            reader.close();
+        } catch (Exception e) {
+            System.err.println("Error reading map file character: " + e.getMessage());
+        }
+
+        return '0'; // Default to grass (0)
+    }
+
     /**
      * Set up initial objects in the map
      * This should be implemented by subclasses to place their initial objects
