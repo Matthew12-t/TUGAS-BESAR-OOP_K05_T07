@@ -43,7 +43,7 @@ public class HouseMap extends Map {
                 for (int col = 0; col < values.length && col < HOUSE_COLS; col++) {
                     char ch = values[col].charAt(0);
                     switch (ch) {
-                        case 'w':
+                        case '2':
                             setTileInMap(col, row, SRC.TILES.Tile.TILE_WALL);
                             break;
                         case 'b':
