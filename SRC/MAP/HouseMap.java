@@ -18,7 +18,7 @@ public class HouseMap extends Map {
      */
     public HouseMap(GamePanel gp) {
         // House map is smaller than world map, allows up to 10 objects
-        super(gp, "House Map", HOUSE_COLS, HOUSE_ROWS, 10);
+        super(gp, "House Map", HOUSE_COLS, HOUSE_ROWS, 100);
 
         // Initialize object deployer
         objDeployer = new ObjectDeployer(gp);
@@ -49,9 +49,7 @@ public class HouseMap extends Map {
                             break;
                         case 'b':
                         case 'c':
-                        case 't':
-                            setTileInMap(col, row, SRC.TILES.Tile.TILE_FLOOR);
-                            break;
+                        
                         default:
                             setTileInMap(col, row, SRC.TILES.Tile.TILE_FLOOR);
                             break;
@@ -113,7 +111,12 @@ public class HouseMap extends Map {
                     }
                     else if (val.equals("s")) {
                         objDeployer.deployStove(col, row);
+                    }else if (val.equals("r")) {
+                        objDeployer.deployRak(col, row);
                     }
+                    else if (val.equals("t")) {
+                        objDeployer.deployTv(col, row);
+                    } 
                     // ignore default/other
                 }
                 row++;

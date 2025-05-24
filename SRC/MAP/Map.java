@@ -256,7 +256,12 @@ public abstract class Map {
                 }else if (obj instanceof SRC.OBJECT.OBJ_Stove) {
                     width = ((SRC.OBJECT.OBJ_Stove) obj).getStoveWidth();
                     height = ((SRC.OBJECT.OBJ_Stove) obj).getStoveHeight();
-                }
+                }else if (obj instanceof SRC.OBJECT.OBJ_Rak) {
+                    width = ((SRC.OBJECT.OBJ_Rak) obj).getRakWidth();
+                    height = ((SRC.OBJECT.OBJ_Rak) obj).getRakHeight();
+                }else if (obj instanceof SRC.OBJECT.OBJ_Tv) {
+                    width = ((SRC.OBJECT.OBJ_Tv) obj).getTvWidth();
+                    height = ((SRC.OBJECT.OBJ_Tv) obj).getTvHeight();}
 
                 // Calculate bounds
                 int leftBound = objCol;

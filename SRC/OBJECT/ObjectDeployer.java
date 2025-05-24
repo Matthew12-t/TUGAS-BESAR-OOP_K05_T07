@@ -135,6 +135,36 @@ public class ObjectDeployer {
         }
         System.out.println("Failed to deploy stove: no free object slots");
     }
+    public void deployRak(int col, int row) {
+        if (!gp.getCurrentMap().isValidPlacement(col, row)) {
+            System.out.println("Cannot place rak at " + col + "," + row + " - invalid placement");
+            return;
+        }
+        SuperObject[] objects = gp.getCurrentMap().getObjects();
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] == null) {
+                objects[i] = new OBJ_Rak(gp, col, row);
+                System.out.println("Rak deployed at " + col + "," + row);
+                return;
+            }
+        }
+        System.out.println("Failed to deploy rak: no free object slots");
+    }
+    public void deployTv(int col, int row) {
+        if (!gp.getCurrentMap().isValidPlacement(col, row)) {
+            System.out.println("Cannot place tv at " + col + "," + row + " - invalid placement");
+            return;
+        }
+        SuperObject[] objects = gp.getCurrentMap().getObjects();
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] == null) {
+                objects[i] = new OBJ_Tv(gp, col, row);
+                System.out.println("Tv deployed at " + col + "," + row);
+                return;
+            }
+        }
+        System.out.println("Failed to deploy tv: no free object slots");
+    }
     /**
      * Menempatkan table pada posisi tertentu pada map aktif
      * @param col Posisi kolom pada grid map
