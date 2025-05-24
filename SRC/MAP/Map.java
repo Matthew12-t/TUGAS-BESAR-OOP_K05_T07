@@ -251,8 +251,11 @@ public abstract class Map {
                     width = ((SRC.OBJECT.OBJ_Bed) obj).getBedWidth();
                     height = ((SRC.OBJECT.OBJ_Bed) obj).getBedHeight();
                 } else if (obj instanceof SRC.OBJECT.OBJ_Chair) {
-                    width = ((SRC.OBJECT.OBJ_Chair) obj).getchairWidth();
-                    height = ((SRC.OBJECT.OBJ_Chair) obj).getchairHeight();
+                    width = ((SRC.OBJECT.OBJ_Chair) obj).getChairWidth();
+                    height = ((SRC.OBJECT.OBJ_Chair) obj).getChairHeight();
+                }else if (obj instanceof SRC.OBJECT.OBJ_Stove) {
+                    width = ((SRC.OBJECT.OBJ_Stove) obj).getStoveWidth();
+                    height = ((SRC.OBJECT.OBJ_Stove) obj).getStoveHeight();
                 }
 
                 // Calculate bounds

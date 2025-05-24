@@ -119,6 +119,22 @@ public class ObjectDeployer {
         }
         System.out.println("Failed to deploy bed: no free object slots");
     }
+    public void deployStove(int col, int row) {
+        if (!gp.getCurrentMap().isValidPlacement(col, row)) {
+            System.out.println("Cannot place stove at " + col + "," + row + " - invalid placement");
+            return;
+        }
+        SuperObject[] objects = gp.getCurrentMap().getObjects();
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] == null) {
+                objects[i] = new OBJ_Stove(gp, col, row);
+                ;
+                System.out.println("Stove deployed at " + col + "," + row);
+                return;
+            }
+        }
+        System.out.println("Failed to deploy stove: no free object slots");
+    }
     /**
      * Menempatkan table pada posisi tertentu pada map aktif
      * @param col Posisi kolom pada grid map
@@ -158,6 +174,46 @@ public class ObjectDeployer {
             }
         }
         System.out.println("Failed to deploy chair: no free object slots");
+    }
+    /**
+     * Menempatkan bed pada posisi tertentu pada map aktif
+     * @param col Posisi kolom pada grid map
+     * @param row Posisi baris pada grid map
+     */
+    public void deployChair(int col, int row, int mode) {
+        if (!gp.getCurrentMap().isValidPlacement(col, row)) {
+            System.out.println("Cannot place chair at " + col + "," + row + " - invalid placement");
+            return;
+        }
+        SuperObject[] objects = gp.getCurrentMap().getObjects();
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] == null) {
+                objects[i] = new OBJ_Chair(gp, col, row, mode);
+                System.out.println("Chair (mode " + mode + ") deployed at " + col + "," + row);
+                return;
+            }
+        }
+        System.out.println("Failed to deploy chair: no free object slots");
+    }
+    /**
+     * Menempatkan table pada posisi tertentu pada map aktif
+     * @param col Posisi kolom pada grid map
+     * @param row Posisi baris pada grid map
+     */
+    public void deployTable(int col, int row, int mode) {
+        if (!gp.getCurrentMap().isValidPlacement(col, row)) {
+            System.out.println("Cannot place table at " + col + "," + row + " - invalid placement");
+            return;
+        }
+        SuperObject[] objects = gp.getCurrentMap().getObjects();
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] == null) {
+                objects[i] = new OBJ_Table(gp, col, row, mode);
+                System.out.println("Table (mode " + mode + ") deployed at " + col + "," + row);
+                return;
+            }
+        }
+        System.out.println("Failed to deploy table: no free object slots");
     }
     /**
      * Menghapus objek pada posisi tertentu pada map aktif

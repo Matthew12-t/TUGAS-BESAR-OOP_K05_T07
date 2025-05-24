@@ -1,0 +1,53 @@
+package SRC.OBJECT;
+
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import SRC.MAIN.GamePanel;
+import java.awt.Graphics2D;
+
+public class OBJ_Stove extends SuperObject {
+    // Ukuran tempat tidur dalam jumlah tile
+    private int stoveWidth = 1;  // Lebar tempat tidur (jumlah kolom)
+    private int stoveHeight = 1; // Tinggi tempat tidur (jumlah baris)
+    public OBJ_Stove(GamePanel gp, int col, int row) {
+        super(gp, col, row);
+        setName("stove");
+        getPosition().setCollision(true); // stove cannot be passed through
+        try {
+            BufferedImage image = ImageIO.read(getClass().getResourceAsStream("/RES/OBJECT/stove.png"));
+            if (image == null) {
+                image = ImageIO.read(new File("RES/OBJECT/stove.png"));
+            }
+            setImage(image);
+        } catch (IOException | IllegalArgumentException e) {
+            System.err.println("stove image not found");
+        }
+    }
+    public void draw(Graphics2D g2, GamePanel gp) {
+        // Hitung posisi layar berdasarkan posisi kamera
+        int worldX = getPosition().getWorldX();
+        int worldY = getPosition().getWorldY();
+        int screenX = worldX - gp.getCameraX();
+        int screenY = worldY - gp.getCameraY();
+
+        // Hanya render jika objek berada dalam area layar yang terlihat
+        if(worldX + (stoveWidth * gp.getTileSize()) > gp.getCameraX() &&
+           worldX - gp.getTileSize() < gp.getCameraX() + gp.getScreenWidth() &&
+           worldY + (stoveHeight * gp.getTileSize()) > gp.getCameraY() &&
+           worldY - gp.getTileSize() < gp.getCameraY() + gp.getScreenHeight()) {
+
+            g2.drawImage(getImage(), screenX, screenY, gp.getTileSize() * stoveWidth, gp.getTileSize() * stoveHeight, null);
+            System.out.println("Stove drawn at: " + screenX + ", " + screenY);
+            System.out.println("Stove size: " + (gp.getTileSize() * stoveWidth) + "x" + (gp.getTileSize() * stoveHeight));
+        }
+    }
+    }
+    public int getstoveWidth() {
+        return stoveWidth;
+    }
+    public int getstoveHeight() {
+        return stoveHeight;
+    }
+}

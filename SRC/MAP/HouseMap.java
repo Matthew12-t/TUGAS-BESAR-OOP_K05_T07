@@ -33,6 +33,7 @@ public class HouseMap extends Map {
         try {
             java.io.BufferedReader reader = new java.io.BufferedReader(
                 new java.io.FileReader("RES/MAP_TXT/housemap.txt"));
+            loadMapFromFile("RES/MAP_TXT/housemap.txt");
             String line;
             int row = 0;
             while ((line = reader.readLine()) != null && row < HOUSE_ROWS) {
@@ -100,20 +101,20 @@ public class HouseMap extends Map {
                 }
                 String[] values = line.trim().split("\\s+");
                 for (int col = 0; col < values.length && col < HOUSE_COLS; col++) {
-                    char ch = values[col].charAt(0);
-                    switch (ch) {
-                        case 'b':
-                            objDeployer.deployBed(col, row);
-                            break;
-                        case 'c':
-                            objDeployer.deployChair(col, row);
-                            break;
-                        case 't':
-                            objDeployer.deployTable(col, row);
-                            break;
-                        default:
-                            break;
+                    String val = values[col];
+                    if (val.length() == 2 && val.charAt(0) == 'c' && Character.isDigit(val.charAt(1))) {
+                        int mode = Character.getNumericValue(val.charAt(1));
+                        objDeployer.deployChair(col, row, mode);
+                    } else if (val.length() == 2 && val.charAt(0) == 't' && Character.isDigit(val.charAt(1))) {
+                        int mode = Character.getNumericValue(val.charAt(1));
+                        objDeployer.deployTable(col, row, mode);
+                    } else if (val.equals("b")) {
+                        objDeployer.deployBed(col, row);
                     }
+                    else if (val.equals("s")) {
+                        objDeployer.deployStove(col, row);
+                    }
+                    // ignore default/other
                 }
                 row++;
             }

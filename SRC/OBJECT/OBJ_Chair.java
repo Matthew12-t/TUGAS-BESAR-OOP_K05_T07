@@ -11,19 +11,24 @@ public class OBJ_Chair extends SuperObject {
     // Ukuran tempat tidur dalam jumlah tile
     private int chairWidth = 1;  // Lebar kursi (jumlah kolom)
     private int chairHeight = 1; // Tinggi kursi (jumlah baris)
-    public OBJ_Chair(GamePanel gp, int col, int row) {
+    private int mode = 1;
+    public OBJ_Chair(GamePanel gp, int col, int row, int mode) {
         super(gp, col, row);
         setName("chair");
         getPosition().setCollision(true); // Chair cannot be passed through
+        this.mode = mode;
         try {
-            BufferedImage image = ImageIO.read(getClass().getResourceAsStream("/RES/OBJECT/chair.png"));
+            BufferedImage image = ImageIO.read(getClass().getResourceAsStream("/RES/OBJECT/chair_" + mode + ".png"));
             if (image == null) {
-                image = ImageIO.read(new File("RES/OBJECT/chair.png"));
+                image = ImageIO.read(new File("RES/OBJECT/chair_" + mode + ".png"));
             }
             setImage(image);
         } catch (IOException | IllegalArgumentException e) {
-            System.err.println("chair image not found");
+            System.err.println("chair image not found for mode " + mode);
         }
+    }
+    public OBJ_Chair(GamePanel gp, int col, int row) {
+        this(gp, col, row, 1);
     }
     public void draw(Graphics2D g2, GamePanel gp) {
         // Hitung posisi layar berdasarkan posisi kamera
@@ -41,10 +46,13 @@ public class OBJ_Chair extends SuperObject {
             g2.drawImage(getImage(), screenX, screenY, gp.getTileSize() * chairWidth, gp.getTileSize() * chairHeight, null);
         }
     }
-    public int getchairWidth() {
+    public int getChairWidth() {
         return chairWidth;
     }
-    public int getchairHeight() {
+    public int getChairHeight() {
         return chairHeight;
+    }
+    public int getMode() {
+        return mode;
     }
 }
