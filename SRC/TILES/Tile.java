@@ -39,6 +39,10 @@ public class Tile {
     public static final int TILE_FLOOR = 6; // lantai
     public static final int TILE_WALL = 7;  // tembok
     public static final int TILE_PATH = 8;
+    public static final int TILE_FOREST_GRASS1 = 9;
+    public static final int TILE_FOREST_GRASS2 = 10;
+    public static final int TILE_EDGE = 11;
+    public static final int TILE_PLATFORM = 12; 
 
     // Resource untuk tile
     private static Image grassTile;
@@ -49,6 +53,10 @@ public class Tile {
     private static Image plantedTile;
     private static Image floorTile;
     private static Image wallTile;
+    private static Image ForestGrassTile1;
+    private static Image ForestGrassTile2;
+    private static Image EdgeTile;
+    private static Image PlatformTile;
 
     
     public Tile(GamePanel gp, int col, int row) {
@@ -194,10 +202,41 @@ public class Tile {
             if (wallTile == null) {
                 wallTile = ImageIO.read(new File("RES/TILE/tembok.png"));
             }
+            
             // Load Path Tile
             pathTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/path.png"));
             if (pathTile == null) {
                 pathTile = ImageIO.read(new File("RES/TILE/path.png"));
+            }            // Load Forest Grass Tile 1
+            try {
+                ForestGrassTile1 = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/forestgrass1.png"));
+                if (ForestGrassTile1 == null) {
+                    ForestGrassTile1 = ImageIO.read(new File("RES/TILE/forestgrass1.png"));
+                    System.out.println("Loaded forestgrass1.png from file system");
+                }
+            } catch (Exception e) {
+                System.err.println("Error loading forestgrass1.png: " + e.getMessage());
+            }
+            
+            // Load Forest Grass Tile 2
+            try {
+                ForestGrassTile2 = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/forestgrass2.png"));
+                if (ForestGrassTile2 == null) {
+                    ForestGrassTile2 = ImageIO.read(new File("RES/TILE/forestgrass2.png"));
+                    System.out.println("Loaded forestgrass2.png from file system");
+                }
+            } catch (Exception e) {
+                System.err.println("Error loading forestgrass2.png: " + e.getMessage());
+            }
+            // Load Edge Tile
+            EdgeTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/edge.png"));
+            if (EdgeTile == null) {
+                EdgeTile = ImageIO.read(new File("RES/TILE/edge.png"));
+            }
+            // Load Platform Tile
+            PlatformTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/platform.png"));
+            if (PlatformTile == null) {
+                PlatformTile = ImageIO.read(new File("RES/TILE/platform.png"));
             }
             
             // Untuk saat ini, kita gunakan grass sebagai fallback untuk tile yang belum punya gambar
@@ -313,6 +352,17 @@ public class Tile {
     public static void drawWallTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
         g2.drawImage(wallTile, screenX, screenY, tileSize, tileSize, null);
 
+    }    public static void drawForestGrassTile1(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(ForestGrassTile1, screenX, screenY, tileSize, tileSize, null);
+    }    public static void drawForestGrassTile2(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(ForestGrassTile2, screenX, screenY, tileSize, tileSize, null);
+    }
+
+    public static void drawEdgeTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(EdgeTile, screenX, screenY, tileSize*2, tileSize, null);
+    }    
+      public static void drawPlatformTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(PlatformTile, screenX, screenY, tileSize * 4, tileSize * 3, null);
     }
     
     /**
@@ -399,7 +449,8 @@ public class Tile {
      * @param screenY Posisi Y pada layar
      * @param tileSize Ukuran tile yang akan digambar
      * @param tileType Tipe tile yang akan digambar
-     */    public static void drawTileByType(Graphics2D g2, int screenX, int screenY, int tileSize, int tileType) {
+     */    
+    public static void drawTileByType(Graphics2D g2, int screenX, int screenY, int tileSize, int tileType) {
         switch (tileType) {
             case TILE_GRASS:
                 drawGrassTile(g2, screenX, screenY, tileSize);
@@ -428,6 +479,18 @@ public class Tile {
             case TILE_PATH:
                 drawPathTile(g2, screenX, screenY, tileSize);
                 break;
+            case TILE_FOREST_GRASS1:
+                drawForestGrassTile1(g2, screenX, screenY, tileSize);
+                break;
+            case TILE_FOREST_GRASS2:
+                drawForestGrassTile2(g2, screenX, screenY, tileSize);
+                break;
+            case TILE_EDGE:
+                drawEdgeTile(g2, screenX, screenY, tileSize);
+                break;
+            case TILE_PLATFORM:
+                drawPlatformTile(g2, screenX, screenY, tileSize);
+                break;
             default:
                 drawGrassTile(g2, screenX, screenY, tileSize);
                 break;
@@ -435,9 +498,56 @@ public class Tile {
     }
     
     /**
-     * Mengembalikan representasi string dari tile
-     * @return String dengan format "Tile[col=x, row=y, type=z]"
+     * Menggambar tile besar sesuai dengan tipe yang diberikan
+     * @param g2 Graphics context untuk menggambar
+     * @param screenX Posisi X pada layar
+     * @param screenY Posisi Y pada layar
+     * @param tileSize Ukuran dasar satu tile
+     * @param tileType Tipe tile yang akan digambar
+     * @param width Lebar dalam jumlah tile
+     * @param height Tinggi dalam jumlah tile
      */
+    public static void drawLargeTileByType(Graphics2D g2, int screenX, int screenY, int tileSize, int tileType, int width, int height) {
+        // Validasi tipe tile
+        switch (tileType) {
+            case TILE_EDGE:
+                drawEdgeTile(g2, screenX, screenY, tileSize);
+                break;
+            case TILE_PLATFORM:
+                drawPlatformTile(g2, screenX, screenY, tileSize);
+                break;
+            default:
+                // Untuk tile lain yang mungkin perlu ditambahkan di kemudian hari
+                drawTileByType(g2, screenX, screenY, tileSize, tileType);
+                break;
+        }
+    }
+    
+    /**
+     * Mendapatkan dimensi tile berdasarkan tipe tile
+     * @param tileType Tipe tile
+     * @return Array berisi [width, height] dalam jumlah tile
+     */
+    public static int[] getTileDimensions(int tileType) {
+        switch (tileType) {
+            case TILE_EDGE:
+                return new int[]{2, 1}; // Lebar 2 tile, tinggi 1 tile
+            case TILE_PLATFORM:
+                return new int[]{4, 3}; // Lebar 4 tile, tinggi 3 tile
+            default:
+                return new int[]{1, 1}; // Tile standar 1x1
+        }
+    }
+    
+    /**
+     * Mengecek apakah tipe tile adalah tile besar
+     * @param tileType Tipe tile yang akan diperiksa
+     * @return true jika tipe tile adalah tile besar
+     */
+    public static boolean isLargeTile(int tileType) {
+        return tileType == TILE_EDGE || tileType == TILE_PLATFORM;
+    }
+
     @Override
     public String toString() {
         return "Tile[col=" + col + ", row=" + row + ", type=" + type + "]";

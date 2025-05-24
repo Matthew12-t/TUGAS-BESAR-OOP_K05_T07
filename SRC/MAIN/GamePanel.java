@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import javax.swing.JPanel;
 import SRC.ENTITY.Player;
 import SRC.MAP.FarmMap;
+import SRC.MAP.ForestRiverMap;
 import SRC.MAP.Map;
 import SRC.MAP.WorldMap;
 import SRC.MAP.HouseMap;
@@ -37,7 +38,7 @@ public class GamePanel extends JPanel implements Runnable {
     private Player player = new Player(this, keyHandler, mouseHandler);
       // MAP
      // Current active map
-    private Map worldMap;   // World map instance
+    private Map forestrivermap;   // World map instance
     private Map farmMap;    // Farm map instance
     private Map currentMap; // Default to farm map
     private Map houseMap;   // House map instance
@@ -147,15 +148,15 @@ public class GamePanel extends JPanel implements Runnable {
     public void switchToWorldMap() {
         farmMap.setActive(false);
         houseMap.setActive(false);
-        worldMap.setActive(true);
-        this.currentMap = worldMap;
+        forestrivermap.setActive(true);
+        this.currentMap = forestrivermap;
     }
     
     /**
      * Switch to farm map
      */    
     public void switchToFarmMap() {
-        worldMap.setActive(false);
+        forestrivermap.setActive(false);
         houseMap.setActive(false);
         farmMap.setActive(true);
         this.currentMap = farmMap;
@@ -165,7 +166,7 @@ public class GamePanel extends JPanel implements Runnable {
      * Switch to house map
      */
     public void switchToHouseMap() {
-        worldMap.setActive(false);
+        forestrivermap.setActive(false);
         farmMap.setActive(false);
         houseMap.setActive(true);
         this.currentMap = houseMap;
@@ -206,7 +207,7 @@ public class GamePanel extends JPanel implements Runnable {
         this.setFocusable(true);
 
           // Initialize maps
-        this.worldMap = new WorldMap(this);
+        this.forestrivermap = new ForestRiverMap(this);
         this.farmMap = new FarmMap(this);
         this.houseMap = new HouseMap(this);
         this.currentMap = houseMap;
@@ -216,18 +217,18 @@ public class GamePanel extends JPanel implements Runnable {
         if(currentMap == farmMap){
             this.farmMap.setupInitialObjects();
         }
-        else if (currentMap == worldMap){
-            this.worldMap.setupInitialObjects();
+        else if (currentMap == forestrivermap){
+            this.forestrivermap.setupInitialObjects();
         }
         else if (currentMap == houseMap){
             this.houseMap.setupInitialObjects();
         }
         else{
-            this.worldMap.setupInitialObjects();
+            this.forestrivermap.setupInitialObjects();
         }
           // Set house map as the active map (since it's the current map)
         this.farmMap.setActive(false);
-        this.worldMap.setActive(false);
+        this.forestrivermap.setActive(false);
         this.houseMap.setActive(true);
     }
 
@@ -270,8 +271,7 @@ public class GamePanel extends JPanel implements Runnable {
     /**
      * Teleport player to another map by name, keeping logic transition as before
      * @param targetMapName Nama map tujuan ("Farm Map" atau "World Map")
-     */      
-    public void teleportToMap(String targetMapName) {
+     */        public void teleportToMap(String targetMapName) {
         if (currentMap.getMapName().equals(targetMapName)) {
             // Sudah di map tujuan, tidak perlu teleport
             return;
@@ -281,9 +281,9 @@ public class GamePanel extends JPanel implements Runnable {
         mouseHandler.setHasTarget(false);
         
         if (targetMapName.equals("World Map")) {
-            switchMap(worldMap);
+            switchMap(forestrivermap);
             if (!isInitializedWorldMap) {
-                worldMap.setupInitialObjects();
+                forestrivermap.setupInitialObjects();
                 isInitializedWorldMap = true;
             }
             // Pindahkan player ke posisi default masuk dari farm
@@ -311,6 +311,15 @@ public class GamePanel extends JPanel implements Runnable {
                 player.setWorldX(tileSize * (FarmMap.FARM_COLS - 4));
                 // Y tetap
             }
+        } else if (targetMapName.equals("Forest River Map")) {
+            switchMap(forestrivermap);
+            if (!isInitializedWorldMap) {
+                forestrivermap.setupInitialObjects();
+                isInitializedWorldMap = true;
+            }
+            // Pindahkan player ke posisi default masuk dari farm
+            player.setWorldX(tileSize * 1); // Kolom kedua dari kiri
+            // Y tetap sama
         } else if (targetMapName.equals("House Map")) {
             switchMap(houseMap);
             if (!isInitializedHouseMap) {
@@ -322,9 +331,7 @@ public class GamePanel extends JPanel implements Runnable {
             player.setWorldX(tileSize * doorStart);
             player.setWorldY(tileSize * (HouseMap.HOUSE_ROWS - 5)); // One tile above the door
         }
-    }
-
-    public void update() {
+    }    public void update() {
         player.update(); // Update player's world position
         // Hitung posisi tengah player
         int playerCenterX = player.getWorldX() + player.getPlayerVisualWidth() / 2;
@@ -341,13 +348,18 @@ public class GamePanel extends JPanel implements Runnable {
                 if (playerCol == farmMapRef.getTeleportToHouseCol() && playerRow == farmMapRef.getTeleportToHouseRow() || playerCol == farmMapRef.getTeleportToHouseCol()+1 &&playerRow == farmMapRef.getTeleportToHouseRow()) {
                     teleportToMap("House Map");
                 } else if (playerCol == FarmMap.FARM_COLS - 1) {
-                    teleportToMap("World Map");
+                    teleportToMap("Forest River Map");
+                    System.out.println("Teleporting to Forest River Map from column " + playerCol);
                 }
             } else if (currentMap.getMapName().equals("World Map")) {
                 teleportToMap("Farm Map");
             } else if (currentMap.getMapName().equals("House Map")) {
                 // When stepping on teleport tile in house, go to farm map
                 teleportToMap("Farm Map");
+            } else if (currentMap.getMapName().equals("Forest River Map")) {
+                if (playerCol == 0) { // Jika di kolom paling kiri
+                    teleportToMap("Farm Map");
+                }
             }
         }
         // Update camera position to follow the player
