@@ -43,6 +43,7 @@ public class Tile {
     public static final int TILE_FOREST_GRASS2 = 10;
     public static final int TILE_EDGE = 11;
     public static final int TILE_PLATFORM = 12; 
+    public static final int TILE_EDGE_MAP = 13;
 
     // Resource untuk tile
     private static Image grassTile;
@@ -257,9 +258,34 @@ public class Tile {
     public static void drawGrassTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
         g2.drawImage(grassTile, screenX, screenY, tileSize, tileSize, null);
     }
-    
+
     public static void drawWaterTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
         g2.drawImage(waterTile, screenX, screenY, tileSize, tileSize, null);
+    }
+
+    public static void drawFloorTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(floorTile, screenX, screenY, tileSize, tileSize, null);
+    }
+
+    public static void drawWallTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(wallTile, screenX, screenY, tileSize, tileSize, null);
+
+    }
+
+    public static void drawForestGrassTile1(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(ForestGrassTile1, screenX, screenY, tileSize, tileSize, null);
+    }
+
+    public static void drawForestGrassTile2(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(ForestGrassTile2, screenX, screenY, tileSize, tileSize, null);
+    }
+
+    public static void drawEdgeTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(EdgeTile, screenX, screenY, tileSize * 2, tileSize, null);
+    }
+
+    public static void drawPlatformTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(PlatformTile, screenX, screenY, tileSize * 4, tileSize * 3, null);
     }
     
     /**
@@ -343,26 +369,21 @@ public class Tile {
                        screenY + (tileSize/3), 
                        plantWidth, plantHeight);
         }
-    }
-    
-    public static void drawFloorTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
-        g2.drawImage(floorTile, screenX, screenY, tileSize, tileSize, null);
-    }
-    
-    public static void drawWallTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
-        g2.drawImage(wallTile, screenX, screenY, tileSize, tileSize, null);
-
-    }    public static void drawForestGrassTile1(Graphics2D g2, int screenX, int screenY, int tileSize) {
-        g2.drawImage(ForestGrassTile1, screenX, screenY, tileSize, tileSize, null);
-    }    public static void drawForestGrassTile2(Graphics2D g2, int screenX, int screenY, int tileSize) {
-        g2.drawImage(ForestGrassTile2, screenX, screenY, tileSize, tileSize, null);
-    }
-
-    public static void drawEdgeTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
-        g2.drawImage(EdgeTile, screenX, screenY, tileSize*2, tileSize, null);
-    }    
-      public static void drawPlatformTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
-        g2.drawImage(PlatformTile, screenX, screenY, tileSize * 4, tileSize * 3, null);
+    }    /**
+     * Menggambar edge map tile pada posisi layar tertentu
+     * @param g2 Graphics context untuk menggambar
+     * @param screenX Posisi X pada layar
+     * @param screenY Posisi Y pada layar
+     * @param tileSize Ukuran tile yang akan digambar
+     */
+    public static void drawEdgeMapTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        // Draw a light brown tile for map borders with collision
+        g2.setColor(new java.awt.Color(210, 180, 140)); // Light brown color
+        g2.fillRect(screenX, screenY, tileSize, tileSize);
+        
+        // Add a subtle border to make it stand out
+        g2.setColor(new java.awt.Color(180, 150, 110)); // Slightly darker brown
+        g2.drawRect(screenX, screenY, tileSize - 1, tileSize - 1);
     }
     
     /**
@@ -420,8 +441,6 @@ public class Tile {
         if (pathTile != null) {
             g2.drawImage(pathTile, screenX, screenY, tileSize, tileSize, null);
         } else {
-            // Fallback jika gambar tidak terload
-            g2.setColor(new java.awt.Color(210, 180, 140)); // Tan/sand color
             g2.fillRect(screenX, screenY, tileSize, tileSize);
             
             // Add path texture with lines
@@ -484,9 +503,11 @@ public class Tile {
                 break;
             case TILE_FOREST_GRASS2:
                 drawForestGrassTile2(g2, screenX, screenY, tileSize);
-                break;
-            case TILE_EDGE:
+                break;            case TILE_EDGE:
                 drawEdgeTile(g2, screenX, screenY, tileSize);
+                break;
+            case TILE_EDGE_MAP:
+                drawEdgeMapTile(g2, screenX, screenY, tileSize);
                 break;
             case TILE_PLATFORM:
                 drawPlatformTile(g2, screenX, screenY, tileSize);
@@ -507,11 +528,13 @@ public class Tile {
      * @param width Lebar dalam jumlah tile
      * @param height Tinggi dalam jumlah tile
      */
-    public static void drawLargeTileByType(Graphics2D g2, int screenX, int screenY, int tileSize, int tileType, int width, int height) {
-        // Validasi tipe tile
+    public static void drawLargeTileByType(Graphics2D g2, int screenX, int screenY, int tileSize, int tileType, int width, int height) {        // Validasi tipe tile
         switch (tileType) {
             case TILE_EDGE:
                 drawEdgeTile(g2, screenX, screenY, tileSize);
+                break;
+            case TILE_EDGE_MAP:
+                drawEdgeMapTile(g2, screenX, screenY, tileSize);
                 break;
             case TILE_PLATFORM:
                 drawPlatformTile(g2, screenX, screenY, tileSize);
@@ -527,25 +550,26 @@ public class Tile {
      * Mendapatkan dimensi tile berdasarkan tipe tile
      * @param tileType Tipe tile
      * @return Array berisi [width, height] dalam jumlah tile
-     */
-    public static int[] getTileDimensions(int tileType) {
+     */    public static int[] getTileDimensions(int tileType) {
         switch (tileType) {
             case TILE_EDGE:
                 return new int[]{2, 1}; // Lebar 2 tile, tinggi 1 tile
+            case TILE_EDGE_MAP:
+                return new int[]{1, 1}; // Tile standar 1x1 untuk tepi map
             case TILE_PLATFORM:
                 return new int[]{4, 3}; // Lebar 4 tile, tinggi 3 tile
             default:
                 return new int[]{1, 1}; // Tile standar 1x1
         }
     }
-    
-    /**
+      /**
      * Mengecek apakah tipe tile adalah tile besar
      * @param tileType Tipe tile yang akan diperiksa
      * @return true jika tipe tile adalah tile besar
      */
     public static boolean isLargeTile(int tileType) {
         return tileType == TILE_EDGE || tileType == TILE_PLATFORM;
+        // Note: TILE_EDGE_MAP is not a large tile, it's a standard 1x1 tile
     }
 
     @Override

@@ -1,6 +1,6 @@
 d d d d d d d d 
-d d d d d d d d 
-5 D D D D D D D 
+D D D d d D D D
+5 p p p p p p p
 a a b b b b a a
 1 1 b b b b 1 1
 1 1 b b b b 1 1 

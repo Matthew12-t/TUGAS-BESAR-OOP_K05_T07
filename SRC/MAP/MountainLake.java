@@ -6,74 +6,81 @@ import java.awt.Graphics2D;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ForestRiverMap extends Map {
-    public static final int FOREST_COLS = 8;
-    public static final int FOREST_ROWS = 8;
+/**
+ * MountainLake Map class represents the mountain lake area in the game
+ */
+public class MountainLake extends Map {
+    public static final int MOUNTAIN_COLS = 8;
+    public static final int MOUNTAIN_ROWS = 8;
     
-    boolean loadSuccess = loadMapFromFile("RES/MAP_TXT/forestrivermap.txt");
+    boolean loadSuccess = loadMapFromFile("RES/MAP_TXT/mountainlake.txt");
     
     // To track which tiles have been drawn as part of large tiles
     private Set<String> drawnLargeTiles = new HashSet<>();
     
     /**
-     * Constructor for the ForestRiverMap
+     * Constructor for the MountainLake
      * @param gp GamePanel reference
      */
-    public ForestRiverMap(GamePanel gp) {
-        super(gp, "Forest River Map", FOREST_COLS, FOREST_ROWS, 10);
-
-    }    /**
-     * Initialize the forest map
-     */    @Override
+    public MountainLake(GamePanel gp) {
+        super(gp, "Mountain Lake", MOUNTAIN_COLS, MOUNTAIN_ROWS, 10);
+    }
+    
+    /**
+     * Initialize the mountain lake map
+     */
+    @Override
     protected void initializeMap() {
         // Start with default initialization
         super.initializeMap();
         
+        // We don't need explicit edge tiles thanks to out-of-bounds collision detection
+        // in the Map.java's getCollisionBounds method
     }
     
-
-  /**
-     * Set up initial objects in the forest map based on forestrivermap.txt
-     */    @Override
+    
+    /**
+     * Set up initial objects in the mountain lake map based on mountainlake.txt
+     */
+    @Override
     public void setupInitialObjects() {
-        // Jika file berhasil dimuat, gunakan data dari file
+        // If file was successfully loaded, use data from the file
         if (loadSuccess) {
-            System.out.println("Setting up objects from forestrivermap.txt...");
 
-            for (int row = 0; row < FOREST_ROWS; row++) {
-                for (int col = 0; col < FOREST_COLS; col++) {
-                    // Periksa karakter dari file asli
-                    char mapChar = super.getMapFileChar(col, row, "RES/MAP_TXT/forestrivermap.txt");
+            for (int row = 0; row < MOUNTAIN_ROWS; row++) {
+                for (int col = 0; col < MOUNTAIN_COLS; col++) {
+                    // Check character from original file
+                    char mapChar = super.getMapFileChar(col, row, "RES/MAP_TXT/mountainlake.txt");
                     
-                    // Proses berdasarkan karakter dari file
+                    // Process based on character from file
                     if (mapChar == 'd') {
                         setTileInMap(col, row, Tile.TILE_FOREST_GRASS1);
                     } else if (mapChar == 'D') {
                         // Forest Grass 2 is a regular 1x1 tile
                         setTileInMap(col, row, Tile.TILE_FOREST_GRASS2);    
                     } else if (mapChar == 'a') {
-                        // Use TILE_EDGE (visible 'a' characters) for the actual edges shown in the map file
+                        // Use TILE_EDGE for visible edge tiles
                         setTileInMap(col, row, Tile.TILE_EDGE);
                     } else if (mapChar == 'b') {
-                        // For Platform, set the tile type for all platform tiles
+                        // For Platform tiles
                         setTileInMap(col, row, Tile.TILE_PLATFORM);
                     } else if (mapChar == '1') {
-                        // Set water tile and explicitly print collision status for debugging
+                        // Water tiles
                         setTileInMap(col, row, Tile.TILE_WATER);
-                    } else if(mapChar == '5'){
+                    } else if (mapChar == '5') {
+                        // Teleport tile
                         setTileInMap(col, row, Tile.TILE_TELEPORT);
                         System.out.println("Set teleport tile at position (" + col + ", " + row + ")");
+                    } else if (mapChar == 'p') {
+                        // Path tiles (new in mountain lake map)
+                        setTileInMap(col, row, Tile.TILE_PATH);
                     }
                 }
             }
-            
-            
-            
         } else {
             System.out.println("Failed to load map file, no objects deployed");
         }
     }
-    
     
     /**
      * Override drawTiles to handle large tiles properly

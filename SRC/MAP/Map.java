@@ -203,24 +203,28 @@ public abstract class Map {
      * @param row Row in the map grid
      * @return int[] containing [leftBound, rightBound, topBound, bottomBound], null
      *         if no collision
-     */
-
-    /**
+     */    /**
      * Get collision bounds at a position if any
      * 
      * @param col Column in the map grid
      * @param row Row in the map grid
      * @return int[] containing [leftBound, rightBound, topBound, bottomBound], null
      *         if no collision
-     */
+     */    
     public int[] getCollisionBounds(int col, int row) {
-        // Check if the tile itself has collision (water tile or wall tile)
+        // Check if the tile itself has collision (water, wall, edge, or edge map tile)
         if (col >= 0 && col < maxCol && row >= 0 && row < maxRow) {
             int tileType = mapTileData[col][row];
-            if (tileType == 1 || tileType == 7) { // Water or Wall tile
-                // For water or wall tiles, return its own bounds
+            if (tileType == 1 || tileType == 7 || tileType == 13) { // Water, Wall, Edge, or Edge Map tile
+                // For tiles with collision, return its own bounds
                 return new int[] { col, col + 1, row, row + 1 };
             }
+        }
+        
+        // Also check for out-of-bounds positions (this prevents player from going outside the map)
+        if (col < 0 || col >= maxCol || row < 0 || row >= maxRow) {
+            // Return collision bounds for out-of-bounds positions
+            return new int[] { col, col + 1, row, row + 1 };
         }
 
         // Check if there's an object with collision at this position
