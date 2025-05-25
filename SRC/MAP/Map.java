@@ -215,7 +215,7 @@ public abstract class Map {
         // Check if the tile itself has collision (water, wall, edge, or edge map tile)
         if (col >= 0 && col < maxCol && row >= 0 && row < maxRow) {
             int tileType = mapTileData[col][row];
-            if (tileType == 1 || tileType == 7 || tileType == 13) { // Water, Wall, Edge, or Edge Map tile
+            if (tileType == 1 || tileType == 7 || tileType == 13 || tileType ==14||tileType ==15) { // Water, Wall, Edge, or Edge Map tile
                 // For tiles with collision, return its own bounds
                 return new int[] { col, col + 1, row, row + 1 };
             }
@@ -401,10 +401,10 @@ public abstract class Map {
         }
     }
 
-        /**
+    /**
      * Mendapatkan karakter asli dari file map pada posisi tertentu
      */
-    public char getMapFileChar(int col, int row,String path) {
+    public char getMapFileChar(int col, int row, String path) {
         try {
             java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(path));
 
@@ -433,6 +433,40 @@ public abstract class Map {
         }
 
         return '0'; // Default to grass (0)
+    }
+    
+    /**
+     * Get the entire value (potentially multi-character) from the map file at a specific position
+     */
+    public String getMapFileValue(int col, int row, String path) {
+        try {
+            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(path));
+
+            String line;
+            int currentRow = 0;
+
+            // Skip to the target row
+            while ((line = reader.readLine()) != null && currentRow < row) {
+                if (!line.trim().startsWith("//") && !line.trim().isEmpty()) {
+                    currentRow++;
+                }
+            }
+
+            // If we found the row
+            if (line != null && !line.trim().startsWith("//")) {
+                String[] values = line.trim().split("\\s+");
+                if (col < values.length) {
+                    reader.close();
+                    return values[col];
+                }
+            }
+
+            reader.close();
+        } catch (Exception e) {
+            System.err.println("Error reading map file value: " + e.getMessage());
+        }
+
+        return "0"; // Default to grass (0)
     }
 
     /**

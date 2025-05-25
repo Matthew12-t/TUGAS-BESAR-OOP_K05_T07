@@ -38,7 +38,6 @@ public class ForestRiverMap extends Map {
     public void setupInitialObjects() {
         // Jika file berhasil dimuat, gunakan data dari file
         if (loadSuccess) {
-            System.out.println("Setting up objects from forestrivermap.txt...");
 
             for (int row = 0; row < FOREST_ROWS; row++) {
                 for (int col = 0; col < FOREST_COLS; col++) {

@@ -42,7 +42,8 @@ public class GamePanel extends JPanel implements Runnable {
     // WORLD SETTINGS
     // Default world dimensions (for WorldMap)
     private final int maxWorldCol = 32;
-    private final int maxWorldRow = 32;    private boolean isInitializedFarmMap = false; // Flag to check if farm map is initialized
+    private final int maxWorldRow = 32;    
+    private boolean isInitializedFarmMap = false; // Flag to check if farm map is initialized
     private boolean isInitializedHouseMap = false; // Flag to check if house map is initialized
     private boolean isInitializedWorldMap = false; // Flag to check if world map is initialized
     private boolean isInitializedMountainLake = false; // Flag to check if mountain lake map is initialized

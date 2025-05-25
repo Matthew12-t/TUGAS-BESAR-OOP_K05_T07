@@ -37,13 +37,15 @@ public class Tile {
     public static final int TILE_PLANTED = 4;  // Planted land (l)
     public static final int TILE_TELEPORT = 5; // teleport    
     public static final int TILE_FLOOR = 6; // lantai
-    public static final int TILE_WALL = 7;  // tembok
+    public static final int TILE_WALL1 = 7;  // tembok
     public static final int TILE_PATH = 8;
     public static final int TILE_FOREST_GRASS1 = 9;
     public static final int TILE_FOREST_GRASS2 = 10;
     public static final int TILE_EDGE = 11;
     public static final int TILE_PLATFORM = 12; 
     public static final int TILE_EDGE_MAP = 13;
+    public static final int TILE_WALL2 = 14; //tembok horizontal
+    public static final int TILE_WALL3 = 15; //temmbok vertikal
 
     // Resource untuk tile
     private static Image grassTile;
@@ -53,7 +55,9 @@ public class Tile {
     private static Image tilledTile;
     private static Image plantedTile;
     private static Image floorTile;
-    private static Image wallTile;
+    private static Image wallTile1;
+    private static Image wallTile2;
+    private static Image wallTile3;
     private static Image ForestGrassTile1;
     private static Image ForestGrassTile2;
     private static Image EdgeTile;
@@ -198,10 +202,22 @@ public class Tile {
             if (floorTile == null) {
                 floorTile = ImageIO.read(new File("RES/TILE/lantai.png"));
             }
-            // Load Wall Tile
-            wallTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/tembok.png"));
-            if (wallTile == null) {
-                wallTile = ImageIO.read(new File("RES/TILE/tembok.png"));
+            // Load Wall Tile1
+            wallTile1 = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/tembok1.png"));
+            if (wallTile1 == null) {
+                wallTile1 = ImageIO.read(new File("RES/TILE/tembok.png"));
+            }
+
+            // Load Wall Tile 2
+            wallTile2 = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/tembok2.png"));
+            if (wallTile2 == null) {
+                wallTile2 = ImageIO.read(new File("RES/TILE/tembok2.png"));
+            }
+
+            // Load Wall Tile 3
+            wallTile3 = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/tembok3.png"));
+            if (wallTile3 == null) {
+                wallTile3 = ImageIO.read(new File("RES/TILE/tembok3.png"));
             }
             
             // Load Path Tile
@@ -267,9 +283,15 @@ public class Tile {
         g2.drawImage(floorTile, screenX, screenY, tileSize, tileSize, null);
     }
 
-    public static void drawWallTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
-        g2.drawImage(wallTile, screenX, screenY, tileSize, tileSize, null);
+    public static void drawWallTile1(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(wallTile1, screenX, screenY, tileSize, tileSize, null);
+    }
+    public static void drawWallTile2(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(wallTile2, screenX, screenY, tileSize, tileSize, null);
+    }
 
+    public static void drawWallTile3(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(wallTile3, screenX, screenY, tileSize, tileSize, null);
     }
 
     public static void drawForestGrassTile1(Graphics2D g2, int screenX, int screenY, int tileSize) {
@@ -492,8 +514,14 @@ public class Tile {
             case TILE_FLOOR:
                 drawFloorTile(g2, screenX, screenY, tileSize);
                 break;
-            case TILE_WALL:
-                drawWallTile(g2, screenX, screenY, tileSize);
+            case TILE_WALL1:
+                drawWallTile1(g2, screenX, screenY, tileSize);
+                break;
+            case TILE_WALL2:
+                drawWallTile2(g2, screenX, screenY, tileSize);
+                break;
+            case TILE_WALL3:
+                drawWallTile3(g2, screenX, screenY, tileSize);
                 break;
             case TILE_PATH:
                 drawPathTile(g2, screenX, screenY, tileSize);
@@ -539,6 +567,12 @@ public class Tile {
             case TILE_PLATFORM:
                 drawPlatformTile(g2, screenX, screenY, tileSize);
                 break;
+            case TILE_WALL2:
+                g2.drawImage(wallTile2, screenX, screenY, tileSize * width, tileSize * height, null);
+                break;
+            case TILE_WALL3:
+                g2.drawImage(wallTile3, screenX, screenY, tileSize * width, tileSize * height, null);
+                break;
             default:
                 // Untuk tile lain yang mungkin perlu ditambahkan di kemudian hari
                 drawTileByType(g2, screenX, screenY, tileSize, tileType);
@@ -558,6 +592,10 @@ public class Tile {
                 return new int[]{1, 1}; // Tile standar 1x1 untuk tepi map
             case TILE_PLATFORM:
                 return new int[]{4, 3}; // Lebar 4 tile, tinggi 3 tile
+            case TILE_WALL2:
+                return new int[]{9, 1}; // Horizontal wall: width 2, height 1
+            case TILE_WALL3:
+                return new int[]{1, 5}; // Vertical wall: width 1, height 2
             default:
                 return new int[]{1, 1}; // Tile standar 1x1
         }
@@ -566,9 +604,9 @@ public class Tile {
      * Mengecek apakah tipe tile adalah tile besar
      * @param tileType Tipe tile yang akan diperiksa
      * @return true jika tipe tile adalah tile besar
-     */
-    public static boolean isLargeTile(int tileType) {
-        return tileType == TILE_EDGE || tileType == TILE_PLATFORM;
+     */    public static boolean isLargeTile(int tileType) {
+        return tileType == TILE_EDGE || tileType == TILE_PLATFORM || 
+               tileType == TILE_WALL2 || tileType == TILE_WALL3;
         // Note: TILE_EDGE_MAP is not a large tile, it's a standard 1x1 tile
     }
 

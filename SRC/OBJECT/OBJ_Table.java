@@ -11,13 +11,18 @@ public class OBJ_Table extends SuperObject {
     // Ukuran meja dalam jumlah tile
     private int tableWidth = 2;  // Lebar meja (jumlah kolom)
     private int tableHeight = 2; // Tinggi meja (jumlah baris)
-    private int mode = 1;
-
+    
     public OBJ_Table(GamePanel gp, int col, int row, int mode) {
         super(gp, col, row);
         setName("table");
         getPosition().setCollision(true); // Table cannot be passed through
-        this.mode = mode;
+        
+        // Set table dimensions based on mode
+        if (mode == 1) {
+            tableWidth = 6;
+            tableHeight = 2;
+        }
+        
         try {
             BufferedImage image = ImageIO.read(getClass().getResourceAsStream("/RES/OBJECT/table_" + mode + ".png"));
             if (image == null) {
@@ -56,7 +61,5 @@ public class OBJ_Table extends SuperObject {
     public int gettableHeight() {
         return tableHeight;
     }
-    public int getMode() {
-        return mode;
-    }
+
 }

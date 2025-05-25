@@ -239,11 +239,9 @@ public class ObjectDeployer {
         for (int i = 0; i < objects.length; i++) {
             if (objects[i] == null) {
                 objects[i] = new OBJ_Table(gp, col, row, mode);
-                System.out.println("Table (mode " + mode + ") deployed at " + col + "," + row);
                 return;
             }
         }
-        System.out.println("Failed to deploy table: no free object slots");
     }
     /**
      * Menghapus objek pada posisi tertentu pada map aktif
