@@ -16,6 +16,7 @@ import SRC.MAP.MountainLake;
 import SRC.MAP.WorldMap;
 import SRC.MAP.HouseMap;
 import SRC.OBJECT.SuperObject;
+import SRC.ITEMS.Time;
 
 public class GamePanel extends JPanel implements Runnable {
     
@@ -63,7 +64,18 @@ public class GamePanel extends JPanel implements Runnable {
     // CAMERA
     private int cameraX = 0; 
     private int cameraY = 0;
-    
+      // TIME SYSTEM
+    private Time time = new Time(6, 0); // Mulai jam 6:00 pagi
+    private int day = 1;
+    private int month = 1;
+    private int year = 1;
+    private String[] dayNames = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+    private int dayOfWeek = 0; 
+    private long lastTimeUpdate = System.currentTimeMillis();
+    private String[] seasons = {"Spring", "Summer", "Fall", "Winter"};
+    private int currentSeasonIndex = 0;
+    private BufferedImage clockImage; // Image for clock display
+
     // Getters and setters
     public int getTileSize() {
         return tileSize;
@@ -220,11 +232,14 @@ public class GamePanel extends JPanel implements Runnable {
         this.setDoubleBuffered(true); 
         this.addKeyListener(keyHandler);
         this.addMouseListener(mouseHandler);
-        this.setFocusable(true);
-
-        // Initialize map menu images
+        this.setFocusable(true);        // Initialize map menu images
         mapMenuImages = new BufferedImage[TOTAL_WORLD_MAPS];
-        loadMapMenuImages();        // Initialize maps
+        loadMapMenuImages();
+        
+        // Load clock image
+        loadClockImage();
+        
+        // Initialize maps
         this.forestrivermap = new ForestRiverMap(this);
         this.mountainLake = new MountainLake(this);
         this.farmMap = new FarmMap(this);
@@ -263,9 +278,22 @@ public class GamePanel extends JPanel implements Runnable {
                 String imagePath = "RES/MAPMENU/worldmap" + (i+1) + ".png";
                 mapMenuImages[i] = ImageIO.read(new File(imagePath));
                 System.out.println("Loaded map menu image: " + imagePath);
-            }
-        } catch (Exception e) {
+            }        } catch (Exception e) {
             System.err.println("Error loading map menu images: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Load clock image from resources
+     */
+    private void loadClockImage() {
+        try {
+            String imagePath = "RES/OBJECT/clock.png";
+            clockImage = ImageIO.read(new File(imagePath));
+            System.out.println("Loaded clock image: " + imagePath);
+        } catch (Exception e) {
+            System.err.println("Error loading clock image: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -288,6 +316,12 @@ public class GamePanel extends JPanel implements Runnable {
             delta += (currentTime - lastTime) / drawInterval;
             timer += (currentTime - lastTime);
             lastTime = currentTime;
+
+            // Update time every 1 second (real world)
+            if (System.currentTimeMillis() - lastTimeUpdate >= 1000) {
+                advanceGameTime();
+                lastTimeUpdate = System.currentTimeMillis();
+            }
 
             if (delta >= 1) {
                 // 1. UPDATE: update information such as character positions
@@ -502,17 +536,16 @@ public class GamePanel extends JPanel implements Runnable {
             // Set the background to black (will be visible around small maps)
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
-            
             // Draw the current map (tiles and objects)
             currentMap.draw(g2);
-    
             // --- Draw Player ---
             // Calculate player's screen position (relative to camera)
             int playerScreenX = player.getWorldX() - cameraX;
             int playerScreenY = player.getWorldY() - cameraY;
-    
             // Draw the player at their screen position
             player.draw(g2, playerScreenX, playerScreenY);
+            // --- Draw Time Info ---
+            drawTimeInfo(g2);
         }else if (gameState == MAP_MENU_STATE) {
             // Draw map selection menu
             if (mapMenuImages != null && currentMapMenuIndex >= 0 && currentMapMenuIndex < mapMenuImages.length) {
@@ -653,5 +686,79 @@ public class GamePanel extends JPanel implements Runnable {
      */
     public int getGameState() {
         return gameState;
+    }
+    
+    // Tambahkan method advanceGameTime
+    private void advanceGameTime() {
+        // Tambah 5 menit setiap detik
+        int minute = time.getMinute() + 5;
+        int hour = time.getHour();
+        if (minute >= 60) {
+            minute -= 60;
+            hour++;
+        }
+        if (hour >= 24) {
+            hour = 0; // Ganti ke 00:00 (jam 12 malam)
+            minute = 0;
+            day++;
+            dayOfWeek = (dayOfWeek + 1) % 7;
+            // Season logic: ganti setiap 10 hari
+            if ((day - 1) % 10 == 0 && day != 1) {
+                currentSeasonIndex = (currentSeasonIndex + 1) % seasons.length;
+            }
+            if (day > 30) {
+                day = 1;
+                month++;
+                if (month > 12) {
+                    month = 1;
+                    year++;
+                }
+                currentSeasonIndex = 0; // Reset ke Spring setiap awal tahun
+            }
+        }
+        time.setHour(hour);
+        time.setMinute(minute);
+    }    // Tambahkan method untuk menggambar waktu di pojok kanan atas
+    private void drawTimeInfo(Graphics2D g2) {
+        String hari = dayNames[dayOfWeek];
+        String tanggal = String.format("%02d", day); // hanya tanggal
+        int hour24 = time.getHour();
+        int hour12 = hour24 % 12;
+        if (hour12 == 0) hour12 = 12;
+        String ampm = (hour24 < 12 || hour24 == 24) ? "AM" : "PM";
+        String jam = String.format("%02d:%02d %s", hour12, time.getMinute(), ampm);
+        
+        // Draw clock image 
+        if (clockImage != null) {
+            // Set the desired size for the clock (64x64 pixels)
+            int clockWidth = 128;
+            int clockHeight = 128;
+            
+            // Position the clock at the top-right corner of the screen
+            int clockX = screenWidth - clockWidth - 10; // 10 pixels from right edge
+            int clockY = 10; // 10 pixels from top
+              // Draw the clock image with the specified size
+            g2.drawImage(clockImage, clockX, clockY, clockWidth, clockHeight, null);
+            
+            // Draw time text centered on the clock
+            int textX = clockX + (clockWidth / 2) - 15;
+            int textY = clockY + (clockHeight / 2) + 5;
+            
+            // Position the date 30px higher than the time
+            g2.setColor(Color.BLACK);
+            java.awt.Font originalFont = g2.getFont();
+            java.awt.Font boldFont = originalFont.deriveFont(java.awt.Font.BOLD, originalFont.getSize() + 2);
+            g2.setFont(boldFont);
+            g2.drawString(hari + ", " + tanggal, textX, textY - 43); // 30px higher
+            g2.drawString(jam, textX, textY);
+            g2.setFont(originalFont);
+        } else {
+            // Fallback to original method if image failed to load
+            g2.setColor(new Color(0,0,0,180));
+            g2.fillRoundRect(screenWidth-120, 10, 110, 65, 15, 15);
+            g2.setColor(Color.BLACK);
+            g2.drawString(hari + ", " + tanggal, screenWidth-110, 30);
+            g2.drawString(jam, screenWidth-110, 60); // Moved 30px lower relative to date
+        }
     }
 }
