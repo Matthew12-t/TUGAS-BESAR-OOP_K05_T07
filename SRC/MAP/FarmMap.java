@@ -112,10 +112,24 @@ public class FarmMap extends Map {
                             objDeployer.deployShippingBin(col, row);
                         
                     } else if (mapChar == 'p') {
-                            objDeployer.deployPond(col, row);
+                            objDeployer.deployPond(col, row);                    
                     } else if (mapChar == 't') {
                         // Set tile sebagai tillable land
                         setTileInMap(col, row, Tile.TILE_TILLABLE);
+                    } else if (mapChar == 'o') {
+                        // Get the full value to check for tree modes (o1, o2, etc.)
+                        String mapValue = super.getMapFileValue(col, row, "RES/MAP_TXT/farmmap.txt");
+                        
+                        if (mapValue.length() > 1 && mapValue.charAt(0) == 'o' && Character.isDigit(mapValue.charAt(1))) {
+                            // Tree with mode (o1, o2, etc.)
+                            int mode = Character.getNumericValue(mapValue.charAt(1));
+                            System.out.println("Deploying tree mode " + mode + " at " + col + "," + row);
+                            objDeployer.deployPohon(col, row, mode);
+                        } else {
+                            // Default tree without mode
+                            System.out.println("Deploying default tree at " + col + "," + row);
+                            objDeployer.deployPohon(col, row);
+                        }
                     }
                 }
             }

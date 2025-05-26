@@ -225,6 +225,41 @@ public class ObjectDeployer {
         }
         System.out.println("Failed to deploy chair: no free object slots");
     }
+    public void deployPohon(int col, int row) {
+        if (!gp.getCurrentMap().isValidPlacement(col, row)) {
+            System.out.println("Cannot place pohon at " + col + "," + row + " - invalid placement");
+            return;
+        }
+        SuperObject[] objects = gp.getCurrentMap().getObjects();
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] == null) {
+                objects[i] = new OBJ_Pohon(gp, col, row);
+                System.out.println("pohon deployed at " + col + "," + row);
+                return;
+            }
+        }
+        System.out.println("Failed to deploy pohon: no free object slots");
+    }
+    /**
+     * Menempatkan bed pada posisi tertentu pada map aktif
+     * @param col Posisi kolom pada grid map
+     * @param row Posisi baris pada grid map
+     */
+    public void deployPohon(int col, int row, int mode) {
+        if (!gp.getCurrentMap().isValidPlacement(col, row)) {
+            System.out.println("Cannot place pohon at " + col + "," + row + " - invalid placement");
+            return;
+        }
+        SuperObject[] objects = gp.getCurrentMap().getObjects();
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] == null) {
+                objects[i] = new OBJ_Pohon(gp, col, row, mode);
+                System.out.println("pohon (mode " + mode + ") deployed at " + col + "," + row);
+                return;
+            }
+        }
+        System.out.println("Failed to deploy pohon: no free object slots");
+    }
     /**
      * Menempatkan table pada posisi tertentu pada map aktif
      * @param col Posisi kolom pada grid map
