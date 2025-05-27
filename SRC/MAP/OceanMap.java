@@ -6,79 +6,60 @@ import java.awt.Graphics2D;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * MountainLake Map class represents the mountain lake area in the game
- */
-public class MountainLake extends Map {
-    public static final int MOUNTAIN_COLS = 8;
-    public static final int MOUNTAIN_ROWS = 8;
+public class OceanMap extends Map {
+    public static final int OCEAN_COLS = 11;
+    public static final int OCEAN_ROWS = 6;
     
-    boolean loadSuccess = loadMapFromFile("RES/MAP_TXT/mountainlake.txt");
+    boolean loadSuccess = loadMapFromFile("RES/MAP_TXT/ocean.txt");
     
     // To track which tiles have been drawn as part of large tiles
     private Set<String> drawnLargeTiles = new HashSet<>();
     
     /**
-     * Constructor for the MountainLake
+     * Constructor for the OceanMap
      * @param gp GamePanel reference
      */
-    public MountainLake(GamePanel gp) {
-        super(gp, "Mountain Lake", MOUNTAIN_COLS, MOUNTAIN_ROWS, 10);
+    public OceanMap(GamePanel gp) {
+        super(gp, "Ocean Map", OCEAN_COLS, OCEAN_ROWS, 10);
     }
     
     /**
-     * Initialize the mountain lake map
+     * Initialize the ocean map
      */
     @Override
     protected void initializeMap() {
         // Start with default initialization
         super.initializeMap();
-        
-        // We don't need explicit edge tiles thanks to out-of-bounds collision detection
-        // in the Map.java's getCollisionBounds method
     }
-    
+  
     
     /**
-     * Set up initial objects in the mountain lake map based on mountainlake.txt
+     * Set up initial objects in the ocean map based on ocean.txt
      */
     @Override
     public void setupInitialObjects() {
         // If file was successfully loaded, use data from the file
         if (loadSuccess) {
-
-            for (int row = 0; row < MOUNTAIN_ROWS; row++) {
-                for (int col = 0; col < MOUNTAIN_COLS; col++) {
+            for (int row = 0; row < OCEAN_ROWS; row++) {
+                for (int col = 0; col < OCEAN_COLS; col++) {
                     // Check character from original file
-                    char mapChar = super.getMapFileChar(col, row, "RES/MAP_TXT/mountainlake.txt");
+                    char mapChar = super.getMapFileChar(col, row, "RES/MAP_TXT/ocean.txt");
                     
                     // Process based on character from file
-                    if (mapChar == 'd') {
-                        setTileInMap(col, row, Tile.TILE_GRASS);
-                    } else if (mapChar == 'D') {
-                        // Forest Grass 2 is a regular 1x1 tile
-                        setTileInMap(col, row, Tile.TILE_GRASSEDGE);    
-                    } else if (mapChar == 'a') {
-                        // Use TILE_EDGE for visible edge tiles
-                        setTileInMap(col, row, Tile.TILE_EDGE2);
+                    if (mapChar == 'w') {
+                        // Water3 tiles
+                        setTileInMap(col, row, Tile.TILE_WATER3);
+                    } else if (mapChar == 'i') {
+                        // Island tiles (4x4 large tile)
+                        setTileInMap(col, row, Tile.TILE_ISLAND);    
                     } else if (mapChar == 'b') {
-                        // For Platform tiles
-                        setTileInMap(col, row, Tile.TILE_PLATFORM);
-                    } else if (mapChar == '1') {
-                        // Water tiles
-                        setTileInMap(col, row, Tile.TILE_WATER2);
-                    } else if (mapChar == '5') {
-                        // Teleport tile
-                        setTileInMap(col, row, Tile.TILE_TELEPORT);
-                        System.out.println("Set teleport tile at position (" + col + ", " + row + ")");
-                    } else if (mapChar == 'p') {
-                        // Path tiles (new in mountain lake map)
-                        setTileInMap(col, row, Tile.TILE_PATH2);
+                        // Bridge tiles (5x2 large tile)
+                        setTileInMap(col, row, Tile.TILE_BRIDGE);
                     }
                 }
             }
         } else {
-            System.out.println("Failed to load map file, no objects deployed");
+            System.out.println("Failed to load ocean map file, no objects deployed");
         }
     }
     
@@ -112,8 +93,7 @@ public class MountainLake extends Map {
             for (int col = startCol; col < endCol; col++) {
                 if (col >= 0 && row >= 0 && col < maxCol && row < maxRow) {
                     int tileType = mapTileData[col][row];
-                    
-                    // Special handling for large tiles
+                      // Special handling for large tiles
                     if (Tile.isLargeTile(tileType)) {
                         // Get the dimensions of this tile type
                         int[] dimensions = Tile.getTileDimensions(tileType);

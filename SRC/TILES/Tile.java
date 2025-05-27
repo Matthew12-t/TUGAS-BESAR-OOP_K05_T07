@@ -46,6 +46,15 @@ public class Tile {
     public static final int TILE_EDGE_MAP = 13;
     public static final int TILE_WALL2 = 14; //tembok horizontal
     public static final int TILE_WALL3 = 15; //temmbok vertikal
+    //montain
+    public final static int TILE_EDGE2 = 16; 
+    public final static int TILE_GRASSEDGE = 17;
+    public final static int TILE_WATER2 = 18;
+    public final static int TILE_PATH2 = 19;
+    //ocean
+    public final static int TILE_WATER3 = 20;
+    public final static int TILE_ISLAND = 21;
+    public final static int TILE_BRIDGE = 22;
 
     // Resource untuk tile
     private static Image grassTile;
@@ -62,6 +71,14 @@ public class Tile {
     private static Image ForestGrassTile2;
     private static Image EdgeTile;
     private static Image PlatformTile;
+    private static Image Edge2;
+    private static Image GrassEdge;
+    private static Image Water2;
+    private static Image pathTile2;
+    //ocean tiles
+    private static Image Water3;
+    private static Image IslandTile;
+    private static Image BridgeTile;
 
     
     public Tile(GamePanel gp, int col, int row) {
@@ -255,7 +272,50 @@ public class Tile {
             if (PlatformTile == null) {
                 PlatformTile = ImageIO.read(new File("RES/TILE/platform.png"));
             }
-            
+
+            // Load Edge2 Tile
+            Edge2 = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/edge2.png"));
+            if (Edge2 == null) {
+                Edge2 = ImageIO.read(new File("RES/TILE/edge2.png"));
+            }
+
+            // Load Grassed Edge Tile
+            GrassEdge = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/grassedge.png"));
+            if (GrassEdge == null) {
+                GrassEdge = ImageIO.read(new File("RES/TILE/grassedge.png"));
+            }
+
+            // Load Water2 Tile
+            Water2 = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/water2.png"));
+            if (Water2 == null) {
+                Water2 = ImageIO.read(new File("RES/TILE/water2.png"));
+            }
+
+            // Load Path Tile 2
+            pathTile2 = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/path2.png"));
+            if (pathTile2 == null) {
+                pathTile2 = ImageIO.read(new File("RES/TILE/path2.png"));
+            }
+
+            // Load Ocean Tiles
+            // Load Water3 Tile
+            Water3 = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/water3.png"));
+            if (Water3 == null) {
+                Water3 = ImageIO.read(new File("RES/TILE/water3.png"));
+            }
+
+            // Load Island Tile
+            IslandTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/island.png"));
+            if (IslandTile == null) {
+                IslandTile = ImageIO.read(new File("RES/TILE/island.png"));
+            }
+
+            // Load Bridge Tile
+            BridgeTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/bridge.png"));
+            if (BridgeTile == null) {
+                BridgeTile = ImageIO.read(new File("RES/TILE/bridge.png"));
+            }
+
             // Untuk saat ini, kita gunakan grass sebagai fallback untuk tile yang belum punya gambar
             tillableTile = grassTile;
             tilledTile = grassTile;
@@ -304,12 +364,40 @@ public class Tile {
 
     public static void drawEdgeTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
         g2.drawImage(EdgeTile, screenX, screenY, tileSize * 2, tileSize, null);
-    }
-
+    }    
+    
     public static void drawPlatformTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
         g2.drawImage(PlatformTile, screenX, screenY, tileSize * 4, tileSize * 3, null);
     }
+
+    public static void drawEdge2Tile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(Edge2, screenX, screenY, tileSize * 2, tileSize, null);
+    }
+
+    public static void drawGrassEdgeTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(GrassEdge, screenX, screenY, tileSize, tileSize, null);
+    }
+
+    public static void drawWater2Tile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(Water2, screenX, screenY, tileSize, tileSize, null);
+    }
+
+    public static void drawPathTile2(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(pathTile2, screenX, screenY, tileSize, tileSize, null);
+    }
     
+    public static void drawWater3Tile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(Water3, screenX, screenY, tileSize, tileSize, null);
+    }
+
+    public static void drawIslandTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(IslandTile, screenX, screenY, tileSize * 4, tileSize * 4, null);
+    }
+
+    public static void drawBridgeTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(BridgeTile, screenX, screenY, tileSize * 5, tileSize * 2, null);
+    }
+
     /**
      * Menggambar tillable land tile pada posisi layar tertentu
      * Tillable land (.) - Tile yang dapat disiapkan untuk tanam
@@ -530,15 +618,36 @@ public class Tile {
                 drawForestGrassTile1(g2, screenX, screenY, tileSize);
                 break;
             case TILE_FOREST_GRASS2:
-                drawForestGrassTile2(g2, screenX, screenY, tileSize);
-                break;            case TILE_EDGE:
+                drawForestGrassTile2(g2, screenX, screenY, tileSize);                
+                break;
+            case TILE_EDGE:
                 drawEdgeTile(g2, screenX, screenY, tileSize);
+                break;
+            case TILE_EDGE2:
+                drawEdge2Tile(g2, screenX, screenY, tileSize);
                 break;
             case TILE_EDGE_MAP:
                 drawEdgeMapTile(g2, screenX, screenY, tileSize);
                 break;
             case TILE_PLATFORM:
                 drawPlatformTile(g2, screenX, screenY, tileSize);
+                break;
+            case TILE_GRASSEDGE:
+                drawGrassEdgeTile(g2, screenX, screenY, tileSize);
+                break;
+            case TILE_WATER2:
+                drawWater2Tile(g2, screenX, screenY, tileSize);
+                break;            case TILE_PATH2:
+                drawPathTile2(g2, screenX, screenY, tileSize);
+                break;
+            case TILE_WATER3:
+                drawWater3Tile(g2, screenX, screenY, tileSize);
+                break;
+            case TILE_ISLAND:
+                drawIslandTile(g2, screenX, screenY, tileSize);
+                break;
+            case TILE_BRIDGE:
+                drawBridgeTile(g2, screenX, screenY, tileSize);
                 break;
             default:
                 drawGrassTile(g2, screenX, screenY, tileSize);
@@ -573,6 +682,15 @@ public class Tile {
             case TILE_WALL3:
                 g2.drawImage(wallTile3, screenX, screenY, tileSize * width, tileSize * height, null);
                 break;
+            case TILE_EDGE2:
+                g2.drawImage(Edge2, screenX, screenY, tileSize * width, tileSize * height, null);
+                break;
+            case TILE_ISLAND:
+                g2.drawImage(IslandTile, screenX, screenY, tileSize * width, tileSize * height, null);
+                break;
+            case TILE_BRIDGE:
+                g2.drawImage(BridgeTile, screenX, screenY, tileSize * width, tileSize * height, null);
+                break;
             default:
                 // Untuk tile lain yang mungkin perlu ditambahkan di kemudian hari
                 drawTileByType(g2, screenX, screenY, tileSize, tileType);
@@ -584,7 +702,8 @@ public class Tile {
      * Mendapatkan dimensi tile berdasarkan tipe tile
      * @param tileType Tipe tile
      * @return Array berisi [width, height] dalam jumlah tile
-     */    public static int[] getTileDimensions(int tileType) {
+     */      
+    public static int[] getTileDimensions(int tileType) {
         switch (tileType) {
             case TILE_EDGE:
                 return new int[]{2, 1}; // Lebar 2 tile, tinggi 1 tile
@@ -596,6 +715,12 @@ public class Tile {
                 return new int[]{9, 1}; // Horizontal wall: width 2, height 1
             case TILE_WALL3:
                 return new int[]{1, 5}; // Vertical wall: width 1, height 2
+            case TILE_EDGE2:
+                return new int[]{2, 1}; // Lebar 2 tile, tinggi 1 tile (same as TILE_EDGE)
+            case TILE_ISLAND:
+                return new int[]{4, 4}; // Lebar 4 tile, tinggi 4 tile
+            case TILE_BRIDGE:
+                return new int[]{5, 2}; // Lebar 5 tile, tinggi 2 tile
             default:
                 return new int[]{1, 1}; // Tile standar 1x1
         }
@@ -604,9 +729,11 @@ public class Tile {
      * Mengecek apakah tipe tile adalah tile besar
      * @param tileType Tipe tile yang akan diperiksa
      * @return true jika tipe tile adalah tile besar
-     */    public static boolean isLargeTile(int tileType) {
+     */    
+    public static boolean isLargeTile(int tileType) {
         return tileType == TILE_EDGE || tileType == TILE_PLATFORM || 
-               tileType == TILE_WALL2 || tileType == TILE_WALL3;
+               tileType == TILE_WALL2 || tileType == TILE_WALL3 || tileType == TILE_EDGE2 ||
+               tileType == TILE_ISLAND || tileType == TILE_BRIDGE;
         // Note: TILE_EDGE_MAP is not a large tile, it's a standard 1x1 tile
     }
 

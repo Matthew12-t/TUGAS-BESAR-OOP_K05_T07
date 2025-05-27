@@ -299,5 +299,107 @@ public class ObjectDeployer {
         }
         
         System.out.println("No object found at " + col + "," + row);
+    }    /**
+     * Deploy store decoration 1 object
+     * @param col Column position on the map
+     * @param row Row position on the map
+     */
+    public void deployStoreDecoration1(int col, int row) {
+        if (!gp.getCurrentMap().isValidPlacement(col, row)) {
+            System.out.println("Cannot place store decoration 1 at " + col + "," + row + " - invalid placement");
+            return;
+        }
+        SuperObject[] objects = gp.getCurrentMap().getObjects();
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] == null) {
+                objects[i] = new OBJ_StoreDecoration1(gp, col, row);
+                System.out.println("Store Decoration 1 deployed at " + col + "," + row);
+                return;
+            }
+        }
+        System.out.println("Failed to deploy store decoration 1: no free object slots");
+    }
+    
+    /**
+     * Deploy store decoration 2 object
+     * @param col Column position on the map
+     * @param row Row position on the map
+     */
+    public void deployStoreDecoration2(int col, int row) {
+        if (!gp.getCurrentMap().isValidPlacement(col, row)) {
+            System.out.println("Cannot place store decoration 2 at " + col + "," + row + " - invalid placement");
+            return;
+        }
+        SuperObject[] objects = gp.getCurrentMap().getObjects();
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] == null) {
+                objects[i] = new OBJ_StoreDecoration2(gp, col, row);
+                System.out.println("Store Decoration 2 deployed at " + col + "," + row);
+                return;
+            }
+        }
+        System.out.println("Failed to deploy store decoration 2: no free object slots");
+    }
+    
+    /**
+     * Deploy store decoration 3 object
+     * @param col Column position on the map
+     * @param row Row position on the map
+     */
+    public void deployStoreDecoration3(int col, int row) {
+        if (!gp.getCurrentMap().isValidPlacement(col, row)) {
+            System.out.println("Cannot place store decoration 3 at " + col + "," + row + " - invalid placement");
+            return;
+        }
+        SuperObject[] objects = gp.getCurrentMap().getObjects();
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] == null) {
+                objects[i] = new OBJ_StoreDecoration3(gp, col, row);
+                System.out.println("Store Decoration 3 deployed at " + col + "," + row);
+                return;
+            }
+        }
+        System.out.println("Failed to deploy store decoration 3: no free object slots");
+    }
+    
+    /**
+     * Deploy store decoration 4 object
+     * @param col Column position on the map
+     * @param row Row position on the map
+     */
+    public void deployStoreDecoration4(int col, int row) {
+        if (!gp.getCurrentMap().isValidPlacement(col, row)) {
+            System.out.println("Cannot place store decoration 4 at " + col + "," + row + " - invalid placement");
+            return;
+        }
+        SuperObject[] objects = gp.getCurrentMap().getObjects();
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] == null) {
+                objects[i] = new OBJ_StoreDecoration4(gp, col, row);
+                System.out.println("Store Decoration 4 deployed at " + col + "," + row);
+                return;
+            }
+        }        System.out.println("Failed to deploy store decoration 4: no free object slots");
+    }
+    
+    /**
+     * Deploy chimney object at specified position
+     * @param col Column position
+     * @param row Row position
+     */
+    public void deployChimney(int col, int row) {
+        if (!gp.getCurrentMap().isValidPlacement(col, row)) {
+            System.out.println("Cannot place chimney at " + col + "," + row + " - invalid placement");
+            return;
+        }
+        SuperObject[] objects = gp.getCurrentMap().getObjects();
+        for (int i = 0; i < objects.length; i++) {
+            if (objects[i] == null) {
+                objects[i] = new OBJ_Chimney(gp, col, row);
+                System.out.println("Chimney deployed at " + col + "," + row);
+                return;
+            }
+        }
+        System.out.println("Failed to deploy chimney: no free object slots");
     }
 }

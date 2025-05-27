@@ -31,7 +31,8 @@ public class HouseMap extends Map {
 
     /**
      * Initialize the house map with various types of tiles and objects from housemap.txt
-     */    @Override    protected void initializeMap() {
+     */    @Override    
+    protected void initializeMap() {
         // Start with default initialization
         super.initializeMap();
         

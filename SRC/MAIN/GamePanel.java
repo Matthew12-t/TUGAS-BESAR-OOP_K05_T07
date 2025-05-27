@@ -13,8 +13,17 @@ import SRC.MAP.FarmMap;
 import SRC.MAP.ForestRiverMap;
 import SRC.MAP.Map;
 import SRC.MAP.MountainLake;
+import SRC.MAP.OceanMap;
 import SRC.MAP.WorldMap;
 import SRC.MAP.HouseMap;
+import SRC.MAP.StoreMap;
+import SRC.MAP.NPCHouseMap;
+import SRC.MAP.AbigailHouseMap;
+import SRC.MAP.CarolineHouseMap;
+import SRC.MAP.DascoHouseMap;
+import SRC.MAP.EmilyHouseMap;
+import SRC.MAP.MayorTadiHouseMap;
+import SRC.MAP.PerryHouseMap;
 import SRC.OBJECT.SuperObject;
 import SRC.ITEMS.Time;
 
@@ -42,25 +51,43 @@ public class GamePanel extends JPanel implements Runnable {
     // WORLD SETTINGS
     // Default world dimensions (for WorldMap)
     private final int maxWorldCol = 32;
-    private final int maxWorldRow = 32;    
-    private boolean isInitializedFarmMap = false; // Flag to check if farm map is initialized
+    private final int maxWorldRow = 32;    private boolean isInitializedFarmMap = false; // Flag to check if farm map is initialized
     private boolean isInitializedHouseMap = false; // Flag to check if house map is initialized
     private boolean isInitializedWorldMap = false; // Flag to check if world map is initialized
     private boolean isInitializedMountainLake = false; // Flag to check if mountain lake map is initialized
+    private boolean isInitializedOceanMap = false; // Flag to check if ocean map is initialized
+    private boolean isInitializedStoreMap = false; // Flag to check if store map is initialized
+    
+    // NPC House initialization flags
+    private boolean isInitializedAbigailHouse = false;
+    private boolean isInitializedCarolineHouse = false;
+    private boolean isInitializedDascoHouse = false;
+    private boolean isInitializedEmilyHouse = false;
+    private boolean isInitializedMayorTadiHouse = false;
+    private boolean isInitializedPerryHouse = false;
     // SYSTEM
     private KeyHandler keyHandler = new KeyHandler(this);
     private MouseHandler mouseHandler = new MouseHandler(this);
     private Thread gameThread;
 
     // ENTITY
-    private Player player = new Player(this, keyHandler, mouseHandler);
-    // MAP
+    private Player player = new Player(this, keyHandler, mouseHandler);    // MAP
      // Current active map
     private Map forestrivermap;   // Forest river map instance
     private Map mountainLake;     // Mountain lake map instance
+    private Map oceanMap;         // Ocean map instance
     private Map farmMap;          // Farm map instance
     private Map currentMap;       // Default to farm map
     private Map houseMap;         // House map instance
+    private Map storeMap;         // Store map instance
+    
+    // NPC House Maps
+    private Map abigailHouseMap;   // Abigail's house instance
+    private Map carolineHouseMap;  // Caroline's house instance
+    private Map dascoHouseMap;     // Dasco's house instance
+    private Map emilyHouseMap;     // Emily's house instance
+    private Map mayorTadiHouseMap; // Mayor Tadi's house instance
+    private Map perryHouseMap;     // Perry's house instance
 
     // CAMERA
     private int cameraX = 0; 
@@ -116,13 +143,14 @@ public class GamePanel extends JPanel implements Runnable {
     
     public int getMaxWorldRow() {
         return maxWorldRow;
-    }
-    public int getMaxWorldWidth() {
+    }    public int getMaxWorldWidth() {
         // Get width based on the active map
         if (currentMap.getMapName().equals("Farm Map")) {
             return tileSize * FarmMap.FARM_COLS;
         } else if (currentMap.getMapName().equals("House Map")) {
             return tileSize * HouseMap.HOUSE_COLS;
+        } else if (currentMap.getMapName().equals("Store Map")) {
+            return tileSize * StoreMap.STORE_COLS;
         } else {
             return tileSize * maxWorldCol;
         }
@@ -134,6 +162,8 @@ public class GamePanel extends JPanel implements Runnable {
             return tileSize * FarmMap.FARM_ROWS;
         } else if (currentMap.getMapName().equals("House Map")) {
             return tileSize * HouseMap.HOUSE_ROWS;
+        } else if (currentMap.getMapName().equals("Store Map")) {
+            return tileSize * StoreMap.STORE_ROWS;
         } else {
             return tileSize * maxWorldRow;
         }
@@ -191,15 +221,97 @@ public class GamePanel extends JPanel implements Runnable {
         farmMap.setActive(true);
         this.currentMap = farmMap;
     }
-    
-    /**
+      /**
      * Switch to house map
      */
     public void switchToHouseMap() {
         forestrivermap.setActive(false);
         farmMap.setActive(false);
+        storeMap.setActive(false);
         houseMap.setActive(true);
         this.currentMap = houseMap;
+    }
+    
+    /**
+     * Switch to store map
+     */    public void switchToStoreMap() {
+        forestrivermap.setActive(false);
+        farmMap.setActive(false);
+        houseMap.setActive(false);
+        storeMap.setActive(true);
+        this.currentMap = storeMap;
+    }
+    
+    /**
+     * Switch to Abigail's house map
+     */
+    public void switchToAbigailHouse() {
+        deactivateAllMaps();
+        abigailHouseMap.setActive(true);
+        this.currentMap = abigailHouseMap;
+    }
+    
+    /**
+     * Switch to Caroline's house map
+     */
+    public void switchToCarolineHouse() {
+        deactivateAllMaps();
+        carolineHouseMap.setActive(true);
+        this.currentMap = carolineHouseMap;
+    }
+    
+    /**
+     * Switch to Dasco's house map
+     */
+    public void switchToDascoHouse() {
+        deactivateAllMaps();
+        dascoHouseMap.setActive(true);
+        this.currentMap = dascoHouseMap;
+    }
+    
+    /**
+     * Switch to Emily's house map
+     */
+    public void switchToEmilyHouse() {
+        deactivateAllMaps();
+        emilyHouseMap.setActive(true);
+        this.currentMap = emilyHouseMap;
+    }
+    
+    /**
+     * Switch to Mayor Tadi's house map
+     */
+    public void switchToMayorTadiHouse() {
+        deactivateAllMaps();
+        mayorTadiHouseMap.setActive(true);
+        this.currentMap = mayorTadiHouseMap;
+    }
+    
+    /**
+     * Switch to Perry's house map
+     */
+    public void switchToPerryHouse() {
+        deactivateAllMaps();
+        perryHouseMap.setActive(true);
+        this.currentMap = perryHouseMap;
+    }
+    
+    /**
+     * Helper method to deactivate all maps
+     */
+    private void deactivateAllMaps() {
+        forestrivermap.setActive(false);
+        farmMap.setActive(false);
+        houseMap.setActive(false);
+        storeMap.setActive(false);
+        abigailHouseMap.setActive(false);
+        carolineHouseMap.setActive(false);
+        dascoHouseMap.setActive(false);
+        emilyHouseMap.setActive(false);
+        mayorTadiHouseMap.setActive(false);
+        perryHouseMap.setActive(false);
+        mountainLake.setActive(false);
+        oceanMap.setActive(false);
     }
     public void setIsInitializedFarmMap(boolean isInitialized) {
         this.isInitializedFarmMap = isInitialized;
@@ -212,12 +324,60 @@ public class GamePanel extends JPanel implements Runnable {
     }
     public boolean isInitializedHouseMap() {
         return isInitializedHouseMap;
-    }
-    public void setIsInitializedWorldMap(boolean isInitialized) {
+    }    public void setIsInitializedWorldMap(boolean isInitialized) {
         this.isInitializedWorldMap = isInitialized;
     }
     public boolean isInitializedWorldMap() {
         return isInitializedWorldMap;
+    }
+      public void setIsInitializedStoreMap(boolean isInitialized) {
+        this.isInitializedStoreMap = isInitialized;
+    }
+    public boolean isInitializedStoreMap() {
+        return isInitializedStoreMap;
+    }
+    
+    // NPC House initialization getters and setters
+    public void setIsInitializedAbigailHouse(boolean isInitialized) {
+        this.isInitializedAbigailHouse = isInitialized;
+    }
+    public boolean isInitializedAbigailHouse() {
+        return isInitializedAbigailHouse;
+    }
+    
+    public void setIsInitializedCarolineHouse(boolean isInitialized) {
+        this.isInitializedCarolineHouse = isInitialized;
+    }
+    public boolean isInitializedCarolineHouse() {
+        return isInitializedCarolineHouse;
+    }
+    
+    public void setIsInitializedDascoHouse(boolean isInitialized) {
+        this.isInitializedDascoHouse = isInitialized;
+    }
+    public boolean isInitializedDascoHouse() {
+        return isInitializedDascoHouse;
+    }
+    
+    public void setIsInitializedEmilyHouse(boolean isInitialized) {
+        this.isInitializedEmilyHouse = isInitialized;
+    }
+    public boolean isInitializedEmilyHouse() {
+        return isInitializedEmilyHouse;
+    }
+    
+    public void setIsInitializedMayorTadiHouse(boolean isInitialized) {
+        this.isInitializedMayorTadiHouse = isInitialized;
+    }
+    public boolean isInitializedMayorTadiHouse() {
+        return isInitializedMayorTadiHouse;
+    }
+    
+    public void setIsInitializedPerryHouse(boolean isInitialized) {
+        this.isInitializedPerryHouse = isInitialized;
+    }
+    public boolean isInitializedPerryHouse() {
+        return isInitializedPerryHouse;
     }
     /**
      * Get objects from the current map
@@ -238,35 +398,58 @@ public class GamePanel extends JPanel implements Runnable {
         loadMapMenuImages();
         
         // Load clock image
-        loadClockImage();
-        
-        // Initialize maps
+        loadClockImage();        // Initialize maps
         this.forestrivermap = new ForestRiverMap(this);
         this.mountainLake = new MountainLake(this);
+        this.oceanMap = new OceanMap(this);
         this.farmMap = new FarmMap(this);
         this.houseMap = new HouseMap(this);
+        this.storeMap = new StoreMap(this);
+        
+        // Initialize NPC house maps
+        this.abigailHouseMap = new AbigailHouseMap(this);
+        this.carolineHouseMap = new CarolineHouseMap(this);
+        this.dascoHouseMap = new DascoHouseMap(this);
+        this.emilyHouseMap = new EmilyHouseMap(this);
+        this.mayorTadiHouseMap = new MayorTadiHouseMap(this);
+        this.perryHouseMap = new PerryHouseMap(this);
+        
         this.currentMap = houseMap;
-        setIsInitializedHouseMap(true);
-          // Setup initial objects in maps
+        setIsInitializedHouseMap(true);// Setup initial objects in maps
         if(currentMap == farmMap){
             this.farmMap.setupInitialObjects();
         }
         else if (currentMap == forestrivermap){
-            this.forestrivermap.setupInitialObjects();
-        }
+            this.forestrivermap.setupInitialObjects();        }
         else if (currentMap == mountainLake){
             this.mountainLake.setupInitialObjects();
+        }
+        else if (currentMap == oceanMap){
+            this.oceanMap.setupInitialObjects();
         }
         else if (currentMap == houseMap){
             this.houseMap.setupInitialObjects();
         }
+        else if (currentMap == storeMap){
+            this.storeMap.setupInitialObjects();
+        }
         else{
             this.forestrivermap.setupInitialObjects();
-        }
-          // Set house map as the active map (since it's the current map)
+        }        // Set house map as the active map (since it's the current map)
         this.farmMap.setActive(false);
         this.forestrivermap.setActive(false);
         this.mountainLake.setActive(false);
+        this.oceanMap.setActive(false);
+        this.storeMap.setActive(false);
+        
+        // Set all NPC houses inactive
+        this.abigailHouseMap.setActive(false);
+        this.carolineHouseMap.setActive(false);
+        this.dascoHouseMap.setActive(false);
+        this.emilyHouseMap.setActive(false);
+        this.mayorTadiHouseMap.setActive(false);
+        this.perryHouseMap.setActive(false);
+        
         this.houseMap.setActive(true);
     }
     
@@ -458,9 +641,79 @@ public class GamePanel extends JPanel implements Runnable {
             int doorStart = (HouseMap.HOUSE_COLS / 2) - 1; // Center of the door
             player.setWorldX(tileSize * doorStart);
             player.setWorldY(tileSize * (HouseMap.HOUSE_ROWS - 5)); // One tile above the door
+              // For consistency, also center the camera on the house map
+            centerCameraOnMap(HouseMap.HOUSE_COLS, HouseMap.HOUSE_ROWS);        } else if (targetMapName.equals("Store Map")) {
+            switchMap(storeMap);
+            if (!isInitializedStoreMap) {
+                storeMap.setupInitialObjects();
+                isInitializedStoreMap = true;
+            }
+            // Position player at the entrance of the store
+            player.setWorldX(tileSize * (StoreMap.STORE_COLS / 2));
+            player.setWorldY(tileSize * (StoreMap.STORE_ROWS - 2)); // Near the bottom entrance
             
-            // For consistency, also center the camera on the house map
-            centerCameraOnMap(HouseMap.HOUSE_COLS, HouseMap.HOUSE_ROWS);
+            // Center camera on the store map
+            centerCameraOnMap(StoreMap.STORE_COLS, StoreMap.STORE_ROWS);
+        } else if (targetMapName.equals("Abigail's House")) {
+            switchToAbigailHouse();
+            if (!isInitializedAbigailHouse) {
+                abigailHouseMap.setupInitialObjects();
+                isInitializedAbigailHouse = true;
+            }
+            // Position player at the entrance
+            player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
+            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+        } else if (targetMapName.equals("Caroline's House")) {
+            switchToCarolineHouse();
+            if (!isInitializedCarolineHouse) {
+                carolineHouseMap.setupInitialObjects();
+                isInitializedCarolineHouse = true;
+            }
+            // Position player at the entrance
+            player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
+            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+        } else if (targetMapName.equals("Dasco's House")) {
+            switchToDascoHouse();
+            if (!isInitializedDascoHouse) {
+                dascoHouseMap.setupInitialObjects();
+                isInitializedDascoHouse = true;
+            }
+            // Position player at the entrance
+            player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
+            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+        } else if (targetMapName.equals("Emily's House")) {
+            switchToEmilyHouse();
+            if (!isInitializedEmilyHouse) {
+                emilyHouseMap.setupInitialObjects();
+                isInitializedEmilyHouse = true;
+            }
+            // Position player at the entrance
+            player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
+            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+        } else if (targetMapName.equals("Mayor Tadi's House")) {
+            switchToMayorTadiHouse();
+            if (!isInitializedMayorTadiHouse) {
+                mayorTadiHouseMap.setupInitialObjects();
+                isInitializedMayorTadiHouse = true;
+            }
+            // Position player at the entrance
+            player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
+            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+        } else if (targetMapName.equals("Perry's House")) {
+            switchToPerryHouse();
+            if (!isInitializedPerryHouse) {
+                perryHouseMap.setupInitialObjects();
+                isInitializedPerryHouse = true;
+            }
+            // Position player at the entrance
+            player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
+            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
         }
     }    
     
@@ -500,6 +753,22 @@ public class GamePanel extends JPanel implements Runnable {
         if (currentMap.getMapName().equals("Forest River Map")) {
             // For the ForestRiverMap, maintain the centered position
             centerCameraOnMap(ForestRiverMap.FOREST_COLS, ForestRiverMap.FOREST_ROWS);
+        } else if (currentMap.getMapName().equals("Mountain Lake")) {
+            // For the MountainLake, maintain the centered position
+            centerCameraOnMap(MountainLake.MOUNTAIN_COLS, MountainLake.MOUNTAIN_ROWS);
+        } else if (currentMap.getMapName().equals("Ocean Map")) {
+            // For the OceanMap, maintain the centered position
+            centerCameraOnMap(OceanMap.OCEAN_COLS, OceanMap.OCEAN_ROWS);        } else if (currentMap.getMapName().equals("Store Map")) {
+            // For the StoreMap, maintain the centered position
+            centerCameraOnMap(StoreMap.STORE_COLS, StoreMap.STORE_ROWS);
+        } else if (currentMap.getMapName().equals("Abigail's House") ||
+                   currentMap.getMapName().equals("Caroline's House") ||
+                   currentMap.getMapName().equals("Dasco's House") ||
+                   currentMap.getMapName().equals("Emily's House") ||
+                   currentMap.getMapName().equals("Mayor Tadi's House") ||
+                   currentMap.getMapName().equals("Perry's House")) {
+            // For NPC houses, maintain the centered position
+            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
         } else {
             // For other maps, camera follows the player
             cameraX = player.getWorldX() - screenWidth / 2 + player.getPlayerVisualWidth() / 2;
@@ -617,8 +886,7 @@ public class GamePanel extends JPanel implements Runnable {
             System.out.println("Teleported player to ForestRiverMap at position (1, 2)");
             
             // Center camera on map
-            centerCameraOnMap(ForestRiverMap.FOREST_COLS, ForestRiverMap.FOREST_ROWS);
-        }
+            centerCameraOnMap(ForestRiverMap.FOREST_COLS, ForestRiverMap.FOREST_ROWS);        }
         else if (selectedMap == 1) {
             // Switch to mountain lake map (second option)
             switchMap(mountainLake);
@@ -634,7 +902,141 @@ public class GamePanel extends JPanel implements Runnable {
             System.out.println("Teleported player to Mountain Lake at position (1, 2)");
             
             // Center camera on map
-            centerCameraOnMap(MountainLake.MOUNTAIN_COLS, MountainLake.MOUNTAIN_ROWS);
+            centerCameraOnMap(MountainLake.MOUNTAIN_COLS, MountainLake.MOUNTAIN_ROWS);        }
+        else if (selectedMap == 2) {
+            // Switch to ocean map (third option)
+            switchMap(oceanMap);
+            if (!isInitializedOceanMap) {
+                oceanMap.setupInitialObjects();
+                isInitializedOceanMap = true;
+            }
+            
+            // Position player next to the teleport tile at position (0,2)
+            player.setWorldX(tileSize * 1); // Column 1 (right after teleport column)
+            player.setWorldY(tileSize * 2); // Row 2 (next to teleport tile)
+            
+            System.out.println("Teleported player to Ocean Map at position (1, 2)");
+            
+            // Center camera on map
+            centerCameraOnMap(OceanMap.OCEAN_COLS, OceanMap.OCEAN_ROWS);
+        }
+        else if (selectedMap == 3) {
+            // Switch to store map (fourth option)
+            switchMap(storeMap);
+            if (!isInitializedStoreMap) {
+                storeMap.setupInitialObjects();
+                isInitializedStoreMap = true;
+            }
+            
+            // Position player at the entrance of the store
+            player.setWorldX(tileSize * (StoreMap.STORE_COLS / 2)); // Center horizontally
+            player.setWorldY(tileSize * (StoreMap.STORE_ROWS - 2)); // Near the bottom entrance
+            
+            System.out.println("Teleported player to Store Map at entrance");
+              // Center camera on map
+            centerCameraOnMap(StoreMap.STORE_COLS, StoreMap.STORE_ROWS);
+        }
+        else if (selectedMap == 4) {
+            // Switch to Abigail's house (fifth option)
+            switchToAbigailHouse();
+            if (!isInitializedAbigailHouse) {
+                abigailHouseMap.setupInitialObjects();
+                isInitializedAbigailHouse = true;
+            }
+            
+            // Position player at the entrance
+            player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
+            
+            System.out.println("Teleported player to Abigail's House at entrance");
+            
+            // Center camera on map
+            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+        }
+        else if (selectedMap == 5) {
+            // Switch to Caroline's house (sixth option)
+            switchToCarolineHouse();
+            if (!isInitializedCarolineHouse) {
+                carolineHouseMap.setupInitialObjects();
+                isInitializedCarolineHouse = true;
+            }
+            
+            // Position player at the entrance
+            player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
+            
+            System.out.println("Teleported player to Caroline's House at entrance");
+            
+            // Center camera on map
+            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+        }
+        else if (selectedMap == 6) {
+            // Switch to Dasco's house (seventh option)
+            switchToDascoHouse();
+            if (!isInitializedDascoHouse) {
+                dascoHouseMap.setupInitialObjects();
+                isInitializedDascoHouse = true;
+            }
+            
+            // Position player at the entrance
+            player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
+            
+            System.out.println("Teleported player to Dasco's House at entrance");
+            
+            // Center camera on map
+            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+        }
+        else if (selectedMap == 7) {
+            // Switch to Emily's house (eighth option)
+            switchToEmilyHouse();
+            if (!isInitializedEmilyHouse) {
+                emilyHouseMap.setupInitialObjects();
+                isInitializedEmilyHouse = true;
+            }
+            
+            // Position player at the entrance
+            player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
+            
+            System.out.println("Teleported player to Emily's House at entrance");
+            
+            // Center camera on map
+            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+        }
+        else if (selectedMap == 8) {
+            // Switch to Mayor Tadi's house (ninth option)
+            switchToMayorTadiHouse();
+            if (!isInitializedMayorTadiHouse) {
+                mayorTadiHouseMap.setupInitialObjects();
+                isInitializedMayorTadiHouse = true;
+            }
+            
+            // Position player at the entrance
+            player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
+            
+            System.out.println("Teleported player to Mayor Tadi's House at entrance");
+            
+            // Center camera on map
+            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+        }
+        else if (selectedMap == 9) {
+            // Switch to Perry's house (tenth option)
+            switchToPerryHouse();
+            if (!isInitializedPerryHouse) {
+                perryHouseMap.setupInitialObjects();
+                isInitializedPerryHouse = true;
+            }
+            
+            // Position player at the entrance
+            player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
+            
+            System.out.println("Teleported player to Perry's House at entrance");
+            
+            // Center camera on map
+            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
         }
         else {
             // Default to forest map for other options
