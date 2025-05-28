@@ -1,4 +1,4 @@
-package SRC.ITEMS;
+package SRC.TIME;
 
 public class Time {
     private int hour;

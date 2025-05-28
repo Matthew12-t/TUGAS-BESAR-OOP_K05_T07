@@ -6,9 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import SRC.MAIN.GamePanel;
-import SRC.OBJECT.OBJ_House;
-import SRC.OBJECT.OBJ_Pond;
-import SRC.OBJECT.OBJ_ShippingBin;
 import SRC.OBJECT.SuperObject;
 import SRC.TILES.Tile;
 
@@ -23,6 +20,7 @@ public abstract class Map {
     protected int maxRow;
     protected String mapName;
     protected boolean isActive; // Tracks if this map is currently active
+    protected MapController mapController; // Controller for non-GUI logic
     
     /**
      * Constructor for the Map class
@@ -31,14 +29,14 @@ public abstract class Map {
      * @param maxCol Maximum number of columns in the map
      * @param maxRow Maximum number of rows in the map
      * @param maxObjects Maximum number of objects allowed on this map
-     */
-    public Map(GamePanel gp, String mapName, int maxCol, int maxRow, int maxObjects) {
+     */    public Map(GamePanel gp, String mapName, int maxCol, int maxRow, int maxObjects) {
         this.gp = gp;
         this.mapName = mapName;
         this.maxCol = maxCol;
         this.maxRow = maxRow;
         this.mapTileData = new int[maxCol][maxRow];
         this.objects = new SuperObject[maxObjects];
+        this.mapController = new MapController(gp);
         
         // Initialize the map with default tiles
         initializeMap();
@@ -170,13 +168,43 @@ public abstract class Map {
      */
     public SuperObject[] getObjects() {
         return objects;
-    }
-      /**
+    }    /**
      * Get the name of the map
      * @return The map name
      */
     public String getMapName() {
         return mapName;
+    }
+      /**
+     * Get the MapController instance
+     * @return The MapController for this map
+     */
+    public MapController getMapController() {
+        return mapController;
+    }
+    
+    /**
+     * Get the maximum number of columns
+     * @return Maximum columns in the map
+     */
+    public int getMaxCol() {
+        return maxCol;
+    }
+    
+    /**
+     * Get the maximum number of rows
+     * @return Maximum rows in the map
+     */
+    public int getMaxRow() {
+        return maxRow;
+    }
+    
+    /**
+     * Get the map tile data array
+     * @return The 2D array containing tile data
+     */
+    public int[][] getMapTileData() {
+        return mapTileData;
     }
     
     /**
@@ -210,82 +238,9 @@ public abstract class Map {
      * @param row Row in the map grid
      * @return int[] containing [leftBound, rightBound, topBound, bottomBound], null
      *         if no collision
-     */    
-    public int[] getCollisionBounds(int col, int row) {
-        // Check if the tile itself has collision (water, wall, edge, or edge map tile)
-        if (col >= 0 && col < maxCol && row >= 0 && row < maxRow) {
-            int tileType = mapTileData[col][row];
-            if (tileType == 1 || tileType == 7 || tileType == 13 || tileType ==14||tileType ==15) { // Water, Wall, Edge, or Edge Map tile
-                // For tiles with collision, return its own bounds
-                return new int[] { col, col + 1, row, row + 1 };
-            }
-        }
-        
-        // Also check for out-of-bounds positions (this prevents player from going outside the map)
-        if (col < 0 || col >= maxCol || row < 0 || row >= maxRow) {
-            // Return collision bounds for out-of-bounds positions
-            return new int[] { col, col + 1, row, row + 1 };
-        }
-
-        // Check if there's an object with collision at this position
-        for (SuperObject obj : objects) {
-            if (obj != null) {
-                Tile objPosition = obj.getPosition();
-                int objCol = objPosition.getCol();
-                int objRow = objPosition.getRow();
-
-                // Get object dimensions and bounds
-                int width = 1; // Default width
-                int height = 1; // Default height
-
-                // Tentukan dimensi berdasarkan tipe objek
-                if (obj instanceof OBJ_House) {
-                    width = ((OBJ_House) obj).getHouseWidth();
-                    height = ((OBJ_House) obj).getHouseHeight();
-                } else if (obj instanceof OBJ_Pond) {
-                    width = ((OBJ_Pond) obj).getPondWidth();
-                    height = ((OBJ_Pond) obj).getPondHeight();
-                } else if (obj instanceof OBJ_ShippingBin) {
-                    width = ((OBJ_ShippingBin) obj).getBinWidth();
-                    height = ((OBJ_ShippingBin) obj).getBinHeight();
-                } else if (obj instanceof SRC.OBJECT.OBJ_Table) {
-                    width = ((SRC.OBJECT.OBJ_Table) obj).gettableWidth();
-                    height = ((SRC.OBJECT.OBJ_Table) obj).gettableHeight();
-                } else if (obj instanceof SRC.OBJECT.OBJ_Bed) {
-                    width = ((SRC.OBJECT.OBJ_Bed) obj).getBedWidth();
-                    height = ((SRC.OBJECT.OBJ_Bed) obj).getBedHeight();
-                } else if (obj instanceof SRC.OBJECT.OBJ_Chair) {
-                    width = ((SRC.OBJECT.OBJ_Chair) obj).getChairWidth();
-                    height = ((SRC.OBJECT.OBJ_Chair) obj).getChairHeight();
-                }else if (obj instanceof SRC.OBJECT.OBJ_Stove) {
-                    width = ((SRC.OBJECT.OBJ_Stove) obj).getStoveWidth();
-                    height = ((SRC.OBJECT.OBJ_Stove) obj).getStoveHeight();
-                }else if (obj instanceof SRC.OBJECT.OBJ_Rak) {
-                    width = ((SRC.OBJECT.OBJ_Rak) obj).getRakWidth();
-                    height = ((SRC.OBJECT.OBJ_Rak) obj).getRakHeight();
-                }else if (obj instanceof SRC.OBJECT.OBJ_Tv) {
-                    width = ((SRC.OBJECT.OBJ_Tv) obj).getTvWidth();
-                    height = ((SRC.OBJECT.OBJ_Tv) obj).getTvHeight();}
-
-                // Calculate bounds
-                int leftBound = objCol;
-                int rightBound = objCol + width;
-                int topBound = objRow;
-                int bottomBound = objRow + height;
-
-                // Check if position is within bounds
-                if (col >= leftBound && col < rightBound &&
-                        row >= topBound && row < bottomBound) {
-                    return new int[] { leftBound, rightBound, topBound, bottomBound };
-                }
-            }
-        }
-
-        // No collision found
-        return null;
-    }
-
-    /**
+     */      public int[] getCollisionBounds(int col, int row) {
+        return mapController.getCollisionBounds(this, col, row);
+    }/**
      * Check if a position has collision (backward compatibility)
      * 
      * @param col Column in the map grid
@@ -293,7 +248,7 @@ public abstract class Map {
      * @return true if the position has collision
      */
     public boolean hasCollision(int col, int row) {
-        return getCollisionBounds(col, row) != null;
+        return mapController.hasCollision(this, col, row);
     }
     
     /**
@@ -316,8 +271,7 @@ public abstract class Map {
         
         System.out.println("No object found at " + col + "," + row);
         return false;
-    }
-      /**
+    }    /**
      * Check if a position is valid for object placement
      * @param col Column position in the grid
      * @param row Row position in the grid
@@ -326,21 +280,7 @@ public abstract class Map {
      * @return true if position is valid for placement
      */
     public boolean isValidPlacement(int col, int row, int width, int height) {
-        // Periksa apakah seluruh area yang dibutuhkan objek berada dalam batas map
-        if (col < 0 || col + width > maxCol || row < 0 || row + height > maxRow) {
-            return false;
-        }
-        
-        // Periksa setiap tile apakah sudah ada collision
-        for (int c = col; c < col + width; c++) {
-            for (int r = row; r < row + height; r++) {
-                if (hasCollision(c, r)) {
-                    return false;
-                }
-            }
-        }
-        
-        return true;
+        return mapController.isValidPlacement(this, col, row, width, height);
     }
     
     /**

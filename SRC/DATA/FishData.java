@@ -1,15 +1,15 @@
 package SRC.DATA;
 
 import SRC.ITEMS.Fish;
-import SRC.ITEMS.Time;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import javax.imageio.ImageIO;
+import SRC.SEASON.Season;
+import SRC.WEATHER.Weather;
+import SRC.TIME.GameTime;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Data class for managing all fish items with static initialization
+ * Updated to match new fishing system specifications
  */
 public class FishData {
     private static Map<String, Fish> fish = new HashMap<>();
@@ -18,35 +18,69 @@ public class FishData {
     static {
         initializeFish();
     }
-    
-    /**
-     * Initialize all fish items
+      /**
+     * Initialize all fish items according to new specifications
      */
-    private static void initializeFish() {
-        // River Fish
-        fish.put("Carp", new Fish("Carp", 30, 15, "Common", "River", "All", "Any", new Time(6, 0)));
-        fish.put("Catfish", new Fish("Catfish", 200, 75, "Rare", "River", "Spring/Fall", "Rain", new Time(6, 0)));
-        fish.put("Rainbow Trout", new Fish("Rainbow Trout", 65, 35, "Uncommon", "River", "Summer", "Sun", new Time(6, 19)));
-        fish.put("Pike", new Fish("Pike", 100, 50, "Uncommon", "River", "Winter", "Any", new Time(6, 0)));
-        fish.put("Walleye", new Fish("Walleye", 105, 45, "Uncommon", "River", "Fall", "Rain", new Time(12, 2)));
+    private static void initializeFish() {        // Common Fish (6 types - including pond fish)
+        fish.put("Bullhead", new Fish("Bullhead", "Common", "Forest River", Season.ANY, Weather.ANY, 
+            new GameTime(6, 0), new GameTime(23, 59)));
+        fish.put("Carp", new Fish("Carp", "Common", "Mountain Lake", Season.ANY, Weather.ANY, 
+            new GameTime(6, 0), new GameTime(23, 59)));
+        fish.put("Chub", new Fish("Chub", "Common", "Forest River", Season.ANY, Weather.ANY, 
+            new GameTime(6, 0), new GameTime(23, 59)));
+        // Pond-specific common fish
+        fish.put("Bluegill", new Fish("Bluegill", "Common", "Pond", Season.ANY, Weather.ANY, 
+            new GameTime(6, 0), new GameTime(23, 59)));
+        fish.put("Perch", new Fish("Perch", "Common", "Pond", Season.ANY, Weather.ANY, 
+            new GameTime(6, 0), new GameTime(23, 59)));
+        fish.put("Sunfish", new Fish("Sunfish", "Common", "Pond", Season.ANY, Weather.SUNNY, 
+            new GameTime(6, 0), new GameTime(19, 0)));
+          // Regular Fish (15 types - including pond fish)
+        fish.put("Catfish", new Fish("Catfish", "Regular", "Forest River", Season.SPRING, Weather.RAINY, 
+            new GameTime(6, 0), new GameTime(23, 59)));
+        fish.put("Largemouth Bass", new Fish("Largemouth Bass", "Regular", "Mountain Lake", Season.ANY, Weather.ANY, 
+            new GameTime(6, 0), new GameTime(19, 0)));
+        fish.put("Pike", new Fish("Pike", "Regular", "Forest River", Season.SUMMER, Weather.ANY, 
+            new GameTime(6, 0), new GameTime(23, 59)));
+        fish.put("Rainbow Trout", new Fish("Rainbow Trout", "Regular", "Forest River", Season.SUMMER, Weather.SUNNY, 
+            new GameTime(6, 0), new GameTime(19, 0)));
+        fish.put("Salmon", new Fish("Salmon", "Regular", "Forest River", Season.FALL, Weather.ANY, 
+            new GameTime(6, 0), new GameTime(19, 0)));
+        fish.put("Shad", new Fish("Shad", "Regular", "Forest River", Season.SPRING, Weather.RAINY, 
+            new GameTime(9, 0), new GameTime(14, 0)));
+        fish.put("Smallmouth Bass", new Fish("Smallmouth Bass", "Regular", "Forest River", Season.FALL, Weather.ANY, 
+            new GameTime(6, 0), new GameTime(23, 59)));
+        fish.put("Walleye", new Fish("Walleye", "Regular", "Forest River", Season.FALL, Weather.RAINY, 
+            new GameTime(12, 0), new GameTime(14, 0)));
+        fish.put("Albacore", new Fish("Albacore", "Regular", "Ocean", Season.FALL, Weather.ANY, 
+            new GameTime(6, 0), new GameTime(11, 0)));
+        fish.put("Anchovy", new Fish("Anchovy", "Regular", "Ocean", Season.SPRING, Weather.ANY, 
+            new GameTime(6, 0), new GameTime(14, 0)));
+        fish.put("Red Snapper", new Fish("Red Snapper", "Regular", "Ocean", Season.SUMMER, Weather.RAINY, 
+            new GameTime(6, 0), new GameTime(19, 0)));
+        fish.put("Tuna", new Fish("Tuna", "Regular", "Ocean", Season.SUMMER, Weather.ANY, 
+            new GameTime(6, 0), new GameTime(19, 0)));
+        // Pond-specific regular fish
+        fish.put("Channel Catfish", new Fish("Channel Catfish", "Regular", "Pond", Season.SPRING, Weather.ANY, 
+            new GameTime(6, 0), new GameTime(22, 0)));
+        fish.put("Pond Bass", new Fish("Pond Bass", "Regular", "Pond", Season.SUMMER, Weather.ANY, 
+            new GameTime(6, 0), new GameTime(20, 0)));
+        fish.put("Golden Carp", new Fish("Golden Carp", "Regular", "Pond", Season.FALL, Weather.SUNNY, 
+            new GameTime(8, 0), new GameTime(18, 0)));
+          // Legendary Fish (5 types - including pond fish)
+        fish.put("Angler", new Fish("Angler", "Legendary", "Forest River", Season.FALL, Weather.ANY, 
+            new GameTime(6, 0), new GameTime(20, 0)));
+        fish.put("Crimsonfish", new Fish("Crimsonfish", "Legendary", "Ocean", Season.SUMMER, Weather.ANY, 
+            new GameTime(6, 0), new GameTime(20, 0)));
+        fish.put("Glacierfish", new Fish("Glacierfish", "Legendary", "Forest River", Season.WINTER, Weather.ANY, 
+            new GameTime(6, 0), new GameTime(20, 0)));
+        fish.put("Legend", new Fish("Legend", "Legendary", "Mountain Lake", Season.SPRING, Weather.RAINY, 
+            new GameTime(6, 0), new GameTime(20, 0)));
+        // Pond-specific legendary fish
+        fish.put("Mystic Koi", new Fish("Mystic Koi", "Legendary", "Pond", Season.SPRING, Weather.RAINY, 
+            new GameTime(6, 0), new GameTime(20, 0)));
         
-        // Ocean Fish
-        fish.put("Sardine", new Fish("Sardine", 40, 20, "Common", "Ocean", "All", "Any", new Time(6, 19)));
-        fish.put("Tuna", new Fish("Tuna", 100, 70, "Rare", "Ocean", "Summer/Winter", "Any", new Time(6, 19)));
-        fish.put("Red Snapper", new Fish("Red Snapper", 50, 25, "Uncommon", "Ocean", "Summer/Fall", "Rain", new Time(6, 19)));
-        fish.put("Flounder", new Fish("Flounder", 100, 50, "Uncommon", "Ocean", "Spring/Summer", "Any", new Time(6, 20)));
-        fish.put("Salmon", new Fish("Salmon", 75, 40, "Uncommon", "Ocean", "Fall", "Any", new Time(6, 19)));
-        
-        // Lake Fish
-        fish.put("Largemouth Bass", new Fish("Largemouth Bass", 100, 50, "Uncommon", "Lake", "All", "Any", new Time(6, 19)));
-        fish.put("Smallmouth Bass", new Fish("Smallmouth Bass", 50, 25, "Common", "Lake", "All", "Any", new Time(6, 19)));
-        
-        // Legendary Fish
-        fish.put("Legend", new Fish("Legend", 5000, 200, "Legendary", "Lake", "Spring", "Rain", new Time(6, 20)));
-        fish.put("Crimsonfish", new Fish("Crimsonfish", 1500, 150, "Legendary", "Ocean", "Summer", "Any", new Time(6, 20)));
-        fish.put("Angler", new Fish("Angler", 900, 100, "Legendary", "River", "Fall", "Any", new Time(6, 20)));
-        
-        System.out.println("FishData: Initialized " + fish.size() + " fish types");
+        System.out.println("FishData: Initialized " + fish.size() + " fish types including pond fish");
     }
     
     /**
@@ -82,8 +116,7 @@ public class FishData {
     public static boolean hasFish(String fishName) {
         return fish.containsKey(fishName);
     }
-    
-    /**
+      /**
      * Get fish by location
      * @param location Location to filter by
      * @return Map of fish for the specified location
@@ -96,6 +129,41 @@ public class FishData {
             }
         }
         return locationFish;
+    }
+    
+    /**
+     * Get fish by type (Common, Regular, Legendary)
+     * @param type Type to filter by
+     * @return Map of fish for the specified type
+     */
+    public static Map<String, Fish> getFishByType(String type) {
+        Map<String, Fish> typeFish = new HashMap<>();
+        for (Map.Entry<String, Fish> entry : fish.entrySet()) {
+            if (entry.getValue().getType().equalsIgnoreCase(type)) {
+                typeFish.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return typeFish;
+    }
+    
+    /**
+     * Get fish that can be caught at specified conditions
+     * @param location Fishing location
+     * @param currentTime Current game time
+     * @param currentSeason Current season
+     * @param currentWeather Current weather
+     * @return Map of catchable fish
+     */
+    public static Map<String, Fish> getCatchableFish(String location, GameTime currentTime, Season currentSeason, Weather currentWeather) {
+        Map<String, Fish> catchableFish = new HashMap<>();
+        for (Map.Entry<String, Fish> entry : fish.entrySet()) {
+            Fish fishItem = entry.getValue();
+            if (fishItem.getLocation().equalsIgnoreCase(location) && 
+                fishItem.canBeCaughtAt(currentTime, currentSeason, currentWeather)) {
+                catchableFish.put(entry.getKey(), fishItem);
+            }
+        }
+        return catchableFish;
     }
     
     /**

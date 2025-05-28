@@ -73,8 +73,7 @@ public class KeyHandler implements KeyListener {
                     gamePanel.getMouseHandler().setPlacingHouse(!isPlacing);
                     System.out.println("House placement mode: " + (!isPlacing ? "ON" : "OFF"));
                 }
-                
-                // Remove object under cursor
+                  // Remove object under cursor
                 if(code == KeyEvent.VK_DELETE || code == KeyEvent.VK_BACK_SPACE) {
                     if (gamePanel.getMouseHandler().isHasTarget()) {
                         int worldX = gamePanel.getMouseHandler().getTargetX();
@@ -84,6 +83,11 @@ public class KeyHandler implements KeyListener {
                         
                         gamePanel.getCurrentMap().removeObject(tileCol, tileRow);
                     }
+                }                // Fishing action with 'C' key
+                if(code == KeyEvent.VK_C) {
+                    System.out.println("DEBUG: 'C' key pressed for fishing");
+                    // Get player from gamePanel and perform fishing action
+                    gamePanel.getPlayer().getPlayerAction().performFishing();
                 }
             }            else if (gamePanel.getGameState() == GamePanel.MAP_MENU_STATE) {
                 // Map menu navigation

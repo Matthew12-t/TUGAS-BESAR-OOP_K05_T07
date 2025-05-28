@@ -13,7 +13,8 @@ public class Tool extends Item {
      * @param sellPrice The price when selling this tool
      * @param buyPrice The price when buying this tool
      * @param description The description of what this tool does
-     */    public Tool(String name, int sellPrice, int buyPrice, String description) {
+     */    
+    public Tool(String name, int sellPrice, int buyPrice, String description) {
         super(name, "Tool", sellPrice, buyPrice);
         this.description = description;
         

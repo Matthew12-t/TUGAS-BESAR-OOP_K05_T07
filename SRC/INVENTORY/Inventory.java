@@ -175,4 +175,18 @@ public class Inventory {
     public int getCols() {
         return INVENTORY_COLS;
     }
+    
+    /**
+     * Check if inventory contains an item with the specified name
+     * @param itemName Name of the item to check for
+     * @return true if item exists in inventory
+     */
+    public boolean hasItem(String itemName) {
+        for (int i = 0; i < MAX_INVENTORY_SLOTS; i++) {
+            if (itemSlots[i] != null && itemSlots[i].getName().equals(itemName)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

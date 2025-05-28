@@ -27,9 +27,9 @@ import SRC.MAP.NPC_HOUSE.EmilyHouseMap;
 import SRC.MAP.NPC_HOUSE.MayorTadiHouseMap;
 import SRC.MAP.NPC_HOUSE.PerryHouseMap;
 import SRC.OBJECT.SuperObject;
-import SRC.ITEMS.Time;
-import SRC.ITEMS.Season;
-import SRC.ITEMS.Weather;
+import SRC.TIME.Time;
+import SRC.SEASON.Season;
+import SRC.WEATHER.Weather;
 
 public class GamePanel extends JPanel implements Runnable {
     
@@ -106,10 +106,9 @@ public class GamePanel extends JPanel implements Runnable {
     private long lastTimeUpdate = System.currentTimeMillis();
     private String[] seasons = {"Spring", "Summer", "Fall", "Winter"};
     private int currentSeasonIndex = 0;
-    private BufferedImage clockImage; // Image for clock display
-      // Weather and Season objects
-    private Weather weather = new Weather();
-    private Season season = new Season();
+    private BufferedImage clockImage; // Image for clock display    // Weather and Season objects
+    private Weather currentWeather = Weather.SUNNY;
+    private Season currentSeason = Season.SPRING;
       // Inventory constants
     private static final int INVENTORY_ROWS = 4;
     private static final int INVENTORY_COLS = 4;
@@ -1139,42 +1138,59 @@ public class GamePanel extends JPanel implements Runnable {
     public void setGameState(int gameState) {
         this.gameState = gameState;
     }
-    
-    // Tambahkan method advanceGameTime
+      // Tambahkan method advanceGameTime
     private void advanceGameTime() {
+        // Don't advance time if it's paused (during fishing)
+        if (isTimePaused) {
+            return;
+        }
+        
         // Tambah 5 menit setiap detik
         int minute = time.getMinute() + 5;
         int hour = time.getHour();
         if (minute >= 60) {
             minute -= 60;
             hour++;
-        }
-        if (hour >= 24) {
+        }        if (hour >= 24) {
             hour = 0;
             minute = 0;
             day++;
             dayOfWeek = (dayOfWeek + 1) % 7;
-            weather.setCurrentWeather(day);
+            
+            // Update weather randomly each day
+            currentWeather = (Math.random() < 0.3) ? Weather.RAINY : Weather.SUNNY;
+            
             if ((day - 1) % 10 == 0 && day != 1) {
                 currentSeasonIndex = (currentSeasonIndex + 1) % seasons.length;
-            }            if (day > 30) {
+                // Update current season based on index
+                Season[] seasonValues = Season.values();
+                if (currentSeasonIndex < seasonValues.length) {
+                    currentSeason = seasonValues[currentSeasonIndex];
+                } else {
+                    currentSeasonIndex = 0;
+                    currentSeason = Season.SPRING;
+                }
+            }
+            
+            if (day > 30) {
                 day = 1;
                 month++;
                 if (month > 12) {
                     month = 1;
                     // Year progression could be tracked here if needed
                 }
-                season.resetToSpring();
-                weather.newSeason();
+                currentSeason = Season.SPRING;
+                currentSeasonIndex = 0;
+                currentWeather = Weather.SUNNY;
             }
         }
         time.setHour(hour);
         time.setMinute(minute);
-    }private void drawTimeInfo(Graphics2D g2) {
+    }    private void drawTimeInfo(Graphics2D g2) {
         String hari = dayNames[dayOfWeek];
         String tanggal = String.format("%02d", day); 
-        String musim = season.getCurrentSeasonName(); 
-        String cuaca = weather.getWeatherString(); // Get current weather string
+        String musim = currentSeason.getDisplayName(); 
+        String cuaca = currentWeather.getDisplayName(); // Get current weather string
         int hour24 = time.getHour();
         int hour12 = hour24 % 12;
         if (hour12 == 0) hour12 = 12;
@@ -1207,31 +1223,29 @@ public class GamePanel extends JPanel implements Runnable {
             g2.drawString(jam, screenWidth-110, 55); 
             g2.drawString(musim, screenWidth-110, 80); // Added season display
             g2.drawString(cuaca, screenWidth-110, 105); // Added weather display
-        }    }
-
-    public Season getSeason() {
-        return season;
+        }    }    public Season getSeason() {
+        return currentSeason;
     }
 
     public String getCurrentSeasonName() {
-        return season.getCurrentSeasonName();
+        return currentSeason.getDisplayName();
     }
 
     public Weather getWeather() {
-        return weather;
+        return currentWeather;
     }
 
     public boolean isRainy() {
-        return weather.isRainy();
+        return currentWeather == Weather.RAINY;
     }
     
 
     public boolean isSunny() {
-        return weather.isSunny();
+        return currentWeather == Weather.SUNNY;
     }
 
     public String getWeatherString() {
-        return weather.getWeatherString();
+        return currentWeather.getDisplayName();
     }
     
     /**
@@ -1359,9 +1373,55 @@ public class GamePanel extends JPanel implements Runnable {
         
         // Draw use button text centered in button
         g2.setColor(Color.WHITE);
-        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 14));
-        String useButtonText = "Use";
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 14));        String useButtonText = "Use";
         int useButtonTextWidth = g2.getFontMetrics().stringWidth(useButtonText);
         int useButtonTextX = useButtonX + (useButtonWidth - useButtonTextWidth) / 2;        g2.drawString(useButtonText, useButtonTextX, useButtonY + 20);
+    }
+    
+    // Time management for fishing system
+    private boolean isTimePaused = false;
+    
+    /**
+     * Pause the game time during fishing
+     */
+    public void pauseTime() {
+        isTimePaused = true;
+    }
+    
+    /**
+     * Resume the game time after fishing
+     */
+    public void resumeTime() {
+        isTimePaused = false;
+    }
+    
+    /**
+     * Add specific minutes to the game time
+     * @param minutes Minutes to add
+     */
+    public void addGameTime(int minutes) {
+        int currentMinute = time.getMinute() + minutes;
+        int currentHour = time.getHour();
+        
+        if (currentMinute >= 60) {
+            currentHour += currentMinute / 60;
+            currentMinute = currentMinute % 60;
+        }
+        
+        if (currentHour >= 24) {
+            currentHour = currentHour % 24;
+            // Could also advance day here if needed
+        }
+        
+        time.setHour(currentHour);
+        time.setMinute(currentMinute);
+    }
+    
+    /**
+     * Get current time object
+     * @return Current Time object
+     */
+    public Time getCurrentTime() {
+        return time;
     }
 }

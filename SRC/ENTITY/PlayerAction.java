@@ -3,6 +3,10 @@ package SRC.ENTITY;
 import SRC.MAIN.GamePanel;
 import SRC.INVENTORY.Inventory;
 import SRC.ITEMS.Item;
+import SRC.ENTITY.ACTION.FishingUI;
+import SRC.SEASON.Season;
+import SRC.WEATHER.Weather;
+import SRC.TIME.GameTime;
 
 /**
  * PlayerAction class handles all player action logic
@@ -13,6 +17,7 @@ public class PlayerAction {
     private GamePanel gamePanel;
     private Player player;
     private Inventory inventory;
+    private FishingUI fishingUI; // Add fishing UI
     
     // Energy system
     private static final int MAX_ENERGY = 100;
@@ -22,6 +27,7 @@ public class PlayerAction {
         this.gamePanel = gamePanel;
         this.player = player;
         this.inventory = new Inventory();
+        this.fishingUI = new FishingUI(gamePanel); // Initialize fishing UI
         this.currentEnergy = MAX_ENERGY; // Start with full energy
     }
     
@@ -140,6 +146,216 @@ public class PlayerAction {
         System.out.println("Preparing to plant: " + seedName);
         // TODO: Implement planting logic
         // This could set a "planting mode" where the player can click on tillable soil
+    }    /**
+     * Handle fishing action when player is on fishable water
+     * @return true if fishing action was performed successfully
+     */
+    public boolean performFishing() {
+        System.out.println("DEBUG: performFishing called");
+        
+        // Check if player has enough energy for fishing (reduced to 5)
+        final int FISHING_ENERGY_COST = 5;
+        if (!hasEnoughEnergy(FISHING_ENERGY_COST)) {
+            System.out.println("DEBUG: Not enough energy");
+            fishingUI.showInsufficientEnergy();
+            return false;
+        }
+        
+        // Check if player has fishing rod in inventory
+        if (!hasValidFishingRod()) {
+            System.out.println("DEBUG: No fishing rod");
+            fishingUI.showMissingFishingRod();
+            return false;
+        }
+        
+        // Get player's current position in tile coordinates
+        int tileSize = gamePanel.getTileSize();
+        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
+        int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
+        
+        // Check if player is on fishable water
+        SRC.MAP.Map currentMap = gamePanel.getCurrentMap();
+        if (!currentMap.getMapController().isOnFishableWater(currentMap, playerCol, playerRow) && 
+            !currentMap.getMapController().isAdjacentToFishableWater(currentMap, playerCol, playerRow)) {
+            System.out.println("DEBUG: Not on fishable water");
+            fishingUI.showInvalidLocation();
+            return false;
+        }
+        
+        // Get current fishing location
+        String fishingLocation = determineFishingLocation(currentMap.getMapName());
+        if (fishingLocation == null) {
+            System.out.println("DEBUG: Invalid fishing location");
+            fishingUI.showInvalidLocation();
+            return false;
+        }
+        
+        System.out.println("DEBUG: All checks passed, starting fishing mini-game");
+        
+        // Show fishing attempt message
+        fishingUI.showFishingAttempt();
+        
+        // Pause game time
+        pauseGameTime();
+        
+        // Consume energy for fishing action
+        consumeEnergy(FISHING_ENERGY_COST);
+        
+        // Perform fishing with mini-game
+        String caughtFish = performFishingWithMiniGame(fishingLocation);
+        
+        // Add 15 minutes to game time
+        addGameTime(15);
+        
+        // Resume game time
+        resumeGameTime();
+        
+        if (caughtFish != null) {
+            // Add fish to inventory using FishData system
+            SRC.ITEMS.Fish fishItem = SRC.DATA.FishData.getFish(caughtFish);
+            if (fishItem != null) {
+                inventory.addItem(fishItem, 1);
+                fishingUI.showFishingResult(caughtFish, true);
+            }
+        } else {
+            fishingUI.showFishingResult("", false);
+        }
+        
+        return true;
+    }    /**
+     * Perform fishing with mini-game based on current location and conditions
+     * @param fishingLocation The location where fishing is taking place
+     * @return name of caught fish or null if nothing caught
+     */
+    private String performFishingWithMiniGame(String fishingLocation) {
+        System.out.println("DEBUG: performFishingWithMiniGame called with location=" + fishingLocation);
+        
+        // Get current game conditions directly from GamePanel (already enum types)
+        Season currentSeason = gamePanel.getSeason();
+        Weather currentWeather = gamePanel.getWeather();
+        GameTime currentTime = new GameTime(
+            gamePanel.getCurrentTime().getHour(), 
+            gamePanel.getCurrentTime().getMinute()
+        );
+        
+        System.out.println("DEBUG: Current conditions - Season: " + currentSeason + ", Weather: " + currentWeather + ", Time: " + currentTime.getHour() + ":" + currentTime.getMinute());
+        
+        // Get catchable fish based on current conditions
+        java.util.Map<String, SRC.ITEMS.Fish> catchableFishMap = SRC.DATA.FishData.getCatchableFish(
+            fishingLocation, currentTime, currentSeason, currentWeather
+        );
+        
+        System.out.println("DEBUG: Found " + catchableFishMap.size() + " catchable fish");
+        
+        if (catchableFishMap.isEmpty()) {
+            System.out.println("DEBUG: No fish available at this location/time/weather");
+            return null; // No fish available at this location/time/weather
+        }
+          // Convert map to list and select random fish
+        java.util.List<SRC.ITEMS.Fish> catchableFish = new java.util.ArrayList<>(catchableFishMap.values());
+        java.util.Random random = new java.util.Random();
+        SRC.ITEMS.Fish selectedFish = catchableFish.get(random.nextInt(catchableFish.size()));
+        
+        System.out.println("DEBUG: Selected fish: " + selectedFish.getName() + " (Type: " + selectedFish.getType() + ")");
+        
+        // Play integrated mini-game based on fish type
+        boolean success = playIntegratedMiniGame(selectedFish.getType());
+        
+        System.out.println("DEBUG: Mini-game result: " + (success ? "SUCCESS" : "FAILED"));
+        
+        return success ? selectedFish.getName() : null;
+    }
+      /**
+     * Integrated mini-game logic
+     * @param fishType Type of fish (Common, Regular, Legendary)
+     * @return true if mini-game was successful
+     */
+    private boolean playIntegratedMiniGame(String fishType) {
+        System.out.println("DEBUG: playIntegratedMiniGame called with fishType=" + fishType);
+        
+        int maxRange;
+        int maxAttempts;
+        
+        // Set parameters based on fish type
+        switch (fishType) {
+            case "Common":
+                maxRange = 10;
+                maxAttempts = 10;
+                break;
+            case "Regular":
+                maxRange = 100;
+                maxAttempts = 10;
+                break;
+            case "Legendary":
+                maxRange = 500;
+                maxAttempts = 7;
+                break;
+            default:
+                maxRange = 50;
+                maxAttempts = 8;
+        }
+        
+        // Generate random target number
+        int targetNumber = (int) (Math.random() * maxRange) + 1;
+        
+        System.out.println("DEBUG: About to call fishingUI.playGUIMiniGame with targetNumber=" + targetNumber);
+        
+        // Use GUI for mini-game
+        return fishingUI.playGUIMiniGame(fishType, targetNumber, maxRange, maxAttempts);
+    }
+    
+    /**
+     * Determine fishing location based on current map
+     * @param mapName The name of the current map
+     * @return fishing location string or null if not a fishing location
+     */
+    private String determineFishingLocation(String mapName) {
+        switch (mapName) {
+            case "Forest River Map":
+                return "Forest River";
+            case "Mountain Lake":
+                return "Mountain Lake";
+            case "Ocean Map":
+                return "Ocean";
+            case "Farm Map":
+                return "Pond"; // Assuming farm has a pond
+            default:
+                return null;
+        }
+    }
+    
+    /**
+     * Check if player has a valid fishing rod in inventory
+     * @return true if player has fishing rod
+     */
+    private boolean hasValidFishingRod() {
+        return inventory.hasItem("Fishing Rod") || inventory.hasItem("Fiberglass Rod");
+    }
+    
+    /**
+     * Pause the game time during fishing
+     */
+    private void pauseGameTime() {
+        // The time system will be paused during fishing mini-game
+        // Implementation depends on GamePanel's time system
+        gamePanel.pauseTime();
+    }
+    
+    /**
+     * Resume the game time after fishing
+     */
+    private void resumeGameTime() {
+        // Resume the time system after fishing
+        gamePanel.resumeTime();
+    }
+    
+    /**
+     * Add specific minutes to game time
+     * @param minutes Minutes to add
+     */
+    private void addGameTime(int minutes) {
+        // Add specified minutes to the game time
+        gamePanel.addGameTime(minutes);
     }
     
     /**
@@ -161,8 +377,7 @@ public class PlayerAction {
     public int getMaxEnergy() {
         return MAX_ENERGY;
     }
-    
-    /**
+      /**
      * Consume energy for actions
      * @param amount energy to consume
      * @return true if energy was consumed, false if not enough energy
@@ -171,15 +386,12 @@ public class PlayerAction {
         if (currentEnergy >= amount) {
             currentEnergy -= amount;
             if (currentEnergy < 0) currentEnergy = 0;
-            System.out.println("Consumed " + amount + " energy. Current: " + currentEnergy);
             return true;
         } else {
-            System.out.println("Not enough energy! Current: " + currentEnergy + ", Required: " + amount);
             return false;
         }
     }
-    
-    /**
+      /**
      * Restore energy
      * @param amount energy to restore
      */
@@ -188,7 +400,6 @@ public class PlayerAction {
         if (currentEnergy > MAX_ENERGY) {
             currentEnergy = MAX_ENERGY;
         }
-        System.out.println("Restored " + amount + " energy. Current: " + currentEnergy);
     }
     
     /**
@@ -216,5 +427,28 @@ public class PlayerAction {
      */
     public double getEnergyPercentage() {
         return (double) currentEnergy / MAX_ENERGY;
+    }
+    
+    /**
+     * Update PlayerAction - including fishing UI
+     */
+    public void update() {
+        fishingUI.update();
+    }
+    
+    /**
+     * Draw PlayerAction UI elements
+     * @param g2 Graphics2D object for drawing
+     */
+    public void draw(java.awt.Graphics2D g2) {
+        fishingUI.draw(g2);
+    }
+    
+    /**
+     * Get the fishing UI instance
+     * @return FishingUI instance
+     */
+    public FishingUI getFishingUI() {
+        return fishingUI;
     }
 }
