@@ -90,6 +90,18 @@ public class MapController {
                 } else if (obj instanceof SRC.OBJECT.OBJ_Tv) {
                     width = ((SRC.OBJECT.OBJ_Tv) obj).getTvWidth();
                     height = ((SRC.OBJECT.OBJ_Tv) obj).getTvHeight();
+                }else if (obj instanceof SRC.OBJECT.OBJ_Chimney) {
+                    width = ((SRC.OBJECT.OBJ_Chimney) obj).getChimneyWidth();
+                    height = ((SRC.OBJECT.OBJ_Chimney) obj).getChimneyHeight();
+                } else if (obj instanceof SRC.OBJECT.OBJ_StoreDecoration1) {
+                    width = ((SRC.OBJECT.OBJ_StoreDecoration1) obj).getDecorationWidth();
+                    height = ((SRC.OBJECT.OBJ_StoreDecoration1) obj).getDecorationHeight();
+                } else if (obj instanceof SRC.OBJECT.OBJ_StoreDecoration2) {
+                    width = ((SRC.OBJECT.OBJ_StoreDecoration2) obj).getDecorationWidth();
+                    height = ((SRC.OBJECT.OBJ_StoreDecoration2) obj).getDecorationHeight();
+                } else if (obj instanceof SRC.OBJECT.OBJ_StoreDecoration3) {
+                    width = ((SRC.OBJECT.OBJ_StoreDecoration3) obj).getDecorationWidth();
+                    height = ((SRC.OBJECT.OBJ_StoreDecoration3) obj).getDecorationHeight();
                 }
 
                 // Calculate bounds

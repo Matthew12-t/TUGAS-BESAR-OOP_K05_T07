@@ -6,4 +6,4 @@ w d 0 0 0 0 0 0 0 0 0 w
 w d 0 0 0 0 0 c c c 0 w
 w d 0 0 0 0 0 c c c 0 w
 w d 0 0 0 0 0 0 0 0 0 w
-w w w w 0 0 w w w w w w 
+w w w w w 0 w w w w w w 
