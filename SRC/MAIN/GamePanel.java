@@ -1000,7 +1000,7 @@ public class GamePanel extends JPanel implements Runnable {
               // Center camera on map
             centerCameraOnMap(StoreMap.STORE_COLS, StoreMap.STORE_ROWS);
         }
-        else if (selectedMap == 4) {
+        else if (selectedMap == 9) {
             // Switch to Abigail's house (fifth option)
             switchToAbigailHouse();
             if (!isInitializedAbigailHouse) {
@@ -1036,7 +1036,7 @@ public class GamePanel extends JPanel implements Runnable {
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
             ((CarolineHouseMap)carolineHouseMap).ensureNPCsVisible();
         }
-        else if (selectedMap == 6) {
+        else if (selectedMap == 7) {
             // Switch to Dasco's house (seventh option)
             switchToDascoHouse();
             if (!isInitializedDascoHouse) {
@@ -1056,7 +1056,7 @@ public class GamePanel extends JPanel implements Runnable {
             // Ensure NPCs are visible after camera centering
             ((DascoHouseMap)dascoHouseMap).ensureNPCsVisible();
         }
-        else if (selectedMap == 7) {
+        else if (selectedMap == 8) {
             // Switch to Emily's house (eighth option)
             switchToEmilyHouse();
             if (!isInitializedEmilyHouse) {
@@ -1074,7 +1074,7 @@ public class GamePanel extends JPanel implements Runnable {
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
             ((EmilyHouseMap)emilyHouseMap).ensureNPCsVisible();
         }
-        else if (selectedMap == 8) {
+        else if (selectedMap == 4) {
             // Switch to Mayor Tadi's house (ninth option)
             switchToMayorTadiHouse();
             if (!isInitializedMayorTadiHouse) {
@@ -1093,8 +1093,7 @@ public class GamePanel extends JPanel implements Runnable {
             ((MayorTadiHouseMap)mayorTadiHouseMap).ensureNPCsVisible();
 
         }
-        else if (selectedMap == 9) {
-            // Switch to Perry's house (tenth option)
+        else if (selectedMap == 6) {
             switchToPerryHouse();
             if (!isInitializedPerryHouse) {
                 perryHouseMap.setupInitialObjects();
