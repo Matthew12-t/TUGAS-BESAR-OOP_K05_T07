@@ -110,32 +110,39 @@ public class Player extends Entity {
     public PlayerAction getPlayerAction() {
         return playerAction;
     }
-    
-    /**
-     * Energy system methods (delegate to PlayerAction)
+      /**
+     * Energy system methods (implemented directly in Player)
      */
     public int getCurrentEnergy() {
-        return playerAction.getCurrentEnergy();
+        return energy;
     }
     
     public int getMaxEnergy() {
-        return playerAction.getMaxEnergy();
+        return MAX_ENERGY;
     }
     
     public boolean consumeEnergy(int amount) {
-        return playerAction.consumeEnergy(amount);
+        if (energy >= amount) {
+            energy -= amount;
+            if (energy < 0) energy = 0;
+            return true;
+        } else {
+            return false;
+        }
     }
     
     public void restoreEnergy(int amount) {
-        playerAction.restoreEnergy(amount);
+        energy += amount;
+        if (energy > MAX_ENERGY) {
+            energy = MAX_ENERGY;
+        }
     }
-    
-    public boolean hasEnoughEnergy(int requiredEnergy) {
-        return playerAction.hasEnoughEnergy(requiredEnergy);
+      public boolean hasEnoughEnergy(int requiredEnergy) {
+        return energy >= requiredEnergy;
     }
     
     public double getEnergyPercentage() {
-        return playerAction.getEnergyPercentage();
+        return (double) energy / MAX_ENERGY;
     }
     
     // Getter for solidArea      

@@ -159,10 +159,10 @@ public class FishingUI {
                 "Attempt " + attempt + "/" + maxAttempts + "\n" +
                 "Guess a number between 1 and " + maxRange + ":",
                 "Fishing Mini-Game",
-                javax.swing.JOptionPane.QUESTION_MESSAGE);
-            
-            // Check if user cancelled
+                javax.swing.JOptionPane.QUESTION_MESSAGE);            // Check if user cancelled
             if (input == null) {
+                // Reset key states to prevent stuck movement keys
+                gp.getKeyHandler().resetAllKeyStates();
                 javax.swing.JOptionPane.showMessageDialog(null, 
                     "The fish got away!", 
                     "Fishing Failed", 

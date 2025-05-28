@@ -23,7 +23,7 @@ public class KeyHandler implements KeyListener {
     public void keyTyped(KeyEvent e) {
         // TODO Auto-generated method stub
     }
-      @Override
+    @Override
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();        // Only handle these if we have a gamePanel reference
         if (gamePanel != null) {
@@ -83,13 +83,22 @@ public class KeyHandler implements KeyListener {
                         
                         gamePanel.getCurrentMap().removeObject(tileCol, tileRow);
                     }
-                }                // Fishing action with 'C' key
+                }                
+                // Fishing action with 'C' key
                 if(code == KeyEvent.VK_C) {
                     System.out.println("DEBUG: 'C' key pressed for fishing");
                     // Get player from gamePanel and perform fishing action
                     gamePanel.getPlayer().getPlayerAction().performFishing();
                 }
-            }            else if (gamePanel.getGameState() == GamePanel.MAP_MENU_STATE) {
+                
+                // Eating action with 'E' key
+                if(code == KeyEvent.VK_E) {
+                    // Get player from gamePanel and perform eating action
+                    gamePanel.getPlayer().getPlayerAction().eatSelectedItem();
+                }
+            }            
+            
+            else if (gamePanel.getGameState() == GamePanel.MAP_MENU_STATE) {
                 // Map menu navigation
                 if(code == KeyEvent.VK_UP) {
                     System.out.println("UP arrow key pressed in map menu");
@@ -130,9 +139,7 @@ public class KeyHandler implements KeyListener {
                 rightPressed = true;
             }
         }
-    }
-
-    @Override
+    }    @Override
     public void keyReleased(KeyEvent e) {
         // TODO Auto-generated method stub
         int code = e.getKeyCode();
@@ -148,5 +155,17 @@ public class KeyHandler implements KeyListener {
         if(code == KeyEvent.VK_D) {
             rightPressed = false;
         }
+    }
+    
+    /**
+     * Reset all key states to false
+     * This method should be called when dialogs are closed to prevent stuck keys
+     */
+    public void resetAllKeyStates() {
+        upPressed = false;
+        downPressed = false;
+        leftPressed = false;
+        rightPressed = false;
+        System.out.println("DEBUG: All key states reset");
     }
 }

@@ -182,7 +182,8 @@ public class MouseHandler extends MouseAdapter {
     
     /**
      * Use the currently selected item
-     */    private void useSelectedItem() {
+     */    
+    private void useSelectedItem() {
         Item[] items = gamePanel.getPlayer().getInventoryItems();
         if (selectedSlotIndex >= 0 && selectedSlotIndex < items.length && items[selectedSlotIndex] != null) {
             // Get the selected item
@@ -203,19 +204,10 @@ public class MouseHandler extends MouseAdapter {
                     // Don't remove tools from inventory, just set as active
                 } else if (itemCategory.equals("Seed")) {
                     System.out.println("Selected seed for planting: " + itemName);
-                    // Set seed as active for planting                } else if (itemCategory.equals("Food")) {
-                    System.out.println("Consumed food: " + itemName);
-                    // Food should restore energy and be consumed
-                    gamePanel.getPlayer().restoreEnergy(20); // Restore 20 energy
-                    
-                    // Reduce quantity or remove if quantity becomes 0
-                    int[] quantities = gamePanel.getPlayer().getInventoryQuantities();
-                    if (quantities[selectedSlotIndex] > 1) {
-                        quantities[selectedSlotIndex]--;
-                    } else {
-                        gamePanel.getPlayer().removeItemFromInventory(selectedSlotIndex);
-                        selectedSlotIndex = -1; // Reset selection since item was removed
-                    }
+                    // Set seed as active for planting                
+                } else if (itemCategory.equals("Food") || itemCategory.equals("Fish") || itemCategory.equals("Crop")) {
+                    // Use the PlayerAction eating system for all edible items
+                    gamePanel.getPlayer().getPlayerAction().eatSelectedItem();
                 }
             }
         }

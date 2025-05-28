@@ -13,22 +13,19 @@ import SRC.TIME.GameTime;
  * including inventory management, movement, and interactions
  */
 public class PlayerAction {
-    
-    private GamePanel gamePanel;
+      private GamePanel gamePanel;
     private Player player;
     private Inventory inventory;
     private FishingUI fishingUI; // Add fishing UI
     
-    // Energy system
+    // Energy system - now delegated to Player
     private static final int MAX_ENERGY = 100;
-    private int currentEnergy;
     
-    public PlayerAction(GamePanel gamePanel, Player player) {
-        this.gamePanel = gamePanel;
+    public PlayerAction(GamePanel gamePanel, Player player) {        this.gamePanel = gamePanel;
         this.player = player;
         this.inventory = new Inventory();
         this.fishingUI = new FishingUI(gamePanel); // Initialize fishing UI
-        this.currentEnergy = MAX_ENERGY; // Start with full energy
+        // Energy is now managed by Player class directly
     }
     
     /**
@@ -152,6 +149,9 @@ public class PlayerAction {
      */
     public boolean performFishing() {
         System.out.println("DEBUG: performFishing called");
+        
+        // Stop player movement during fishing
+        stopPlayerMovement();
         
         // Check if player has enough energy for fishing (reduced to 5)
         final int FISHING_ENERGY_COST = 5;
@@ -323,7 +323,22 @@ public class PlayerAction {
                 return null;
         }
     }
-    
+      /**
+     * Stop player movement during actions like fishing
+     */
+    private void stopPlayerMovement() {
+        // Stop keyboard movement by resetting key states
+        gamePanel.getKeyHandler().upPressed = false;
+        gamePanel.getKeyHandler().downPressed = false;
+        gamePanel.getKeyHandler().leftPressed = false;
+        gamePanel.getKeyHandler().rightPressed = false;
+        
+        // Stop mouse movement by clearing target
+        gamePanel.getMouseHandler().setHasTarget(false);
+        
+        System.out.println("DEBUG: Player movement stopped for action");
+    }
+
     /**
      * Check if player has a valid fishing rod in inventory
      * @return true if player has fishing rod
@@ -361,13 +376,12 @@ public class PlayerAction {
     /**
      * Energy management methods
      */
-    
-    /**
-     * Get current energy level
+      /**
+     * Get current energy level (delegate to Player)
      * @return current energy value
      */
     public int getCurrentEnergy() {
-        return currentEnergy;
+        return player.getEnergy();
     }
     
     /**
@@ -376,57 +390,41 @@ public class PlayerAction {
      */
     public int getMaxEnergy() {
         return MAX_ENERGY;
-    }
-      /**
-     * Consume energy for actions
+    }    /**
+     * Consume energy for actions (delegate to Player)
      * @param amount energy to consume
      * @return true if energy was consumed, false if not enough energy
      */
     public boolean consumeEnergy(int amount) {
-        if (currentEnergy >= amount) {
-            currentEnergy -= amount;
-            if (currentEnergy < 0) currentEnergy = 0;
-            return true;
-        } else {
-            return false;
-        }
-    }
-      /**
-     * Restore energy
+        return player.consumeEnergy(amount);
+    }      /**
+     * Restore energy (delegate to Player)
      * @param amount energy to restore
      */
     public void restoreEnergy(int amount) {
-        currentEnergy += amount;
-        if (currentEnergy > MAX_ENERGY) {
-            currentEnergy = MAX_ENERGY;
-        }
+        player.restoreEnergy(amount);
     }
-    
-    /**
-     * Set energy to specific value
+      /**
+     * Set energy to specific value (delegate to Player)
      * @param energy new energy value
      */
     public void setEnergy(int energy) {
-        if (energy < 0) energy = 0;
-        if (energy > MAX_ENERGY) energy = MAX_ENERGY;
-        this.currentEnergy = energy;
+        player.setEnergy(energy);
     }
-    
-    /**
-     * Check if player has enough energy for an action
+      /**
+     * Check if player has enough energy for an action (delegate to Player)
      * @param requiredEnergy energy required
      * @return true if player has enough energy
      */
     public boolean hasEnoughEnergy(int requiredEnergy) {
-        return currentEnergy >= requiredEnergy;
+        return player.hasEnoughEnergy(requiredEnergy);
     }
-    
-    /**
-     * Get energy percentage (0.0 to 1.0)
+      /**
+     * Get energy percentage (0.0 to 1.0) (delegate to Player)
      * @return energy as percentage
      */
     public double getEnergyPercentage() {
-        return (double) currentEnergy / MAX_ENERGY;
+        return player.getEnergyPercentage();
     }
     
     /**
@@ -450,5 +448,75 @@ public class PlayerAction {
      */
     public FishingUI getFishingUI() {
         return fishingUI;
+    }    /**
+     * Find the first edible item in inventory
+     * @return slot index of first edible item, or -1 if none found
+     */
+    private int findFirstEdibleItem() {
+        Item[] items = player.getInventoryItems();
+        for (int i = 0; i < items.length; i++) {
+            if (items[i] != null && items[i] instanceof SRC.ITEMS.Edible) {
+                return i;
+            }
+        }
+        return -1; // No edible items found
+    }
+
+    /**
+     * Eat the currently selected item if it's edible
+     * Called when player presses 'E' key or clicks "Use" button
+     */
+    public void eatSelectedItem() {
+        // Get the currently selected slot from MouseHandler
+        int selectedSlotIndex = gamePanel.getMouseHandler().getSelectedSlotIndex();
+        
+        // If no slot is selected (e.g., 'E' key press), find first edible item
+        if (selectedSlotIndex < 0) {
+            selectedSlotIndex = findFirstEdibleItem();
+            if (selectedSlotIndex < 0) {
+                System.out.println("No edible items found in inventory");
+                return;
+            }
+            System.out.println("No item selected, using first edible item at slot " + selectedSlotIndex);
+        }
+        Item[] items = player.getInventoryItems();
+        int[] quantities = player.getInventoryQuantities();
+        
+        if (selectedSlotIndex >= items.length || items[selectedSlotIndex] == null) {
+            System.out.println("No item in selected slot");
+            return;
+        }
+        
+        Item selectedItem = items[selectedSlotIndex];
+          // Check if the item is edible
+        if (!(selectedItem instanceof SRC.ITEMS.Edible)) {
+            System.out.println(selectedItem.getName() + " is not edible!");
+            return;
+        }
+        SRC.ITEMS.Edible edibleItem = (SRC.ITEMS.Edible) selectedItem;
+          // Consume the item (restore energy)
+        int energyGained = edibleItem.getEnergyValue();
+        System.out.println("DEBUG: Item " + selectedItem.getName() + " gives " + energyGained + " energy");
+        
+        // Get current energy before eating
+        int currentEnergy = player.getEnergy();
+        System.out.println("DEBUG: Player energy before eating: " + currentEnergy);        // Update Player's energy directly
+        int newEnergy = currentEnergy + energyGained;
+        if (newEnergy > 100) newEnergy = 100; // Cap at max energy
+        player.setEnergy(newEnergy);
+        
+        System.out.println("DEBUG: Player energy after eating: " + player.getEnergy());
+        System.out.println("You consumed " + selectedItem.getName() + " and gained " + energyGained + " energy!");
+        
+        // Add 5 minutes to game time
+        addGameTime(5);
+        // Reduce quantity or remove item if quantity becomes 0
+        if (quantities[selectedSlotIndex] > 1) {
+            quantities[selectedSlotIndex]--;
+        } else {
+            player.removeItemFromInventory(selectedSlotIndex);
+            // Reset selection since item was removed
+            gamePanel.getMouseHandler().setSelectedSlotIndex(-1);
+        }
     }
 }
