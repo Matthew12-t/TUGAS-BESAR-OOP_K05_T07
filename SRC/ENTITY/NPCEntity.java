@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.awt.Graphics2D;
 import java.awt.Color;
+import java.awt.Rectangle;
 
 import SRC.MAIN.GamePanel;
 
@@ -20,7 +21,8 @@ public class NPCEntity extends Entity implements NPC {
     private List<String> likedItems;
     private List<String> hatedItems;
     
-    // Constructor
+    private Rectangle solidArea;
+    private boolean isSolid = true; 
     public NPCEntity(GamePanel gp, int worldX, int worldY, String name, String location, String description) {
         super(gp, worldX, worldY);
         this.name = name;
@@ -32,6 +34,10 @@ public class NPCEntity extends Entity implements NPC {
         this.lovedItems = new ArrayList<>();
         this.likedItems = new ArrayList<>();
         this.hatedItems = new ArrayList<>();
+        
+        // Initialize collision area - NPC takes up the full tile size
+        int tileSize = gp.getTileSize();
+        this.solidArea = new Rectangle(0, 0, tileSize, tileSize);
     }
     public void update() {
         incrementSpriteCounter();
@@ -179,7 +185,7 @@ public class NPCEntity extends Entity implements NPC {
     }
     
     
-    public void receiveGift(String itemName) {
+    public void receiveGift(String itemName) {        
         if (lovedItems.contains(itemName)) {
             increaseHeartPoints(25);
             System.out.println(name + " loves this gift!");
@@ -193,5 +199,38 @@ public class NPCEntity extends Entity implements NPC {
             increaseHeartPoints(0);
             System.out.println(name + " accepts your gift.");
         }
+    }
+    
+    /**
+     * Get the collision bounds of this NPC
+     * @return Rectangle representing the collision area in world coordinates
+     */
+    public Rectangle getCollisionBounds() {
+        return new Rectangle(getWorldX() + solidArea.x, getWorldY() + solidArea.y, 
+                           solidArea.width, solidArea.height);
+    }
+    
+    /**
+     * Check if this NPC is solid (blocks player movement)
+     * @return true if NPC should block player movement
+     */
+    public boolean isSolid() {
+        return isSolid;
+    }
+    
+    /**
+     * Set whether this NPC should be solid
+     * @param solid true to make NPC block player movement
+     */
+    public void setSolid(boolean solid) {
+        this.isSolid = solid;
+    }
+    
+    /**
+     * Get the solid area rectangle of this NPC
+     * @return Rectangle representing the relative solid area
+     */
+    public Rectangle getSolidArea() {
+        return solidArea;
     }
 }

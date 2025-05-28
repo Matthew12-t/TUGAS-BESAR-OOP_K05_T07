@@ -149,9 +149,8 @@ public class Player extends Entity {
     public void toggleHitbox() {
         showHitbox = !showHitbox;
     }
-      
-    /**
-     * Check if player collides with any map objects or tiles
+        /**
+     * Check if player collides with any map objects, tiles, or NPCs
      * @return true if collision detected
      */
     public boolean checkCollision() {
@@ -180,10 +179,63 @@ public class Player extends Entity {
             }
         }
         
+        if (checkNPCCollision()) {
+            return true;
+        }
+        
         return false;
     }
     
-    // Getter for player visual dimensions
+    /**
+     * Check if player collides with any NPCs on the current map
+     * @return true if collision with an NPC is detected
+     */
+    private boolean checkNPCCollision() {
+        SRC.MAP.Map currentMap = gp.getCurrentMap();
+        if (currentMap instanceof SRC.MAP.NPC_HOUSE.NPCHouseMap) {
+            SRC.MAP.NPC_HOUSE.NPCHouseMap npcHouseMap = (SRC.MAP.NPC_HOUSE.NPCHouseMap) currentMap;
+            java.util.ArrayList<NPCEntity> npcs = null;
+            if (npcHouseMap instanceof SRC.MAP.NPC_HOUSE.AbigailHouseMap) {
+                npcs = ((SRC.MAP.NPC_HOUSE.AbigailHouseMap) npcHouseMap).getNPCs();
+            } else if (npcHouseMap instanceof SRC.MAP.NPC_HOUSE.DascoHouseMap) {
+                npcs = ((SRC.MAP.NPC_HOUSE.DascoHouseMap) npcHouseMap).getNPCs();
+            } else if (npcHouseMap instanceof SRC.MAP.NPC_HOUSE.EmilyHouseMap) {
+                npcs = ((SRC.MAP.NPC_HOUSE.EmilyHouseMap) npcHouseMap).getNPCs();
+            } else if (npcHouseMap instanceof SRC.MAP.NPC_HOUSE.CarolineHouseMap) {
+                npcs = ((SRC.MAP.NPC_HOUSE.CarolineHouseMap) npcHouseMap).getNPCs();
+            } else if (npcHouseMap instanceof SRC.MAP.NPC_HOUSE.PerryHouseMap) {
+                npcs = ((SRC.MAP.NPC_HOUSE.PerryHouseMap) npcHouseMap).getNPCs();
+            } else if (npcHouseMap instanceof SRC.MAP.NPC_HOUSE.MayorTadiHouseMap) {
+                npcs = ((SRC.MAP.NPC_HOUSE.MayorTadiHouseMap) npcHouseMap).getNPCs();
+            }
+            if (npcs != null) {
+                for (NPCEntity npc : npcs) {
+                    if (npc.isSolid() && checkCollisionWithNPC(npc)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Check if player collides with a specific NPC
+     * @param npc The NPC to check collision with
+     * @return true if collision is detected
+     */
+    private boolean checkCollisionWithNPC(NPCEntity npc) {
+        java.awt.Rectangle playerBounds = new java.awt.Rectangle(
+            getWorldX() + collisionOffsetX,
+            getWorldY() + collisionOffsetY,
+            collisionWidth,
+            collisionHeight
+        );
+        java.awt.Rectangle npcBounds = npc.getCollisionBounds();
+        return playerBounds.intersects(npcBounds);
+    }
+    
     public int getPlayerVisualWidth() {
         return playerVisualWidth;
     }
