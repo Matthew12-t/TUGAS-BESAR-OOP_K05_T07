@@ -26,6 +26,8 @@ import SRC.MAP.MayorTadiHouseMap;
 import SRC.MAP.PerryHouseMap;
 import SRC.OBJECT.SuperObject;
 import SRC.ITEMS.Time;
+import SRC.ITEMS.Season;
+import SRC.ITEMS.Weather;
 
 public class GamePanel extends JPanel implements Runnable {
     
@@ -92,17 +94,16 @@ public class GamePanel extends JPanel implements Runnable {
     // CAMERA
     private int cameraX = 0; 
     private int cameraY = 0;
-      // TIME SYSTEM
     private Time time = new Time(6, 0); // Mulai jam 6:00 pagi
     private int day = 1;
     private int month = 1;
     private int year = 1;
     private String[] dayNames = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-    private int dayOfWeek = 0; 
+    private int dayOfWeek = 0;    
     private long lastTimeUpdate = System.currentTimeMillis();
-    private String[] seasons = {"Spring", "Summer", "Fall", "Winter"};
-    private int currentSeasonIndex = 0;
-    private BufferedImage clockImage; // Image for clock display
+    private Season season = new Season(); 
+    private Weather weather = new Weather(); // Weather system
+    private BufferedImage clockImage;
 
     // Getters and setters
     public int getTileSize() {
@@ -488,7 +489,7 @@ public class GamePanel extends JPanel implements Runnable {
     
     @Override
     public void run(){
-        double drawInterval = 1000000000.0 / FPS; // Time in nanoseconds per frame
+        double drawInterval = 1000000000.0 / FPS; 
         double delta = 0;
         long lastTime = System.nanoTime();
         long currentTime;
@@ -508,17 +509,15 @@ public class GamePanel extends JPanel implements Runnable {
             }
 
             if (delta >= 1) {
-                // 1. UPDATE: update information such as character positions
                 update();
-                // 2. DRAW: draw the screen with the updated information
-                repaint(); // Calls paintComponent method
+                repaint();
                 delta--;
                 drawCount++;
             }
 
             // Display FPS
             if(timer >= 1000000000) {
-                System.out.println("FPS: " + drawCount); // Show FPS in console
+                System.out.println("FPS: " + drawCount);
                 drawCount = 0;
                 timer = 0;
             }        }
@@ -564,7 +563,8 @@ public class GamePanel extends JPanel implements Runnable {
 
     /**
      * Teleport player to another map by name, keeping logic transition as before
-     * @param targetMapName Nama map tujuan ("Farm Map" atau "World Map")    */          public void teleportToMap(String targetMapName) {
+     * @param targetMapName Nama map tujuan ("Farm Map" atau "World Map")    */          
+    public void teleportToMap(String targetMapName) {
         if (currentMap.getMapName().equals(targetMapName)) {
             // Sudah di map tujuan, tidak perlu teleport
             return;
@@ -1092,9 +1092,7 @@ public class GamePanel extends JPanel implements Runnable {
      */
     public int getGameState() {
         return gameState;
-    }
-    
-    // Tambahkan method advanceGameTime
+    }    // Tambahkan method advanceGameTime
     private void advanceGameTime() {
         // Tambah 5 menit setiap detik
         int minute = time.getMinute() + 5;
@@ -1104,14 +1102,17 @@ public class GamePanel extends JPanel implements Runnable {
             hour++;
         }
         if (hour >= 24) {
-            hour = 0; // Ganti ke 00:00 (jam 12 malam)
+            hour = 0;
             minute = 0;
             day++;
             dayOfWeek = (dayOfWeek + 1) % 7;
-            // Season logic: ganti setiap 10 hari
+            weather.setCurrentWeather(day);
             if ((day - 1) % 10 == 0 && day != 1) {
-                currentSeasonIndex = (currentSeasonIndex + 1) % seasons.length;
+                weather.newSegment();
+                season.nextSeason();
+                weather.newSeason();
             }
+            
             if (day > 30) {
                 day = 1;
                 month++;
@@ -1119,52 +1120,74 @@ public class GamePanel extends JPanel implements Runnable {
                     month = 1;
                     year++;
                 }
-                currentSeasonIndex = 0; // Reset ke Spring setiap awal tahun
+                season.resetToSpring();
+                weather.newSeason();
             }
         }
         time.setHour(hour);
         time.setMinute(minute);
-    }    // Tambahkan method untuk menggambar waktu di pojok kanan atas
-    private void drawTimeInfo(Graphics2D g2) {
+    }private void drawTimeInfo(Graphics2D g2) {
         String hari = dayNames[dayOfWeek];
-        String tanggal = String.format("%02d", day); // hanya tanggal
+        String tanggal = String.format("%02d", day); 
+        String musim = season.getCurrentSeasonName(); 
+        String cuaca = weather.getWeatherString(); // Get current weather string
         int hour24 = time.getHour();
         int hour12 = hour24 % 12;
         if (hour12 == 0) hour12 = 12;
         String ampm = (hour24 < 12 || hour24 == 24) ? "AM" : "PM";
         String jam = String.format("%02d:%02d %s", hour12, time.getMinute(), ampm);
         
-        // Draw clock image 
         if (clockImage != null) {
-            // Set the desired size for the clock (64x64 pixels)
             int clockWidth = 128;
             int clockHeight = 128;
-            
-            // Position the clock at the top-right corner of the screen
-            int clockX = screenWidth - clockWidth - 10; // 10 pixels from right edge
-            int clockY = 10; // 10 pixels from top
-              // Draw the clock image with the specified size
+            int clockX = screenWidth - clockWidth - 10; 
+            int clockY = 10; 
             g2.drawImage(clockImage, clockX, clockY, clockWidth, clockHeight, null);
             
             // Draw time text centered on the clock
             int textX = clockX + (clockWidth / 2) - 15;
             int textY = clockY + (clockHeight / 2) + 5;
-            
-            // Position the date 30px higher than the time
             g2.setColor(Color.BLACK);
             java.awt.Font originalFont = g2.getFont();
             java.awt.Font boldFont = originalFont.deriveFont(java.awt.Font.BOLD, originalFont.getSize() + 2);
             g2.setFont(boldFont);
-            g2.drawString(hari + ", " + tanggal, textX, textY - 43); // 30px higher
+            g2.drawString(hari + ", " + tanggal, textX, textY - 43); 
             g2.drawString(jam, textX, textY);
-            g2.setFont(originalFont);
+            g2.setFont(originalFont);        
         } else {
             // Fallback to original method if image failed to load
             g2.setColor(new Color(0,0,0,180));
-            g2.fillRoundRect(screenWidth-120, 10, 110, 65, 15, 15);
+            g2.fillRoundRect(screenWidth-120, 10, 110, 100, 15, 15); // Made taller to fit season and weather
             g2.setColor(Color.BLACK);
             g2.drawString(hari + ", " + tanggal, screenWidth-110, 30);
-            g2.drawString(jam, screenWidth-110, 60); // Moved 30px lower relative to date
+            g2.drawString(jam, screenWidth-110, 55); 
+            g2.drawString(musim, screenWidth-110, 80); // Added season display
+            g2.drawString(cuaca, screenWidth-110, 105); // Added weather display
         }
+    }
+
+    public Season getSeason() {
+        return season;
+    }
+
+    public String getCurrentSeasonName() {
+        return season.getCurrentSeasonName();
+    }
+
+    public Weather getWeather() {
+        return weather;
+    }
+
+    public boolean isRainy() {
+        return weather.isRainy();
+    }
+    
+
+    public boolean isSunny() {
+        return weather.isSunny();
+    }
+
+    public String getWeatherString() {
+        return weather.getWeatherString();
     }
 }
