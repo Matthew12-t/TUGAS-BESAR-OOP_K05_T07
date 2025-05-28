@@ -33,15 +33,10 @@ public class NPCEntity extends Entity implements NPC {
         this.likedItems = new ArrayList<>();
         this.hatedItems = new ArrayList<>();
     }
-      // Update method for NPCs - can be overridden by specific NPC types
     public void update() {
-        // Basic NPC update behavior
-        // Static NPCs don't need movement updates
         incrementSpriteCounter();
-        
-        // Simple idle animation cycle
-        if (getSpriteCounter() > 60) {  // Slower animation for NPCs
-            setSpriteNum((getSpriteNum() + 1) % 2);  // Simple 2-frame idle animation
+        if (getSpriteCounter() > 60) { 
+            setSpriteNum((getSpriteNum() + 1) % 2);  
             setSpriteCounter(0);
         }
     }    /**

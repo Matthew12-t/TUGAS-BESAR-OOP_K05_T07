@@ -22,44 +22,31 @@ public class DascoEntity extends NPCEntity {
      */
     public DascoEntity(GamePanel gp, int worldX, int worldY) {
         super(gp, worldX, worldY, "Dasco", "Dasco's House", 
-              "A cheerful local who loves fine cuisine and has a passion for cooking.");
-        
-        // Set item preferences
+              "Dasco adalah pemilik kasino besar di Spakbor Hills.");
         setItemPreferences();
-        
-        // Load sprite
+
         loadSprite();
         
-        // Set movement speed to 0 to make NPC static
         setSpeed(0);
     }
       /**
      * Set up Dasco's item preferences
      */
     private void setItemPreferences() {
-        // Define Dasco's item preferences based on the specs provided
-        
-        // Add loved items
         Set<String> lovedItems = Set.of("The Legends of Spakbor", "Cooked Pig's Head", "Wine", "Fugu", "Spakbor Salad");
         for (String item : lovedItems) {
             addLovedItem(item);
         }
-        
-        // Add liked items
         Set<String> likedItems = Set.of("Fish Sandwich", "Fish Stew", "Baguette", "Fish n' Chips");
         for (String item : likedItems) {
             addLikedItem(item);
         }
-        
-        // Add hated items
         Set<String> hatedItems = Set.of("Legend", "Grape", "Cauliflower", "Wheat", "Pufferfish", "Salmon");
         for (String item : hatedItems) {
             addHatedItem(item);
         }
-    }    /**
-     * Load Dasco's sprite from the file system
-     */    private void loadSprite() {
-        // Try multiple path formats to handle different environments
+    }    
+    private void loadSprite() {
         String[] pathsToTry = {
             "RES/ENTITY/NPC/dasco.png",
             "RES\\ENTITY\\NPC\\dasco.png",
@@ -68,8 +55,6 @@ public class DascoEntity extends NPCEntity {
         };
         
         boolean loaded = false;
-        
-        // First try loading with File
         for (String path : pathsToTry) {
             try {
                 File spriteFile = new File(path);
@@ -86,10 +71,8 @@ public class DascoEntity extends NPCEntity {
             }
         }
         
-        // If file-based loading failed, try with resource stream
         if (!loaded) {
             try {
-                // Try with classloader resource stream
                 java.io.InputStream is = getClass().getClassLoader().getResourceAsStream("RES/ENTITY/NPC/dasco.png");
                 if (is != null) {
                     sprite = ImageIO.read(is);
@@ -102,7 +85,6 @@ public class DascoEntity extends NPCEntity {
             }
         }
         
-        // If all loading attempts failed, create a placeholder sprite
         if (!loaded || sprite == null) {
             System.err.println("Failed to load Dasco sprite from all paths. Creating placeholder.");
             createPlaceholderSprite();

@@ -673,7 +673,8 @@ public class GamePanel extends JPanel implements Runnable {
             // Position player at the entrance
             player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
-            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);        } else if (targetMapName.equals("Dasco's House")) {
+            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);        } 
+        else if (targetMapName.equals("Dasco's House")) {
             switchToDascoHouse();
             if (!isInitializedDascoHouse) {
                 dascoHouseMap.setupInitialObjects();
@@ -714,6 +715,7 @@ public class GamePanel extends JPanel implements Runnable {
             player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+            ((PerryHouseMap)perryHouseMap).ensureNPCsVisible();
         }
     }    
     
@@ -1023,6 +1025,7 @@ public class GamePanel extends JPanel implements Runnable {
             
             // Center camera on map
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+
         }
         else if (selectedMap == 9) {
             // Switch to Perry's house (tenth option)
@@ -1040,6 +1043,7 @@ public class GamePanel extends JPanel implements Runnable {
             
             // Center camera on map
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+            ((PerryHouseMap)perryHouseMap).ensureNPCsVisible();
         }
         else {
             // Default to forest map for other options
