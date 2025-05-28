@@ -93,9 +93,11 @@ public class GamePanel extends JPanel implements Runnable {
     private Map dascoHouseMap;     // Dasco's house instance
     private Map emilyHouseMap;     // Emily's house instance
     private Map mayorTadiHouseMap; // Mayor Tadi's house instance
-    private Map perryHouseMap;     // Perry's house instance    // CAMERA
+    private Map perryHouseMap;     // Perry's house instance
+    
+    // CAMERA
     private int cameraX = 0; 
-    private int cameraY = 0;
+    private int cameraY = 0;      // TIME SYSTEM
     private Time time = new Time(6, 0); // Mulai jam 6:00 pagi
     private int day = 1;
     private int month = 1;
@@ -108,8 +110,7 @@ public class GamePanel extends JPanel implements Runnable {
       // Weather and Season objects
     private Weather weather = new Weather();
     private Season season = new Season();
-    
-    // Inventory constants
+      // Inventory constants
     private static final int INVENTORY_ROWS = 4;
     private static final int INVENTORY_COLS = 4;
 
@@ -1131,8 +1132,7 @@ public class GamePanel extends JPanel implements Runnable {
      */
     public int getGameState() {
         return gameState;
-    }
-      /**
+    }    /**
      * Set the current game state
      * @param gameState The game state to set
      */
@@ -1362,7 +1362,6 @@ public class GamePanel extends JPanel implements Runnable {
         g2.setFont(g2.getFont().deriveFont(Font.BOLD, 14));
         String useButtonText = "Use";
         int useButtonTextWidth = g2.getFontMetrics().stringWidth(useButtonText);
-        int useButtonTextX = useButtonX + (useButtonWidth - useButtonTextWidth) / 2;
-        g2.drawString(useButtonText, useButtonTextX, useButtonY + 20);
+        int useButtonTextX = useButtonX + (useButtonWidth - useButtonTextWidth) / 2;        g2.drawString(useButtonText, useButtonTextX, useButtonY + 20);
     }
 }
