@@ -624,7 +624,8 @@ public class GamePanel extends JPanel implements Runnable {
                     isInitializedFarmMap = true;
                 }
                 // Pindahkan player ke posisi default masuk dari world
-                player.setWorldX(tileSize * (FarmMap.FARM_COLS - 4));
+                player.setWorldX(tileSize * (28));
+                player.setWorldY(tileSize * (8)); // Kolom 30, baris 30
                 // Y tetap
             }          
         } else if (targetMapName.equals("Forest River Map")) {
@@ -779,6 +780,26 @@ public class GamePanel extends JPanel implements Runnable {
                 if (playerCol == 0) { // Jika di kolom paling kiri
                     teleportToMap("Farm Map");
                 }
+            } else if (currentMap.getMapName().equals("Mountain Lake")) {
+                if (playerCol == 0) { // Jika di kolom paling kiri
+                    teleportToMap("Farm Map");
+                }
+            } else if (currentMap.getMapName().equals("Ocean Map")) {
+                if (playerCol == 0) { // Jika di kolom paling kiri
+                    teleportToMap("Farm Map");
+                }
+            } else if (currentMap.getMapName().equals("Store Map")) {
+                
+                    teleportToMap("Farm Map");
+                
+            } else if (currentMap.getMapName().equals("Abigail's House") ||
+                       currentMap.getMapName().equals("Caroline's House") ||
+                       currentMap.getMapName().equals("Dasco's House") ||
+                       currentMap.getMapName().equals("Emily's House") ||
+                       currentMap.getMapName().equals("Mayor Tadi's House") ||
+                       currentMap.getMapName().equals("Perry's House")) {
+                // For NPC houses, teleport back to house map
+                teleportToMap("Farm Map");
             }
         }        // Update camera position based on map type
         if (currentMap.getMapName().equals("Forest River Map")) {
@@ -789,7 +810,8 @@ public class GamePanel extends JPanel implements Runnable {
             centerCameraOnMap(MountainLake.MOUNTAIN_COLS, MountainLake.MOUNTAIN_ROWS);
         } else if (currentMap.getMapName().equals("Ocean Map")) {
             // For the OceanMap, maintain the centered position
-            centerCameraOnMap(OceanMap.OCEAN_COLS, OceanMap.OCEAN_ROWS);        } else if (currentMap.getMapName().equals("Store Map")) {
+            centerCameraOnMap(OceanMap.OCEAN_COLS, OceanMap.OCEAN_ROWS);       
+        } else if (currentMap.getMapName().equals("Store Map")) {
             // For the StoreMap, maintain the centered position
             centerCameraOnMap(StoreMap.STORE_COLS, StoreMap.STORE_ROWS);
         } else if (currentMap.getMapName().equals("Abigail's House") ||
@@ -954,8 +976,8 @@ public class GamePanel extends JPanel implements Runnable {
             }
             
             // Position player next to the teleport tile at position (0,2)
-            player.setWorldX(tileSize * 1); // Column 1 (right after teleport column)
-            player.setWorldY(tileSize * 2); // Row 2 (next to teleport tile)
+            player.setWorldX(tileSize * 0); // Column 1 (right after teleport column)
+            player.setWorldY(tileSize * 1); // Row 2 (next to teleport tile)
             
             System.out.println("Teleported player to Ocean Map at position (1, 2)");
             

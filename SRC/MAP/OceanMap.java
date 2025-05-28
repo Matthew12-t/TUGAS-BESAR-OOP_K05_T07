@@ -55,6 +55,10 @@ public class OceanMap extends Map {
                     } else if (mapChar == 'b') {
                         // Bridge tiles (5x2 large tile)
                         setTileInMap(col, row, Tile.TILE_BRIDGE);
+                    }else if (mapChar == '5') {
+                        // Teleport tile
+                        setTileInMap(col, row, Tile.TILE_TELEPORT);
+                        System.out.println("Set teleport tile at position (" + col + ", " + row + ")");
                     }
                 }
             }

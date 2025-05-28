@@ -39,7 +39,7 @@ public class MapController {
         // Check if the tile itself has collision (water, wall, edge, or edge map tile)
         if (col >= 0 && col < map.getMaxCol() && row >= 0 && row < map.getMaxRow()) {
             int tileType = map.getMapTileData()[col][row];
-            if (tileType == 1 || tileType == 7 || tileType == 13 || tileType == 14 || tileType == 15) { // Water, Wall, Edge, or Edge Map tile
+            if (tileType == 1 || tileType == 7 || tileType == 13 || tileType == 14 || tileType == 15 || tileType == 18 || tileType == 20) { // Water, Wall, Edge, or Edge Map tile
                 // For tiles with collision, return its own bounds
                 return new int[] { col, col + 1, row, row + 1 };
             }
