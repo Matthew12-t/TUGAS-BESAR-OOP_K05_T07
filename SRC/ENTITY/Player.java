@@ -1,14 +1,14 @@
 package SRC.ENTITY;
 
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
-import java.util.ArrayList;
-import java.util.List;
 
 import SRC.ITEMS.Item;
 import SRC.MAIN.GamePanel;
@@ -19,8 +19,8 @@ public class Player extends Entity {
     private GamePanel gp;
     private KeyHandler keyH;
     private MouseHandler mouseHandler;
+    private PlayerAction playerAction;
     private int energy;
-    private List<Item> inventory;
     private final int MAX_ENERGY = 100; // Maximum energy value
     private final int TOTAL_FRAMES = 8;
 
@@ -47,16 +47,14 @@ public class Player extends Entity {
     private int collisionHeight;
     private int collisionOffsetX;
     private int collisionOffsetY;
-    // ----------------------------------
-
-    //contructor
+    // ----------------------------------    //contructor
     public Player(GamePanel gp, KeyHandler keyH, MouseHandler mouseHandler) {
         super(gp, 100, 100); // Panggil konstruktor Entity dengan posisi awal
         this.gp = gp;
         this.keyH = keyH;
         this.mouseHandler = mouseHandler;
         this.energy = 100; 
-        this.inventory = new ArrayList<>();
+        this.playerAction = new PlayerAction(gp, this);
         
         // Hitung ukuran visual player berdasarkan skala
         this.playerVisualWidth = gp.getTileSize() * visualScale; // 48 * 4 = 192 pixels
@@ -95,19 +93,52 @@ public class Player extends Entity {
         } else {
             this.energy = energy;
         }
+    }    public void addItemToInventory(Item item) {
+        playerAction.addItemToInventory(item);
     }
-    public void addItemToInventory(Item item) {
-        inventory.add(item);
+    
+    public void removeItemFromInventory(int slotIndex) {
+        playerAction.removeInventoryItem(slotIndex);
     }
-    public void removeItemFromInventory(Item item) {
-        inventory.remove(item);
-    }    
-    public List<Item> getInventory() {
-        return inventory;
+    
+    public Item[] getInventoryItems() {
+        return playerAction.getInventoryItems();
     }
-    public void setInventory(List<Item> inventory) {
-        this.inventory = inventory;
+    
+    public int[] getInventoryQuantities() {
+        return playerAction.getInventoryQuantities();
     }
+    public PlayerAction getPlayerAction() {
+        return playerAction;
+    }
+    
+    /**
+     * Energy system methods (delegate to PlayerAction)
+     */
+    public int getCurrentEnergy() {
+        return playerAction.getCurrentEnergy();
+    }
+    
+    public int getMaxEnergy() {
+        return playerAction.getMaxEnergy();
+    }
+    
+    public boolean consumeEnergy(int amount) {
+        return playerAction.consumeEnergy(amount);
+    }
+    
+    public void restoreEnergy(int amount) {
+        playerAction.restoreEnergy(amount);
+    }
+    
+    public boolean hasEnoughEnergy(int requiredEnergy) {
+        return playerAction.hasEnoughEnergy(requiredEnergy);
+    }
+    
+    public double getEnergyPercentage() {
+        return playerAction.getEnergyPercentage();
+    }
+    
     // Getter for solidArea      
     public Rectangle getSolidArea() {
         return solidArea;
@@ -429,14 +460,7 @@ public class Player extends Entity {
             int hitboxWorldY = getWorldY() + collisionOffsetY;
             int hitboxLeftCol = hitboxWorldX / tileSize;
             int hitboxTopRow = hitboxWorldY / tileSize;
-            int hitboxRightCol = (hitboxWorldX + collisionWidth - 1) / tileSize;
-            int hitboxBottomRow = (hitboxWorldY + collisionHeight - 1) / tileSize;
-            
-            // Convert tile coordinates back to screen coordinates
-            int leftTileScreenX = (hitboxLeftCol * tileSize) - gp.getCameraX();
-            int topTileScreenY = (hitboxTopRow * tileSize) - gp.getCameraY();
-            int rightTileScreenX = (hitboxRightCol * tileSize) - gp.getCameraX();
-            int bottomTileScreenY = (hitboxBottomRow * tileSize) - gp.getCameraY();
+            int hitboxRightCol = (hitboxWorldX + collisionWidth - 1) / tileSize;            int hitboxBottomRow = (hitboxWorldY + collisionHeight - 1) / tileSize;
             
             // Draw tile-based collision boxes
             g2.setColor(new Color(0, 255, 0, 100)); // Green with transparency
@@ -467,10 +491,57 @@ public class Player extends Entity {
             // Draw a semi-transparent square centered on the target tile
             int tileSize = gp.getTileSize();
             g2.fillRect(targetScreenX - tileSize/2, targetScreenY - tileSize/2, tileSize, tileSize);
-            
-            // Add a white border with slightly higher opacity to make it more visible
+              // Add a white border with slightly higher opacity to make it more visible
             g2.setColor(new Color(255, 255, 255, 150));
             g2.drawRect(targetScreenX - tileSize/2, targetScreenY - tileSize/2, tileSize, tileSize);
         }
+        
+        // Draw energy status bar
+        drawEnergyBar(g2);
+    }
+    
+    /**
+     * Draw energy status bar on screen
+     */
+    private void drawEnergyBar(Graphics2D g2) {
+        int barWidth = 200;
+        int barHeight = 20;
+        int barX = 10; // Top-left corner
+        int barY = 10;
+        
+        // Draw background (empty bar)
+        g2.setColor(new Color(50, 50, 50, 150)); // Dark gray semi-transparent
+        g2.fillRect(barX, barY, barWidth, barHeight);
+        
+        // Draw border
+        g2.setColor(Color.WHITE);
+        g2.drawRect(barX, barY, barWidth, barHeight);
+        
+        // Calculate energy fill width
+        double energyPercentage = getEnergyPercentage();
+        int fillWidth = (int) (barWidth * energyPercentage);
+        
+        // Draw energy fill with color based on energy level
+        if (energyPercentage > 0.6) {
+            g2.setColor(new Color(76, 175, 80)); // Green
+        } else if (energyPercentage > 0.3) {
+            g2.setColor(new Color(255, 193, 7)); // Yellow
+        } else {
+            g2.setColor(new Color(244, 67, 54)); // Red
+        }
+        
+        g2.fillRect(barX + 1, barY + 1, fillWidth - 2, barHeight - 2);
+        
+        // Draw energy text
+        g2.setColor(Color.WHITE);
+        g2.setFont(new Font("Arial", Font.BOLD, 12));
+        String energyText = getCurrentEnergy() + "/" + getMaxEnergy();
+        FontMetrics fm = g2.getFontMetrics();
+        int textX = barX + (barWidth - fm.stringWidth(energyText)) / 2;
+        int textY = barY + (barHeight + fm.getAscent()) / 2 - 2;
+        g2.drawString(energyText, textX, textY);
+          // Draw "Energy" label above the bar
+        g2.setFont(new Font("Arial", Font.BOLD, 10));
+        g2.drawString("Energy", barX, barY - 2);
     }
 }

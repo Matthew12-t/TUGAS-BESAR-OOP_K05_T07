@@ -6,11 +6,10 @@ public class Fish extends Item implements Edible {
     private String type;
     private String location;
     private String season;
-    private String weather;
-    private Time time;
-    private int energy ;
+    private String weather;    private Time time;
+    private int energy;
 
-    //constructor
+    // Constructor
     public Fish(String name, int sellPrice, int buyPrice, String type, String location, String season, String weather, Time time) {
         super(name, "Fish", sellPrice, buyPrice);
         this.type = type;
@@ -18,7 +17,11 @@ public class Fish extends Item implements Edible {
         this.season = season;
         this.weather = weather;
         this.time = time;
-        this.energy = 1; 
+        this.energy = 1;
+        
+        // Load image untuk fish ini
+        String imagePath = "RES/FISH/" + name.toLowerCase().replace(" ", "_") + ".png";
+        loadImage(imagePath);
     }
     // Getters
     public String getType() {

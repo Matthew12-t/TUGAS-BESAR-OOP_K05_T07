@@ -1,9 +1,9 @@
-package SRC.MAP;
+package SRC.MAP.NPC_HOUSE;
 import java.awt.Graphics2D;
 import java.util.HashSet;
 import java.util.Set;
 import SRC.MAIN.GamePanel;
-
+import SRC.MAP.Map;
 import SRC.OBJECT.ObjectDeployer;
 import SRC.TILES.Tile;
 public class HouseMap extends Map {

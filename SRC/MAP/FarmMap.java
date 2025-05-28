@@ -144,13 +144,12 @@ public class FarmMap extends Map {
      * @param col Column in the map grid
      * @param row Row in the map grid
      * @return true if the tile was successfully tilled
-     */
-    public boolean tillSoil(int col, int row) {
+     */    public boolean tillSoil(int col, int row) {
         if (col >= 0 && col < FARM_COLS && row >= 0 && row < FARM_ROWS) {
             int tileType = getTile(col, row);
             
-            // Hanya bisa mengolah TILE_TILLABLE
-            if (tileType != Tile.TILE_TILLABLE) {
+            // Bisa mengolah TILE_TILLABLE atau TILE_GRASS
+            if (tileType != Tile.TILE_TILLABLE && tileType != Tile.TILE_GRASS) {
                 return false;
             }
             

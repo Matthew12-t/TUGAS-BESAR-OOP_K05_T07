@@ -1,4 +1,4 @@
-package SRC.MAP;
+package SRC.MAP.NPC_HOUSE;
 
 import SRC.MAIN.GamePanel;
 

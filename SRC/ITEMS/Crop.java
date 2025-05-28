@@ -4,11 +4,14 @@ import SRC.ENTITY.Player;
 
 public class Crop extends Item implements Edible {
     private int energy;
-    private int cropPerHarvest;
-    public Crop(String name, int sellPrice, int buyPrice, int cropPerHarvest) {
+    private int cropPerHarvest;    public Crop(String name, int sellPrice, int buyPrice, int cropPerHarvest) {
         super(name, "Crop", sellPrice, buyPrice);
         this.energy = 3;
         this.cropPerHarvest = cropPerHarvest;
+        
+        // Load image untuk crop ini
+        String imagePath = "RES/CROPS/" + name.toLowerCase().replace(" ", "_") + ".png";
+        loadImage(imagePath);
     }
     
     public int getCropPerHarvest() {

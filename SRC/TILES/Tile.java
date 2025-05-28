@@ -55,6 +55,11 @@ public class Tile {
     public final static int TILE_WATER3 = 20;
     public final static int TILE_ISLAND = 21;
     public final static int TILE_BRIDGE = 22;
+    
+    //land
+    public final static int TILE_TILLED_LAND = 24;
+    public final static int TILE_PLANTED_LAND = 25;
+    public final static int TILE_LAND = 26;
 
     // Resource untuk tile
     private static Image grassTile;
@@ -78,7 +83,11 @@ public class Tile {
     //ocean tiles
     private static Image Water3;
     private static Image IslandTile;
-    private static Image BridgeTile;
+    private static Image BridgeTile;    //tile
+    private static Image tilledLandTile;
+    private static Image plantedLandTile;
+    private static Image landTile;
+
 
     
     public Tile(GamePanel gp, int col, int row) {
@@ -316,10 +325,23 @@ public class Tile {
                 BridgeTile = ImageIO.read(new File("RES/TILE/bridge.png"));
             }
 
-            // Untuk saat ini, kita gunakan grass sebagai fallback untuk tile yang belum punya gambar
-            tillableTile = grassTile;
-            tilledTile = grassTile;
-            plantedTile = grassTile;
+            // Load Tillable Land Tile
+            tillableTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/tillable.png"));
+            if (tillableTile == null) {
+                tillableTile = ImageIO.read(new File("RES/TILE/tillable.png"));
+            }
+          
+            // Load Planted Land Tile
+            plantedTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/planted.png"));
+            if (plantedTile == null) {
+                plantedTile = ImageIO.read(new File("RES/TILE/planted.png"));
+            }
+
+            // Load Land Tile
+            landTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/Land.png"));
+            if (landTile == null) {
+                landTile = ImageIO.read(new File("RES/TILE/Land.png"));
+            }
             
             System.out.println("Tile resources loaded successfully!");
         } catch (IOException e) {
@@ -392,100 +414,24 @@ public class Tile {
 
     public static void drawIslandTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
         g2.drawImage(IslandTile, screenX, screenY, tileSize * 4, tileSize * 4, null);
-    }
-
+    }    
+    
     public static void drawBridgeTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
         g2.drawImage(BridgeTile, screenX, screenY, tileSize * 5, tileSize * 2, null);
     }
 
-    /**
-     * Menggambar tillable land tile pada posisi layar tertentu
-     * Tillable land (.) - Tile yang dapat disiapkan untuk tanam
-     * @param g2 Graphics context untuk menggambar
-     * @param screenX Posisi X pada layar
-     * @param screenY Posisi Y pada layar
-     * @param tileSize Ukuran tile yang akan digambar
-     */
-    public static void drawTillableTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
-        if (tillableTile != null) {
-            g2.drawImage(tillableTile, screenX, screenY, tileSize, tileSize, null);
-        } else {
-            // Fallback jika gambar tidak terload
-            g2.setColor(new java.awt.Color(153, 102, 51)); // Light brown
-            g2.fillRect(screenX, screenY, tileSize, tileSize);
-            
-            // Tambahkan titik (.) untuk menandakan tillable
-            g2.setColor(java.awt.Color.BLACK);
-            int dotSize = tileSize / 10;
-            g2.fillOval(screenX + (tileSize/2) - (dotSize/2), 
-                         screenY + (tileSize/2) - (dotSize/2), 
-                         dotSize, dotSize);
-        }
-    }
-    
-    /**
-     * Menggambar tilled land tile pada posisi layar tertentu
-     * Tilled land (t) - Tile yang dapat ditanamkan seed
-     * @param g2 Graphics context untuk menggambar
-     * @param screenX Posisi X pada layar
-     * @param screenY Posisi Y pada layar
-     * @param tileSize Ukuran tile yang akan digambar
-     */
     public static void drawTilledTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
-        if (tilledTile != null) {
-            g2.drawImage(tilledTile, screenX, screenY, tileSize, tileSize, null);
-        } else {
-            // Fallback jika gambar tidak terload
-            g2.setColor(new java.awt.Color(102, 51, 0)); // Dark brown
-            g2.fillRect(screenX, screenY, tileSize, tileSize);
-            
-            // Tambahkan garis untuk menandakan tanah yang sudah diolah (t)
-            g2.setColor(java.awt.Color.BLACK);
-            int lineWidth = tileSize / 10;
-            for(int i = 1; i < 3; i++) {
-                g2.fillRect(screenX, screenY + (i*tileSize/3), tileSize, lineWidth);
-            }
-        }
+        g2.drawImage(tilledLandTile, screenX, screenY, tileSize, tileSize, null);
     }
-    
-    /**
-     * Menggambar planted land tile pada posisi layar tertentu
-     * Planted land (l) - Tile yang sudah ditanamkan seed
-     * @param g2 Graphics context untuk menggambar
-     * @param screenX Posisi X pada layar
-     * @param screenY Posisi Y pada layar
-     * @param tileSize Ukuran tile yang akan digambar
-     */
+
     public static void drawPlantedTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
-        if (plantedTile != null) {
-            g2.drawImage(plantedTile, screenX, screenY, tileSize, tileSize, null);
-        } else {
-            // Fallback jika gambar tidak terload - tilled land + tanaman hijau
-            g2.setColor(new java.awt.Color(102, 51, 0)); // Dark brown
-            g2.fillRect(screenX, screenY, tileSize, tileSize);
-            
-            // Tambahkan garis untuk menandakan tanah yang sudah diolah
-            g2.setColor(java.awt.Color.BLACK);
-            int lineWidth = tileSize / 10;
-            for(int i = 1; i < 3; i++) {
-                g2.fillRect(screenX, screenY + (i*tileSize/3), tileSize, lineWidth);
-            }
-            
-            // Tambahkan tanaman (l)
-            g2.setColor(new java.awt.Color(0, 153, 0)); // Bright green
-            int plantWidth = tileSize / 5;
-            int plantHeight = tileSize / 3;            
-            g2.fillRect(screenX + (tileSize/2) - (plantWidth/2), 
-                       screenY + (tileSize/3), 
-                       plantWidth, plantHeight);
-        }
-    }    /**
-     * Menggambar edge map tile pada posisi layar tertentu
-     * @param g2 Graphics context untuk menggambar
-     * @param screenX Posisi X pada layar
-     * @param screenY Posisi Y pada layar
-     * @param tileSize Ukuran tile yang akan digambar
-     */
+        g2.drawImage(plantedLandTile, screenX, screenY, tileSize, tileSize, null);
+    }
+
+    public static void drawLandTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(landTile, screenX, screenY, tileSize, tileSize, null);
+    }   
+    
     public static void drawEdgeMapTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
         // Draw a light brown tile for map borders with collision
         g2.setColor(new java.awt.Color(210, 180, 140)); // Light brown color
@@ -587,9 +533,6 @@ public class Tile {
             case TILE_WATER:
                 drawWaterTile(g2, screenX, screenY, tileSize);
                 break;
-            case TILE_TILLABLE:
-                drawTillableTile(g2, screenX, screenY, tileSize);
-                break;
             case TILE_TILLED:
                 drawTilledTile(g2, screenX, screenY, tileSize);
                 break;
@@ -645,9 +588,11 @@ public class Tile {
                 break;
             case TILE_ISLAND:
                 drawIslandTile(g2, screenX, screenY, tileSize);
-                break;
-            case TILE_BRIDGE:
+                break;            case TILE_BRIDGE:
                 drawBridgeTile(g2, screenX, screenY, tileSize);
+                break;
+            case TILE_LAND:
+                drawLandTile(g2, screenX, screenY, tileSize);
                 break;
             default:
                 drawGrassTile(g2, screenX, screenY, tileSize);

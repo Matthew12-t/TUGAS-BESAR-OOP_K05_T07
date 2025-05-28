@@ -1,10 +1,15 @@
 package SRC.ITEMS;
 
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.File;
+
 public abstract class Item {
     private String name;
     private String category;
     private int sellPrice;
     private int buyPrice;
+    private BufferedImage image;
 
     // Constructor
     public Item(String name, String category, int sellPrice, int buyPrice) {
@@ -12,6 +17,19 @@ public abstract class Item {
         this.category = category;
         this.sellPrice = sellPrice;
         this.buyPrice = buyPrice;
+        this.image = null;
+    }
+    
+    /**
+     * Load image for this item
+     * @param imagePath Path to the image file
+     */
+    protected void loadImage(String imagePath) {
+        try {
+            this.image = ImageIO.read(new File(imagePath));
+        } catch (Exception e) {
+            System.err.println("Error loading image for " + name + ": " + e.getMessage());
+        }
     }
     // Getters
     public String getName() {
@@ -39,4 +57,9 @@ public abstract class Item {
     public void setBuyPrice(int buyPrice) {
         this.buyPrice = buyPrice;
     }    
+    
+    // Image getter
+    public BufferedImage getImage() {
+        return image;
+    }
 }

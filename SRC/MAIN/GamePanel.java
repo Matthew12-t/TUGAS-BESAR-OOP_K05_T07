@@ -2,28 +2,30 @@ package SRC.MAIN;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import SRC.ENTITY.Player;
+import SRC.ITEMS.Item;
 import SRC.MAP.FarmMap;
 import SRC.MAP.ForestRiverMap;
 import SRC.MAP.Map;
 import SRC.MAP.MountainLake;
 import SRC.MAP.OceanMap;
-import SRC.MAP.WorldMap;
-import SRC.MAP.HouseMap;
 import SRC.MAP.StoreMap;
-import SRC.MAP.NPCHouseMap;
-import SRC.MAP.AbigailHouseMap;
-import SRC.MAP.CarolineHouseMap;
-import SRC.MAP.DascoHouseMap;
-import SRC.MAP.EmilyHouseMap;
-import SRC.MAP.MayorTadiHouseMap;
-import SRC.MAP.PerryHouseMap;
+import SRC.MAP.NPC_HOUSE.HouseMap;
+import SRC.MAP.NPC_HOUSE.NPCHouseMap;
+import SRC.MAP.NPC_HOUSE.AbigailHouseMap;
+import SRC.MAP.NPC_HOUSE.CarolineHouseMap;
+import SRC.MAP.NPC_HOUSE.DascoHouseMap;
+import SRC.MAP.NPC_HOUSE.EmilyHouseMap;
+import SRC.MAP.NPC_HOUSE.MayorTadiHouseMap;
+import SRC.MAP.NPC_HOUSE.PerryHouseMap;
 import SRC.OBJECT.SuperObject;
 import SRC.ITEMS.Time;
 import SRC.ITEMS.Season;
@@ -39,11 +41,13 @@ public class GamePanel extends JPanel implements Runnable {
     private final int screenWidth = tileSize * maxScreenCol; // 768 pixels
     private final int screenHeight = tileSize * maxScreenRow; // 576 pixels
     private final int FPS = 60;
-    
-    // Game states
+      // Game states
     public static final int PLAY_STATE = 0;
     public static final int MAP_MENU_STATE = 1;
+    public static final int INVENTORY_STATE = 2;
     private int gameState = PLAY_STATE;
+      // Inventory UI properties
+    private BufferedImage inventoryImage;
     
     // Map menu
     private BufferedImage[] mapMenuImages;
@@ -89,21 +93,25 @@ public class GamePanel extends JPanel implements Runnable {
     private Map dascoHouseMap;     // Dasco's house instance
     private Map emilyHouseMap;     // Emily's house instance
     private Map mayorTadiHouseMap; // Mayor Tadi's house instance
-    private Map perryHouseMap;     // Perry's house instance
-
-    // CAMERA
+    private Map perryHouseMap;     // Perry's house instance    // CAMERA
     private int cameraX = 0; 
     private int cameraY = 0;
     private Time time = new Time(6, 0); // Mulai jam 6:00 pagi
     private int day = 1;
     private int month = 1;
-    private int year = 1;
     private String[] dayNames = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
     private int dayOfWeek = 0;    
     private long lastTimeUpdate = System.currentTimeMillis();
-    private Season season = new Season(); 
-    private Weather weather = new Weather(); // Weather system
-    private BufferedImage clockImage;
+    private String[] seasons = {"Spring", "Summer", "Fall", "Winter"};
+    private int currentSeasonIndex = 0;
+    private BufferedImage clockImage; // Image for clock display
+      // Weather and Season objects
+    private Weather weather = new Weather();
+    private Season season = new Season();
+    
+    // Inventory constants
+    private static final int INVENTORY_ROWS = 4;
+    private static final int INVENTORY_COLS = 4;
 
     // Getters and setters
     public int getTileSize() {
@@ -399,7 +407,11 @@ public class GamePanel extends JPanel implements Runnable {
         loadMapMenuImages();
         
         // Load clock image
-        loadClockImage();        // Initialize maps
+        loadClockImage();
+          // Load inventory image
+        loadInventoryImage();
+        
+        // Initialize maps
         this.forestrivermap = new ForestRiverMap(this);
         this.mountainLake = new MountainLake(this);
         this.oceanMap = new OceanMap(this);
@@ -480,6 +492,17 @@ public class GamePanel extends JPanel implements Runnable {
         } catch (Exception e) {
             System.err.println("Error loading clock image: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Load the inventory background image
+     */
+    private void loadInventoryImage() {
+        try {
+            inventoryImage = ImageIO.read(new File("RES/INVENTORY/inventory.png"));
+        } catch (IOException e) {
+            System.err.println("Error loading inventory image: " + e.getMessage());
         }
     }
 
@@ -718,12 +741,13 @@ public class GamePanel extends JPanel implements Runnable {
             ((PerryHouseMap)perryHouseMap).ensureNPCsVisible();
         }
     }    
-    
-    public void update() {
+      public void update() {
         // Handle different game states
-        if (gameState == PLAY_STATE) {
-            // Only update player in PLAY_STATE
-            player.update(); // Update player's world position
+        if (gameState == PLAY_STATE || gameState == INVENTORY_STATE) {
+            // Update player in both PLAY_STATE and INVENTORY_STATE (background still visible)
+            if (gameState == PLAY_STATE) {
+                player.update(); // Only update position in PLAY_STATE
+            }
             // Hitung posisi tengah player
             int playerCenterX = player.getWorldX() + player.getPlayerVisualWidth() / 2;
             int playerCenterY = player.getWorldY() + player.getPlayerVisualHeight() / 2;
@@ -731,7 +755,8 @@ public class GamePanel extends JPanel implements Runnable {
             // Check for teleport tile berdasarkan posisi tengah player
             int playerCol = playerCenterX / tileSize;
             int playerRow = playerCenterY / tileSize;
-            int tileType = currentMap.getTile(playerCol, playerRow);if (tileType == SRC.TILES.Tile.TILE_TELEPORT) {
+            int tileType = currentMap.getTile(playerCol, playerRow);
+            if (tileType == 5) { // TILE_TELEPORT value is 5
             if (currentMap.getMapName().equals("Farm Map")) {
                 FarmMap farmMapRef = (FarmMap) farmMap;
                 // Teleport ke HouseMap jika di bawah rumah
@@ -818,7 +843,18 @@ public class GamePanel extends JPanel implements Runnable {
             player.draw(g2, playerScreenX, playerScreenY);
             // --- Draw Time Info ---
             drawTimeInfo(g2);
-        }else if (gameState == MAP_MENU_STATE) {
+        } else if (gameState == INVENTORY_STATE) {
+            // First draw the game world in the background
+            g2.setColor(Color.black);
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+            currentMap.draw(g2);
+            int playerScreenX = player.getWorldX() - cameraX;
+            int playerScreenY = player.getWorldY() - cameraY;
+            player.draw(g2, playerScreenX, playerScreenY);
+            
+            // Then draw inventory overlay
+            drawInventoryScreen(g2);
+        } else if (gameState == MAP_MENU_STATE) {
             // Draw map selection menu
             if (mapMenuImages != null && currentMapMenuIndex >= 0 && currentMapMenuIndex < mapMenuImages.length) {
                 BufferedImage currentImage = mapMenuImages[currentMapMenuIndex];
@@ -1089,14 +1125,22 @@ public class GamePanel extends JPanel implements Runnable {
         // Force repaint to show new selection immediately
         repaint();
     }
-    
-    /**
+      /**
      * Get the current game state
      * @return Current game state (PLAY_STATE or MAP_MENU_STATE)
      */
     public int getGameState() {
         return gameState;
-    }    // Tambahkan method advanceGameTime
+    }
+      /**
+     * Set the current game state
+     * @param gameState The game state to set
+     */
+    public void setGameState(int gameState) {
+        this.gameState = gameState;
+    }
+    
+    // Tambahkan method advanceGameTime
     private void advanceGameTime() {
         // Tambah 5 menit setiap detik
         int minute = time.getMinute() + 5;
@@ -1112,17 +1156,13 @@ public class GamePanel extends JPanel implements Runnable {
             dayOfWeek = (dayOfWeek + 1) % 7;
             weather.setCurrentWeather(day);
             if ((day - 1) % 10 == 0 && day != 1) {
-                weather.newSegment();
-                season.nextSeason();
-                weather.newSeason();
-            }
-            
-            if (day > 30) {
+                currentSeasonIndex = (currentSeasonIndex + 1) % seasons.length;
+            }            if (day > 30) {
                 day = 1;
                 month++;
                 if (month > 12) {
                     month = 1;
-                    year++;
+                    // Year progression could be tracked here if needed
                 }
                 season.resetToSpring();
                 weather.newSeason();
@@ -1167,8 +1207,7 @@ public class GamePanel extends JPanel implements Runnable {
             g2.drawString(jam, screenWidth-110, 55); 
             g2.drawString(musim, screenWidth-110, 80); // Added season display
             g2.drawString(cuaca, screenWidth-110, 105); // Added weather display
-        }
-    }
+        }    }
 
     public Season getSeason() {
         return season;
@@ -1193,5 +1232,137 @@ public class GamePanel extends JPanel implements Runnable {
 
     public String getWeatherString() {
         return weather.getWeatherString();
+    }
+    
+    /**
+     * Draws the inventory screen
+     * @param g2 Graphics2D object to draw with
+     */
+    private void drawInventoryScreen(Graphics2D g2) {
+        // Draw semi-transparent black overlay across entire screen
+        g2.setColor(new Color(0, 0, 0, 180)); // Black with 70% opacity
+        g2.fillRect(0, 0, screenWidth, screenHeight);
+        
+        // Calculate inventory position to center it on screen
+        int inventoryWidth = 128 * scale; // 128 pixels * 3 = 384 pixels
+        int inventoryHeight = 128 * scale; // 128 pixels * 3 = 384 pixels
+        int x = (screenWidth - inventoryWidth) / 2;
+        int y = (screenHeight - inventoryHeight) / 2;
+        
+        // Draw inventory background
+        if (inventoryImage != null) {
+            g2.drawImage(inventoryImage, x, y, inventoryWidth, inventoryHeight, null);
+        } else {
+            // Fallback if image fails to load
+            g2.setColor(new Color(139, 69, 19, 200)); // Brown with transparency
+            g2.fillRoundRect(x, y, inventoryWidth, inventoryHeight, 15, 15);
+            g2.setColor(Color.BLACK);
+            g2.drawRoundRect(x, y, inventoryWidth, inventoryHeight, 15, 15);
+        }
+        
+        // Draw grid for item slots (4x4 grid)
+        int slotSize = 32 * scale; // 32x32 pixel slots * scale
+        int slotSpacing = 0; // No spacing between slots
+        int slotOffsetX = 0; // Offset from left edge of inventory
+        int slotOffsetY = 0; // Offset from top edge of inventory
+        
+        // Get selected slot index from mouse handler
+        int selectedSlotIndex = mouseHandler.getSelectedSlotIndex();
+        
+        // Draw item slots and items
+        for (int row = 0; row < INVENTORY_ROWS; row++) {
+            for (int col = 0; col < INVENTORY_COLS; col++) {
+                // Calculate slot position
+                int slotX = x + slotOffsetX + col * (slotSize + slotSpacing);
+                int slotY = y + slotOffsetY + row * (slotSize + slotSpacing);
+                
+                // Calculate slot index (0-15)
+                int slotIndex = row * INVENTORY_COLS + col;
+                
+                // Only draw slot background if selected (remove black grid)
+                if (slotIndex == selectedSlotIndex) {
+                    g2.setColor(new Color(255, 255, 100, 180)); // Yellow highlight for selected slot
+                    g2.fillRect(slotX, slotY, slotSize, slotSize);
+                    g2.setColor(Color.BLACK);
+                    g2.drawRect(slotX, slotY, slotSize, slotSize);
+                }
+                  // Draw item in slot if it exists
+                Item[] playerItems = player.getInventoryItems();
+                int[] playerQuantities = player.getInventoryQuantities();
+                if (slotIndex < playerItems.length && playerItems[slotIndex] != null) {
+                    Item item = playerItems[slotIndex];
+                    int quantity = playerQuantities[slotIndex];
+                    
+                    // Draw item image centered in slot with bigger scale
+                    if (item.getImage() != null) {
+                        // Scale item images to be bigger (1.5x the original size)
+                        int scaledWidth = (int)(item.getImage().getWidth() * 1.5);
+                        int scaledHeight = (int)(item.getImage().getHeight() * 1.5);
+                        int itemX = slotX + (slotSize - scaledWidth) / 2;
+                        int itemY = slotY + (slotSize - scaledHeight) / 2;
+                        g2.drawImage(item.getImage(), itemX, itemY, scaledWidth, scaledHeight, null);
+                    }
+                    
+                    // Draw item quantity
+                    if (quantity > 1) {
+                        g2.setColor(Color.WHITE);
+                        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 12));
+                        String quantityText = "x" + quantity;
+                        g2.drawString(quantityText, slotX + slotSize - 25, slotY + slotSize - 5);
+                    }
+                }
+            }
+        }
+        
+        // Draw inventory title centered above the inventory
+        g2.setColor(Color.WHITE);
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 24));
+        String titleText = "Inventory";
+        int titleWidth = g2.getFontMetrics().stringWidth(titleText);
+        int titleX = x + (inventoryWidth - titleWidth) / 2;
+        g2.drawString(titleText, titleX, y - 15);
+          // Draw remove button on the right side of inventory (wider button)
+        int removeButtonWidth = 80; // Increased width from 60 to 80
+        int removeButtonHeight = 30;
+        int removeButtonX = x + inventoryWidth + 10;
+        int removeButtonY = y + 20;
+        
+        // Draw remove button background
+        g2.setColor(new Color(200, 60, 60)); // Red button
+        g2.fillRoundRect(removeButtonX, removeButtonY, removeButtonWidth, removeButtonHeight, 10, 10);
+        
+        // Draw remove button border
+        g2.setColor(Color.BLACK);
+        g2.drawRoundRect(removeButtonX, removeButtonY, removeButtonWidth, removeButtonHeight, 10, 10);
+        
+        // Draw remove button text centered in button
+        g2.setColor(Color.WHITE);
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 14));
+        String removeButtonText = "Remove";
+        int removeButtonTextWidth = g2.getFontMetrics().stringWidth(removeButtonText);
+        int removeButtonTextX = removeButtonX + (removeButtonWidth - removeButtonTextWidth) / 2;
+        g2.drawString(removeButtonText, removeButtonTextX, removeButtonY + 20);
+        
+        // Draw use button below remove button
+        int useButtonWidth = 80;
+        int useButtonHeight = 30;
+        int useButtonX = x + inventoryWidth + 10;
+        int useButtonY = removeButtonY + removeButtonHeight + 10; // 10px gap below remove button
+        
+        // Draw use button background
+        g2.setColor(new Color(60, 200, 60)); // Green button
+        g2.fillRoundRect(useButtonX, useButtonY, useButtonWidth, useButtonHeight, 10, 10);
+        
+        // Draw use button border
+        g2.setColor(Color.BLACK);
+        g2.drawRoundRect(useButtonX, useButtonY, useButtonWidth, useButtonHeight, 10, 10);
+        
+        // Draw use button text centered in button
+        g2.setColor(Color.WHITE);
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 14));
+        String useButtonText = "Use";
+        int useButtonTextWidth = g2.getFontMetrics().stringWidth(useButtonText);
+        int useButtonTextX = useButtonX + (useButtonWidth - useButtonTextWidth) / 2;
+        g2.drawString(useButtonText, useButtonTextX, useButtonY + 20);
     }
 }

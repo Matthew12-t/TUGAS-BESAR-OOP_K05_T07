@@ -14,20 +14,30 @@ public class KeyHandler implements KeyListener {
     public KeyHandler(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
     }
-    
-    // Default constructor (for backward compatibility)
+      // Default constructor (for backward compatibility)
     public KeyHandler() {
         // No GamePanel reference
-    }    @Override
+    }    
+    
+    @Override
     public void keyTyped(KeyEvent e) {
         // TODO Auto-generated method stub
     }
       @Override
     public void keyPressed(KeyEvent e) {
-        int code = e.getKeyCode();
-
-        // Only handle these if we have a gamePanel reference
+        int code = e.getKeyCode();        // Only handle these if we have a gamePanel reference
         if (gamePanel != null) {
+            // Toggle inventory with 'i' key - works in any state
+            if(code == KeyEvent.VK_I) {
+                if (gamePanel.getGameState() == GamePanel.INVENTORY_STATE) {
+                    gamePanel.setGameState(GamePanel.PLAY_STATE);
+                    System.out.println("Closed inventory");
+                } else {
+                    gamePanel.setGameState(GamePanel.INVENTORY_STATE);
+                    System.out.println("Opened inventory");
+                }
+            }
+            
             // Handle different key inputs depending on game state
             if (gamePanel.getGameState() == GamePanel.PLAY_STATE) {
                 // Movement keys - only active in play state
@@ -57,8 +67,7 @@ public class KeyHandler implements KeyListener {
                     gamePanel.switchToHouseMap();
                     System.out.println("Switched to House Map");
                 }
-                
-                // Object placement mode
+                  // Object placement mode                
                 if(code == KeyEvent.VK_P) {
                     boolean isPlacing = gamePanel.getMouseHandler().isPlacingHouse();
                     gamePanel.getMouseHandler().setPlacingHouse(!isPlacing);
