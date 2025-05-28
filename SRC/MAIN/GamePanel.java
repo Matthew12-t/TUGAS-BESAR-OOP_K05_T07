@@ -673,8 +673,7 @@ public class GamePanel extends JPanel implements Runnable {
             // Position player at the entrance
             player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
-            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
-        } else if (targetMapName.equals("Dasco's House")) {
+            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);        } else if (targetMapName.equals("Dasco's House")) {
             switchToDascoHouse();
             if (!isInitializedDascoHouse) {
                 dascoHouseMap.setupInitialObjects();
@@ -684,6 +683,7 @@ public class GamePanel extends JPanel implements Runnable {
             player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+            ((DascoHouseMap)dascoHouseMap).ensureNPCsVisible();
         } else if (targetMapName.equals("Emily's House")) {
             switchToEmilyHouse();
             if (!isInitializedEmilyHouse) {
@@ -984,8 +984,11 @@ public class GamePanel extends JPanel implements Runnable {
             
             System.out.println("Teleported player to Dasco's House at entrance");
             
-            // Center camera on map
+            // Center camera after the map and NPCs are initialized
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+            
+            // Ensure NPCs are visible after camera centering
+            ((DascoHouseMap)dascoHouseMap).ensureNPCsVisible();
         }
         else if (selectedMap == 7) {
             // Switch to Emily's house (eighth option)

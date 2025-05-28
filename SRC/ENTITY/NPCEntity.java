@@ -1,0 +1,202 @@
+package SRC.ENTITY;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.awt.Graphics2D;
+import java.awt.Color;
+
+import SRC.MAIN.GamePanel;
+
+public class NPCEntity extends Entity implements NPC {
+    // Basic NPC properties
+    private String name;
+    private String location;
+    private String description;
+    
+    private int heartPoints;
+    private static final int MAX_HEART_POINTS = 150;
+    private String relationshipStatus; 
+    private List<String> lovedItems;
+    private List<String> likedItems;
+    private List<String> hatedItems;
+    
+    // Constructor
+    public NPCEntity(GamePanel gp, int worldX, int worldY, String name, String location, String description) {
+        super(gp, worldX, worldY);
+        this.name = name;
+        this.location = location;
+        this.description = description;
+        
+        this.heartPoints = 0; 
+        this.relationshipStatus = "single";
+        this.lovedItems = new ArrayList<>();
+        this.likedItems = new ArrayList<>();
+        this.hatedItems = new ArrayList<>();
+    }
+      // Update method for NPCs - can be overridden by specific NPC types
+    public void update() {
+        // Basic NPC update behavior
+        // Static NPCs don't need movement updates
+        incrementSpriteCounter();
+        
+        // Simple idle animation cycle
+        if (getSpriteCounter() > 60) {  // Slower animation for NPCs
+            setSpriteNum((getSpriteNum() + 1) % 2);  // Simple 2-frame idle animation
+            setSpriteCounter(0);
+        }
+    }    /**
+     * Draw the NPC on screen
+     * @param g2 Graphics2D object for drawing
+     */    public void draw(Graphics2D g2) {
+        // Calculate screen position based on world position and camera
+        int screenX = getWorldX() - gp.getCameraX();
+        int screenY = getWorldY() - gp.getCameraY();
+        
+        // Debug - log visibility calculation values
+        boolean isVisible = getWorldX() + gp.getTileSize() > gp.getCameraX() &&
+                           getWorldX() - gp.getTileSize() < gp.getCameraX() + gp.getScreenWidth() &&
+                           getWorldY() + gp.getTileSize() > gp.getCameraY() &&
+                           getWorldY() - gp.getTileSize() < gp.getCameraY() + gp.getScreenHeight();
+        
+        // Print NPC visibility info when entering DascoHouseMap 
+        if (name.equals("Dasco") && gp.getCurrentMap().getMapName().equals("Dasco's House")) {
+            System.out.println("Dasco NPC draw check - worldX: " + getWorldX() + ", worldY: " + getWorldY() + 
+                            ", cameraX: " + gp.getCameraX() + ", cameraY: " + gp.getCameraY() + 
+                            ", visible: " + isVisible);
+        }
+        
+        // Only draw if NPC is visible on screen
+        if (isVisible) {
+            // Default NPC rendering - draw a colored rectangle with name
+            g2.setColor(Color.BLUE);
+            g2.fillRect(screenX, screenY, gp.getTileSize(), gp.getTileSize());
+            
+            g2.setColor(Color.WHITE);
+            g2.drawString(name.substring(0, Math.min(4, name.length())), 
+                         screenX + 5, screenY + gp.getTileSize()/2);
+        }
+    }    
+    @Override
+    public String getNPCName() {
+        return name;
+    }
+    
+    @Override
+    public String getLocation() {
+        return location;
+    }
+    
+    @Override
+    public String getDescription() {
+        return description;
+    }
+      @Override
+    public void interact(Player player) {
+        // Basic interaction logic - can be overridden by specific NPC types
+        System.out.println(name + " says: Hello, player!");
+    }
+    
+    @Override
+    public String getRelationshipStatus(Player player) {
+        return "Relationship with player: " + relationshipStatus + 
+               " (Heart Points: " + heartPoints + "/" + MAX_HEART_POINTS + ")";
+    }
+    
+    @Override
+    public List<String> getLovedItems() {
+        return lovedItems;
+    }
+    
+    @Override
+    public List<String> getLikedItems() {
+        return likedItems;
+    }
+    
+    @Override
+    public List<String> getHatedItems() {
+        return hatedItems;
+    }
+    
+    @Override
+    public void performAction(Player player, String action) {
+        switch (action.toLowerCase()) {            case "chat":
+                System.out.println(name + " chats with player");
+                break;
+            case "gift":
+                System.out.println(name + " received a gift from player");
+                break;
+            default:
+                System.out.println("Unknown action: " + action);
+                break;
+        }
+    }
+    
+    public int getHeartPoints() {
+        return heartPoints;
+    }
+    
+    public void setHeartPoints(int points) {
+        this.heartPoints = Math.max(0, Math.min(points, MAX_HEART_POINTS));
+    }
+    
+    public void increaseHeartPoints(int amount) {
+        setHeartPoints(heartPoints + amount);
+    }
+    
+    public void decreaseHeartPoints(int amount) {
+        setHeartPoints(heartPoints - amount);
+    }
+    
+    public String getRelationshipStatus() {
+        return relationshipStatus;
+    }
+    
+    public void setRelationshipStatus(String status) {
+        if (status.equals("single") || status.equals("fiance") || status.equals("spouse")) {
+            this.relationshipStatus = status;
+        } else {
+            throw new IllegalArgumentException("Invalid relationship status. Must be 'single', 'fiance', or 'spouse'");
+        }
+    }
+    
+    public void addLovedItem(String item) {
+        lovedItems.add(item);
+    }
+    
+    public void addLikedItem(String item) {
+        likedItems.add(item);
+    }
+    
+    public void addHatedItem(String item) {
+        hatedItems.add(item);
+    }
+    
+    public void removeLovedItem(String item) {
+        lovedItems.remove(item);
+    }
+    
+    public void removeLikedItem(String item) {
+        likedItems.remove(item);
+    }
+    
+    public void removeHatedItem(String item) {
+        hatedItems.remove(item);
+    }
+    
+    
+    public void receiveGift(String itemName) {
+        if (lovedItems.contains(itemName)) {
+            increaseHeartPoints(25);
+            System.out.println(name + " loves this gift!");
+        } else if (likedItems.contains(itemName)) {
+            increaseHeartPoints(20);
+            System.out.println(name + " likes this gift.");
+        } else if (hatedItems.contains(itemName)) {
+            decreaseHeartPoints(25);
+            System.out.println(name + " hates this gift...");
+        } else {
+            increaseHeartPoints(0);
+            System.out.println(name + " accepts your gift.");
+        }
+    }
+}

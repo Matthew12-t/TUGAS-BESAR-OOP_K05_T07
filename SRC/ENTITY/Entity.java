@@ -6,6 +6,7 @@ import SRC.MAIN.GamePanel;
 public abstract class Entity {
     private Tile position;
     private int speed;
+    protected GamePanel gp;  // Store GamePanel reference for subclasses
     
     // Direction
     private String direction;
@@ -16,13 +17,14 @@ public abstract class Entity {
     
     // Constructor
     public Entity(GamePanel gp, int worldX, int worldY) {
+        this.gp = gp;  // Store GamePanel reference
         this.position = new Tile(gp, worldX, worldY);
         this.speed = 0;
         this.direction = "down";
     }
     
     // Abstract method that must be implemented by subclasses
-    public abstract void update(); //semua pergerakan yang dilakukan oleh entity ada di sini
+    //public abstract void update(); //semua pergerakan yang dilakukan oleh entity ada di sini
 
       // Getters and Setters
     public int getWorldX() {
