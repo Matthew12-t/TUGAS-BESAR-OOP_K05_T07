@@ -687,6 +687,7 @@ public class GamePanel extends JPanel implements Runnable {
             player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+            ((AbigailHouseMap)abigailHouseMap).ensureNPCsVisible();
         } else if (targetMapName.equals("Caroline's House")) {
             switchToCarolineHouse();
             if (!isInitializedCarolineHouse) {
@@ -696,7 +697,8 @@ public class GamePanel extends JPanel implements Runnable {
             // Position player at the entrance
             player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
-            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);        } 
+            centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);  
+            ((CarolineHouseMap)carolineHouseMap).ensureNPCsVisible();} 
         else if (targetMapName.equals("Dasco's House")) {
             switchToDascoHouse();
             if (!isInitializedDascoHouse) {
@@ -718,6 +720,7 @@ public class GamePanel extends JPanel implements Runnable {
             player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+            ((EmilyHouseMap)emilyHouseMap).ensureNPCsVisible();
         } else if (targetMapName.equals("Mayor Tadi's House")) {
             switchToMayorTadiHouse();
             if (!isInitializedMayorTadiHouse) {
@@ -728,6 +731,7 @@ public class GamePanel extends JPanel implements Runnable {
             player.setWorldX(tileSize * (NPCHouseMap.NPC_HOUSE_COLS / 2));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+            
         } else if (targetMapName.equals("Perry's House")) {
             switchToPerryHouse();
             if (!isInitializedPerryHouse) {
@@ -990,6 +994,7 @@ public class GamePanel extends JPanel implements Runnable {
             
             // Center camera on map
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+            ((AbigailHouseMap)abigailHouseMap).ensureNPCsVisible();
         }
         else if (selectedMap == 5) {
             // Switch to Caroline's house (sixth option)
@@ -1007,6 +1012,7 @@ public class GamePanel extends JPanel implements Runnable {
             
             // Center camera on map
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+            ((CarolineHouseMap)carolineHouseMap).ensureNPCsVisible();
         }
         else if (selectedMap == 6) {
             // Switch to Dasco's house (seventh option)
@@ -1044,6 +1050,7 @@ public class GamePanel extends JPanel implements Runnable {
             
             // Center camera on map
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+            ((EmilyHouseMap)emilyHouseMap).ensureNPCsVisible();
         }
         else if (selectedMap == 8) {
             // Switch to Mayor Tadi's house (ninth option)
@@ -1061,6 +1068,7 @@ public class GamePanel extends JPanel implements Runnable {
             
             // Center camera on map
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
+            ((MayorTadiHouseMap)mayorTadiHouseMap).ensureNPCsVisible();
 
         }
         else if (selectedMap == 9) {
