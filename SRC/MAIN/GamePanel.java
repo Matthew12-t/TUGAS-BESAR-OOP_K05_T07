@@ -1581,10 +1581,11 @@ public class GamePanel extends JPanel implements Runnable {
             Item[] items = player.getInventoryItems();
             int selectedSlot = mouseHandler.getSelectedSlotIndex();
             if (selectedSlot >= 0 && items[selectedSlot] != null) {
-                giftingTargetNPC.receiveGift(items[selectedSlot]);
-                showMessagePanel(giftingTargetNPC.getNPCName() + ": Terima kasih atas " + items[selectedSlot].getName() + "!");
+                String reactionMsg = giftingTargetNPC.receiveGift(items[selectedSlot]);
+                showMessagePanel(reactionMsg);
                 // Remove only one item from inventory here
                 player.removeOneItemFromInventory(selectedSlot);
+                player.setEnergy(player.getEnergy() - 5);
                 giftingTargetNPC = null;
                 setGameState(PLAY_STATE);
             } 
@@ -1592,7 +1593,7 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void tryTalkToNearbyNPC() {
-        NPCEntity nearbyNPC = getNearbyNPC(1); // 1 tile away only
+        NPCEntity nearbyNPC = getNearbyNPC(1); 
         if (nearbyNPC != null) {
             java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
             java.io.PrintStream oldOut = System.out;

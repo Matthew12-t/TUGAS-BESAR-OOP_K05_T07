@@ -93,7 +93,6 @@ public class NPCEntity extends Entity implements NPC {
     }
       @Override
     public void interact(Player player) {
-        // Basic interaction logic - can be overridden by specific NPC types
         System.out.println(name + " says: Hello, player!");
     }
     
@@ -182,20 +181,26 @@ public class NPCEntity extends Entity implements NPC {
         hatedItems.remove(item);
     }
     
-      public void receiveGift(Item item) {        
+      /**
+     * Player memberikan hadiah ke NPC, return pesan reaksi untuk UI
+     */
+    public String receiveGift(Item item) {        
+        String reactionMsg;
         if (lovedItems.contains(item)) {
             increaseHeartPoints(25);
-            System.out.println(name + " loves this gift!");
+            reactionMsg = name + " loves this gift!";
         } else if (likedItems.contains(item)) {
             increaseHeartPoints(20);
-            System.out.println(name + " likes this gift.");
+            reactionMsg = name + " likes this gift.";
         } else if (hatedItems.contains(item)) {
             decreaseHeartPoints(25);
-            System.out.println(name + " hates this gift...");
+            reactionMsg = name + " hates this gift.";
         } else {
             increaseHeartPoints(0);
-            System.out.println(name + " accepts your gift.");
+            reactionMsg = name + " accepts your gift.";
         }
+        System.out.println(reactionMsg);
+        return reactionMsg;
     }
     
     /**

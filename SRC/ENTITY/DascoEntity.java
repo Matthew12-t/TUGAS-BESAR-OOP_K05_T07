@@ -158,9 +158,19 @@ public class DascoEntity extends NPCEntity {
      * @param item the item being given
      */
     @Override
-    public void receiveGift(Item item) {
-        super.receiveGift(item);
+    public String receiveGift(Item item) {
+        String baseMsg = super.receiveGift(item);
         updateRelationshipStatus();
+        // Modifikasi pesan agar lebih khas Dasco
+        if (baseMsg.contains("loves")) {
+            return "Dasco: Wah, ini makanan yang sangat mahal! " + baseMsg;
+        } else if (baseMsg.contains("likes")) {
+            return "Dasco: Lumayan, aku suka. " + baseMsg;
+        } else if (baseMsg.contains("hates")) {
+            return "Dasco: Hah?! Kenapa kamu kasih ini... " + baseMsg;
+        } else {
+            return "Dasco: Terima kasih, tapi kamu bisa lebih baik dari ini. " + baseMsg;
+        }
     }
       /**
      * Get Dasco's sprite for rendering

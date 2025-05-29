@@ -156,9 +156,18 @@ public class AbigailEntity extends NPCEntity {
      * @param item the item being given
      */
     @Override
-    public void receiveGift(Item item) {
-        super.receiveGift(item);
+    public String receiveGift(Item item) {
+        String baseMsg = super.receiveGift(item);
         updateRelationshipStatus();
+        if (baseMsg.contains("loves")) {
+            return "Abigail: Wah, aku suka sekali! " + baseMsg;
+        } else if (baseMsg.contains("likes")) {
+            return "Abigail: Ini cukup menarik, terima kasih! " + baseMsg;
+        } else if (baseMsg.contains("hates")) {
+            return "Abigail: Uh... aku tidak suka ini... " + baseMsg;
+        } else {
+            return "Abigail: Terima kasih, tapi aku harap lain kali lebih baik! " + baseMsg;
+        }
     }
     
     /**

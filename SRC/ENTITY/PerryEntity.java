@@ -142,9 +142,18 @@ public class PerryEntity extends NPCEntity {
      * @param item the item being given
      */
     @Override
-    public void receiveGift(Item item) {
-        super.receiveGift(item);
+    public String receiveGift(Item item) {
+        String baseMsg = super.receiveGift(item);
         updateRelationshipStatus();
+        if (baseMsg.contains("loves")) {
+            return "Perry: Wah, buah beri segar! Aku suka sekali!! " + baseMsg;
+        } else if (baseMsg.contains("likes")) {
+            return "Perry: Terima kasih, minuman ini cocok untuk ide menulis! " + baseMsg;
+        } else if (baseMsg.contains("hates")) {
+            return "Perry: sorry yee, aku ada alergi ikan. " + baseMsg;
+        } else {
+            return "Perry: Terima kasih, tapi aku lebih suka buah atau minuman. " + baseMsg;
+        }
     }
     
     /**

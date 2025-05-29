@@ -155,9 +155,18 @@ public class CarolineEntity extends NPCEntity {
      * @param item the item being given
      */
     @Override
-    public void receiveGift(Item item) {
-        super.receiveGift(item);
+    public String receiveGift(Item item) {
+        String baseMsg = super.receiveGift(item);
         updateRelationshipStatus();
+        if (baseMsg.contains("loves")) {
+            return "Caroline: Wah, akan uubah menjadi suatu karya seni. " + baseMsg;
+        } else if (baseMsg.contains("likes")) {
+            return "Caroline: Terima kasih, aku suka ini! " + baseMsg;
+        } else if (baseMsg.contains("hates")) {
+            return "Caroline: Hmm... aku tidak suka Makanan PEDASSS!. " + baseMsg;
+        } else {
+            return "Caroline: Terima kasih, tapi aku lebih suka sesuatu yang lain. " + baseMsg;
+        }
     }
     
     /**
