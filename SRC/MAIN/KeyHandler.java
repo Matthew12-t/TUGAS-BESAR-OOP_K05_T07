@@ -102,7 +102,26 @@ public class KeyHandler implements KeyListener {
                         gamePanel.getPlayer().getPlayerAction().performFishing();
                     }
                 }
-              }            
+                
+                // --- NPC INTERACTION KEYS ---
+                if(code == KeyEvent.VK_G) {
+                    // Gifting
+                    gamePanel.tryGiftToNearbyNPC();
+                }
+                if(code == KeyEvent.VK_T) {
+                    // Talking
+                    gamePanel.tryTalkToNearbyNPC();
+                }
+            }
+            // --- INVENTORY STATE GIFTING ---
+            else if (gamePanel.getGameState() == GamePanel.INVENTORY_STATE) {
+                if (code == KeyEvent.VK_G) {
+                    // Only confirm gift if giftingTargetNPC is set
+                    if (gamePanel.getGiftingTargetNPC() != null) {
+                        gamePanel.confirmGiftFromInventory();
+                    }
+                }
+            }            
             
             // Eating action with 'E' key - works in both PLAY_STATE and INVENTORY_STATE
             if(code == KeyEvent.VK_E) {

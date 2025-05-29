@@ -97,6 +97,22 @@ public class Inventory {
     }
     
     /**
+     * Remove one item from specific slot (decrement quantity by 1, remove if 0)
+     */
+    public void removeOneItem(int slotIndex) {
+        if (slotIndex >= 0 && slotIndex < MAX_INVENTORY_SLOTS) {
+            if (itemSlots[slotIndex] != null) {
+                if (quantitySlots[slotIndex] > 1) {
+                    quantitySlots[slotIndex]--;
+                } else {
+                    itemSlots[slotIndex] = null;
+                    quantitySlots[slotIndex] = 0;
+                }
+            }
+        }
+    }
+    
+    /**
      * Get item at specific slot
      */
     public Item getItem(int slotIndex) {

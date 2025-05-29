@@ -127,6 +127,10 @@ public class Player extends Entity {
         playerAction.removeInventoryItem(slotIndex);
     }
     
+    public void removeOneItemFromInventory(int slotIndex) {
+        playerAction.removeOneInventoryItem(slotIndex);
+    }
+    
     public Item[] getInventoryItems() {
         return playerAction.getInventoryItems();
     }
