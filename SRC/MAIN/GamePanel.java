@@ -40,11 +40,11 @@ public class GamePanel extends JPanel implements Runnable {
     private final int maxScreenRow = 14; // Number of tiles vertically on screen
     private final int screenWidth = tileSize * maxScreenCol; // 768 pixels
     private final int screenHeight = tileSize * maxScreenRow; // 576 pixels
-    private final int FPS = 60;
-      // Game states
+    private final int FPS = 60;      // Game states
     public static final int PLAY_STATE = 0;
     public static final int MAP_MENU_STATE = 1;
     public static final int INVENTORY_STATE = 2;
+    public static final int SLEEP_STATE = 3;
     private int gameState = PLAY_STATE;
       // Inventory UI properties
     private BufferedImage inventoryImage;
@@ -529,10 +529,14 @@ public class GamePanel extends JPanel implements Runnable {
             if (System.currentTimeMillis() - lastTimeUpdate >= 1000) {
                 advanceGameTime();
                 lastTimeUpdate = System.currentTimeMillis();
-            }
-
-            if (delta >= 1) {
+            }            if (delta >= 1) {
                 update();
+                
+                // Check for automatic sleep triggers (low energy and late time)
+                if (gameState == PLAY_STATE) {
+                    player.getPlayerAction().checkAutomaticSleep();
+                }
+                
                 repaint();
                 delta--;
                 drawCount++;
@@ -879,7 +883,17 @@ public class GamePanel extends JPanel implements Runnable {
             player.draw(g2, playerScreenX, playerScreenY);
             
             // Then draw inventory overlay
-            drawInventoryScreen(g2);
+            drawInventoryScreen(g2);        } else if (gameState == SLEEP_STATE) {
+            // First draw current map and player as background
+            g2.setColor(Color.black);
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+            currentMap.draw(g2);
+            int playerScreenX = player.getWorldX() - cameraX;
+            int playerScreenY = player.getWorldY() - cameraY;
+            player.draw(g2, playerScreenX, playerScreenY);
+            
+            // Then draw sleep UI on top
+            player.getPlayerAction().getSleepUI().draw(g2);
         } else if (gameState == MAP_MENU_STATE) {
             // Draw map selection menu
             if (mapMenuImages != null && currentMapMenuIndex >= 0 && currentMapMenuIndex < mapMenuImages.length) {
@@ -1445,12 +1459,57 @@ public class GamePanel extends JPanel implements Runnable {
         time.setHour(currentHour);
         time.setMinute(currentMinute);
     }
-    
-    /**
+      /**
      * Get current time object
      * @return Current Time object
      */
     public Time getCurrentTime() {
         return time;
+    }
+    
+    /**
+     * Get current day
+     * @return Current day
+     */
+    public int getCurrentDay() {
+        return day;
+    }
+      /**
+     * Advance to next day (doesn't change time)
+     */
+    public void advanceToNextDay() {
+        // Advance to next day (but don't change time - that is handled by sleep effects)
+        day++;
+        dayOfWeek = (dayOfWeek + 1) % 7;
+        
+        // Update weather randomly each day
+        currentWeather = (Math.random() < 0.3) ? Weather.RAINY : Weather.SUNNY;
+        
+        // Check for season change every 10 days
+        if ((day - 1) % 10 == 0 && day != 1) {
+            currentSeasonIndex = (currentSeasonIndex + 1) % seasons.length;
+            // Update current season based on index
+            Season[] seasonValues = Season.values();
+            if (currentSeasonIndex < seasonValues.length) {
+                currentSeason = seasonValues[currentSeasonIndex];
+            } else {
+                currentSeasonIndex = 0;
+                currentSeason = Season.SPRING;
+            }
+        }
+        
+        // Check for month/year progression
+        if (day > 30) {
+            day = 1;
+            month++;
+            if (month > 12) {
+                month = 1;
+            }
+            currentSeason = Season.SPRING;
+            currentSeasonIndex = 0;
+            currentWeather = Weather.SUNNY;
+        }
+        
+        System.out.println("Advanced to next day: Day " + day);
     }
 }

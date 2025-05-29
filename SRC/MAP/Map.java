@@ -404,9 +404,45 @@ public abstract class Map {
             reader.close();
         } catch (Exception e) {
             System.err.println("Error reading map file value: " + e.getMessage());
-        }
+        }        return "0"; // Default to grass (0)
+    }
 
-        return "0"; // Default to grass (0)
+    /**
+     * Check if there is an object at the specified coordinates
+     * @param col Column position
+     * @param row Row position
+     * @return true if there is an object at the position, false otherwise
+     */
+    public boolean hasObjectAt(int col, int row) {
+        for (SuperObject obj : objects) {
+            if (obj != null) {
+                int objCol = obj.getWorldX() / gp.getTileSize();
+                int objRow = obj.getWorldY() / gp.getTileSize();
+                if (objCol == col && objRow == row) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Get the object at the specified coordinates
+     * @param col Column position
+     * @param row Row position
+     * @return SuperObject at the position, or null if none exists
+     */
+    public SuperObject getObjectAt(int col, int row) {
+        for (SuperObject obj : objects) {
+            if (obj != null) {
+                int objCol = obj.getWorldX() / gp.getTileSize();
+                int objRow = obj.getWorldY() / gp.getTileSize();
+                if (objCol == col && objRow == row) {
+                    return obj;
+                }
+            }
+        }
+        return null;
     }
 
     /**
