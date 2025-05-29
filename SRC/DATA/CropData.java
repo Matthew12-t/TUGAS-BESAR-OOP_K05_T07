@@ -22,28 +22,17 @@ public class CropData {
      * Initialize all crop items
      */
     private static void initializeCrops() {
-        // Spring Crops
-        crops.put("Parsnip", new Crop("Parsnip", 35, 25, 1));
-        crops.put("Cauliflower", new Crop("Cauliflower", 175, 100, 1));
-        crops.put("Potato", new Crop("Potato", 80, 50, 1));
-        crops.put("Kale", new Crop("Kale", 110, 70, 1));
-        
-        // Summer Crops  
-        crops.put("Tomato", new Crop("Tomato", 60, 50, 1));
-        crops.put("Corn", new Crop("Corn", 50, 150, 1));
-        crops.put("Blueberry", new Crop("Blueberry", 50, 80, 3));
-        crops.put("Pepper", new Crop("Pepper", 40, 40, 1));
-        
-        // Fall Crops
-        crops.put("Pumpkin", new Crop("Pumpkin", 320, 100, 1));
-        crops.put("Eggplant", new Crop("Eggplant", 60, 20, 1));
-        crops.put("Cranberry", new Crop("Cranberry", 75, 240, 2));
-        crops.put("Beet", new Crop("Beet", 100, 20, 1));
-        
-        // Special/Rare Crops
-        crops.put("Ancient Fruit", new Crop("Ancient Fruit", 550, 1000, 1));
-        crops.put("Starfruit", new Crop("Starfruit", 750, 400, 1));
-        crops.put("Sweet Gem Berry", new Crop("Sweet Gem Berry", 3000, 1000, 1));
+        crops.put("Parsnip", new Crop("Parsnip", 35, 50, 1));
+        crops.put("Cauliflower", new Crop("Cauliflower", 150, 200, 1));
+        crops.put("Potato", new Crop("Potato", 80, 0, 1)); 
+        crops.put("Wheat", new Crop("Wheat", 30, 50, 3)); 
+        crops.put("Tomato", new Crop("Tomato", 60, 90, 1)); 
+        crops.put("Blueberry", new Crop("Blueberry", 40, 150, 3)); 
+        crops.put("Hot Pepper", new Crop("Hot Pepper", 40, 0, 1)); 
+        crops.put("Pumpkin", new Crop("Pumpkin", 250, 300, 1));
+        crops.put("Cranberry", new Crop("Cranberry", 25, 0, 10)); 
+        crops.put("Grape", new Crop("Grape", 10, 100, 20)); 
+        crops.put("Melon", new Crop("Melon", 250, 0, 1));
         
         System.out.println("CropData: Initialized " + crops.size() + " crop types");
     }

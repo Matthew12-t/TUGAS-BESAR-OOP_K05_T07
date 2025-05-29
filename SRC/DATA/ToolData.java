@@ -36,9 +36,7 @@ public class ToolData {
         tools.put("Fishing Rod", new Tool("Fishing Rod", 300, 500, "Used for catching fish"));
         tools.put("Fiberglass Rod", new Tool("Fiberglass Rod", 800, 1800, "Better fishing rod"));
         
-        // Combat Tools
-        tools.put("Sword", new Tool("Sword", 1000, 250, "Used for combat"));
-        tools.put("Dagger", new Tool("Dagger", 500, 100, "Fast combat weapon"));
+        tools.put("Proposal Ring", new Tool("Proposal Ring", 3000, 250, "Used for Propoing NPC"));
         
         System.out.println("ToolData: Initialized " + tools.size() + " tool types");
     }

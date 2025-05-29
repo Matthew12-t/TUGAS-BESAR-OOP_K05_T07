@@ -22,24 +22,21 @@ public class SeedData {
      * Initialize all seed items
      */
     private static void initializeSeeds() {
-        // Spring Seeds
-        seeds.put("Parsnip Seeds", new Seed("Parsnip Seeds", 20, 25, "Spring", 4));
-        seeds.put("Cauliflower Seeds", new Seed("Cauliflower Seeds", 80, 100, "Spring", 12));
-        seeds.put("Potato Seeds", new Seed("Potato Seeds", 80, 50, "Spring", 6));
-        seeds.put("Kale Seeds", new Seed("Kale Seeds", 110, 70, "Spring", 6));
-        
-        // Summer Seeds
-        seeds.put("Tomato Seeds", new Seed("Tomato Seeds", 60, 50, "Summer", 11));
-        seeds.put("Corn Seeds", new Seed("Corn Seeds", 50, 150, "Summer", 14));
-        seeds.put("Blueberry Seeds", new Seed("Blueberry Seeds", 50, 80, "Summer", 13));
-        seeds.put("Pepper Seeds", new Seed("Pepper Seeds", 40, 40, "Summer", 5));
-        
-        // Fall Seeds
-        seeds.put("Pumpkin Seeds", new Seed("Pumpkin Seeds", 320, 100, "Fall", 13));
-        seeds.put("Eggplant Seeds", new Seed("Eggplant Seeds", 60, 20, "Fall", 5));
-        seeds.put("Cranberry Seeds", new Seed("Cranberry Seeds", 75, 240, "Fall", 7));
-        seeds.put("Beet Seeds", new Seed("Beet Seeds", 100, 20, "Fall", 6));
-        
+       
+        seeds.put("Parsnip Seeds", new Seed("Parsnip Seeds", 10, 20, "Spring", 4)); // Sell Price: Setengah dari Buy Price
+        seeds.put("Cauliflower Seeds", new Seed("Cauliflower Seeds", 40, 80, "Spring", 5)); 
+        seeds.put("Potato Seeds", new Seed("Potato Seeds", 25, 50, "Spring", 3));
+        seeds.put("Wheat Seeds", new Seed("Wheat Seeds", 30, 60, "Spring", 1));
+
+        seeds.put("Blueberry Seeds", new Seed("Blueberry Seeds", 40, 80, "Summer", 7));
+        seeds.put("Tomato Seeds", new Seed("Tomato Seeds", 25, 50, "Summer", 3));
+        seeds.put("Hot Pepper Seeds", new Seed("Hot Pepper Seeds", 20, 40, "Summer", 1));
+        seeds.put("Melon Seeds", new Seed("Melon Seeds", 40, 80, "Summer", 4));
+
+        seeds.put("Cranberry Seeds", new Seed("Cranberry Seeds", 50, 100, "Fall", 2));
+        seeds.put("Pumpkin Seeds", new Seed("Pumpkin Seeds", 75, 150, "Fall", 7));
+        seeds.put("Wheat Seeds", new Seed("Wheat Seeds", 30, 60, "Fall", 1));
+        seeds.put("Grape Seeds", new Seed("Grape Seeds", 30, 60, "Fall", 3));
         System.out.println("SeedData: Initialized " + seeds.size() + " seed types");
     }
     
