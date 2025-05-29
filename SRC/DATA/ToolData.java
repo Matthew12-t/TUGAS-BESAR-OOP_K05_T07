@@ -29,12 +29,9 @@ public class ToolData {
         
         // Mining Tools
         tools.put("Pickaxe", new Tool("Pickaxe", 500, 2000, "Used for mining rocks"));
-        tools.put("Copper Pickaxe", new Tool("Copper Pickaxe", 1000, 5000, "Upgraded pickaxe"));
-        tools.put("Iron Pickaxe", new Tool("Iron Pickaxe", 2500, 25000, "Advanced pickaxe"));
         
         // Fishing Tools
         tools.put("Fishing Rod", new Tool("Fishing Rod", 300, 500, "Used for catching fish"));
-        tools.put("Fiberglass Rod", new Tool("Fiberglass Rod", 800, 1800, "Better fishing rod"));
         
         tools.put("Proposal Ring", new Tool("Proposal Ring", 3000, 250, "Used for Propoing NPC"));
         
