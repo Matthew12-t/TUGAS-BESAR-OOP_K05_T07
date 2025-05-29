@@ -1530,7 +1530,7 @@ public class GamePanel extends JPanel implements Runnable {
     private long messagePanelTimestamp = 0;
     private static final int MESSAGE_PANE_DURATION_MS = 3500;
 
-    public void showMessagePane(String text) {
+    public void showMessagePanel(String text) {
         messagePanelText = text;
         messagePanelTimestamp = System.currentTimeMillis();
         repaint();
@@ -1543,15 +1543,15 @@ public class GamePanel extends JPanel implements Runnable {
                 messagePanelText = null;
                 return;
             }
-            int panelWidth = 600;
+            int panelWidth = 625;
             int panelHeight = 60;
             int x = (screenWidth - panelWidth) / 2;
-            int y = screenHeight - panelHeight - 40;
+            int y = screenHeight - panelHeight - 125;
             g2.setColor(new Color(0,0,0,200));
             g2.fillRoundRect(x, y, panelWidth, panelHeight, 18, 18);
             g2.setColor(Color.WHITE);
-            g2.setFont(g2.getFont().deriveFont(Font.BOLD, 18));
-            int textX = x + 20;
+            g2.setFont(g2.getFont().deriveFont(Font.BOLD, 12));
+            int textX = x + 15;
             int textY = y + 35;
             g2.drawString(messagePanelText, textX, textY);
         }
@@ -1563,11 +1563,8 @@ public class GamePanel extends JPanel implements Runnable {
         if (nearbyNPC != null) {
             // Open inventory for gifting
             setGameState(INVENTORY_STATE);
-            showMessagePane("Pilih item di inventory lalu tekan G untuk memberi ke " + nearbyNPC.getNPCName());
             giftingTargetNPC = nearbyNPC;
-        } else {
-            showMessagePane("Tidak ada NPC dalam 1 tile untuk diberi hadiah.");
-        }
+        } 
     }
 
     // Store the NPC being gifted to (only in gifting mode)
@@ -1585,14 +1582,12 @@ public class GamePanel extends JPanel implements Runnable {
             int selectedSlot = mouseHandler.getSelectedSlotIndex();
             if (selectedSlot >= 0 && items[selectedSlot] != null) {
                 giftingTargetNPC.receiveGift(items[selectedSlot]);
-                showMessagePane(giftingTargetNPC.getNPCName() + ": Terima kasih atas " + items[selectedSlot].getName() + "!");
+                showMessagePanel(giftingTargetNPC.getNPCName() + ": Terima kasih atas " + items[selectedSlot].getName() + "!");
                 // Remove only one item from inventory here
                 player.removeOneItemFromInventory(selectedSlot);
                 giftingTargetNPC = null;
                 setGameState(PLAY_STATE);
-            } else {
-                showMessagePane("Pilih item yang ingin diberikan!");
-            }
+            } 
         }
     }
 
@@ -1609,9 +1604,7 @@ public class GamePanel extends JPanel implements Runnable {
             }
             String npcReply = baos.toString().trim();
             if (npcReply.isEmpty()) npcReply = nearbyNPC.getNPCName() + ": ...";
-            showMessagePane(npcReply);
-        } else {
-            showMessagePane("Tidak ada NPC dalam 1 tile untuk diajak bicara.");
+            showMessagePanel(npcReply);
         }
     }
 
