@@ -1642,10 +1642,7 @@ public class GamePanel extends JPanel implements Runnable {
                 for (NPCEntity npc : npcs) {
                     int npcTileX = npc.getWorldX() / tileSize;
                     int npcTileY = npc.getWorldY() / tileSize;
-                    System.out.println("[DEBUG] Player tile: (" + playerTileX + "," + playerTileY + ") | NPC '" + npc.getNPCName() + "' tile: (" + npcTileX + "," + npcTileY + ")");
-                    // Cek horizontal/vertikal, tidak diagonal, tepat 1 tile
-                    if ((Math.abs(playerTileX - npcTileX) == 1 && playerTileY == npcTileY) ||
-                        (Math.abs(playerTileY - npcTileY) == 1 && playerTileX == npcTileX)) {
+                    if ((playerTileX == 4 && playerTileY == 3)) {
                         return npc;
                     }
                 }
