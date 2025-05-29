@@ -138,6 +138,7 @@ public class CarolineEntity extends NPCEntity {
      */
     @Override
     public void interact(Player player) {
+        super.interact(player);
         System.out.println("Caroline says: I've been collecting firewood all day!");
         updateRelationshipStatus();
     }

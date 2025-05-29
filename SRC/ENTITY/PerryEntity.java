@@ -128,6 +128,7 @@ public class PerryEntity extends NPCEntity {
 
     @Override
     public void interact(Player player) {
+        super.interact(player);
         System.out.println("Perry says: I love berries, but please keep fish away from me!");
         updateRelationshipStatus();
     }

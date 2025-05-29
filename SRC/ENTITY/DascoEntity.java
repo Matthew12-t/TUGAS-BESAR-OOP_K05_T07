@@ -140,7 +140,7 @@ public class DascoEntity extends NPCEntity {
      */
     @Override
     public void interact(Player player) {
-        // Custom interaction logic for Dasco
+        super.interact(player);
         System.out.println("Dasco love wowo");
         // Determine relationship status based on heart points
         updateRelationshipStatus();

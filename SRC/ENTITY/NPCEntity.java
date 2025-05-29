@@ -93,7 +93,8 @@ public class NPCEntity extends Entity implements NPC {
     }
       @Override
     public void interact(Player player) {
-        System.out.println(name + " says: Hello, player!");
+        setHeartPoints(getHeartPoints() + 10); 
+        player.setEnergy(player.getEnergy() - 10);        
     }
     
     @Override

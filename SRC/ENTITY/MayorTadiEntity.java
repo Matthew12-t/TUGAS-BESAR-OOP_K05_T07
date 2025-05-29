@@ -139,6 +139,7 @@ public class MayorTadiEntity extends NPCEntity {
      */
     @Override
     public void interact(Player player) {
+        super.interact(player);
         System.out.println("Mayor Tadi says: Kenal WOWO ga lu");
         updateRelationshipStatus();
     }
