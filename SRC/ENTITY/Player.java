@@ -1,8 +1,6 @@
 package SRC.ENTITY;
 
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.io.IOException;
@@ -575,58 +573,45 @@ public class Player extends Entity {
             
             // Draw a semi-transparent square centered on the target tile
             int tileSize = gp.getTileSize();
-            g2.fillRect(targetScreenX - tileSize/2, targetScreenY - tileSize/2, tileSize, tileSize);
-              // Add a white border with slightly higher opacity to make it more visible
+            g2.fillRect(targetScreenX - tileSize/2, targetScreenY - tileSize/2, tileSize, tileSize);            // Add a white border with slightly higher opacity to make it more visible
             g2.setColor(new Color(255, 255, 255, 150));
             g2.drawRect(targetScreenX - tileSize/2, targetScreenY - tileSize/2, tileSize, tileSize);
         }
-        
-        // Draw energy status bar
-        drawEnergyBar(g2);
+    }
+      
+    // Add holding tool system
+    private SRC.ITEMS.Tool currentHoldingTool = null;
+    /**
+     * Get currently holding tool
+     * @return Current holding tool or null if none
+     */
+    public SRC.ITEMS.Tool getCurrentHoldingTool() {
+        return currentHoldingTool;
     }
     
     /**
-     * Draw energy status bar on screen
+     * Set currently holding tool
+     * @param tool Tool to hold
      */
-    private void drawEnergyBar(Graphics2D g2) {
-        int barWidth = 200;
-        int barHeight = 20;
-        int barX = 10; // Top-left corner
-        int barY = 10;
-        
-        // Draw background (empty bar)
-        g2.setColor(new Color(50, 50, 50, 150)); // Dark gray semi-transparent
-        g2.fillRect(barX, barY, barWidth, barHeight);
-        
-        // Draw border
-        g2.setColor(Color.WHITE);
-        g2.drawRect(barX, barY, barWidth, barHeight);
-        
-        // Calculate energy fill width
-        double energyPercentage = getEnergyPercentage();
-        int fillWidth = (int) (barWidth * energyPercentage);
-        
-        // Draw energy fill with color based on energy level
-        if (energyPercentage > 0.6) {
-            g2.setColor(new Color(76, 175, 80)); // Green
-        } else if (energyPercentage > 0.3) {
-            g2.setColor(new Color(255, 193, 7)); // Yellow
-        } else {
-            g2.setColor(new Color(244, 67, 54)); // Red
-        }
-        
-        g2.fillRect(barX + 1, barY + 1, fillWidth - 2, barHeight - 2);
-        
-        // Draw energy text
-        g2.setColor(Color.WHITE);
-        g2.setFont(new Font("Arial", Font.BOLD, 12));
-        String energyText = getCurrentEnergy() + "/" + getMaxEnergy();
-        FontMetrics fm = g2.getFontMetrics();
-        int textX = barX + (barWidth - fm.stringWidth(energyText)) / 2;
-        int textY = barY + (barHeight + fm.getAscent()) / 2 - 2;
-        g2.drawString(energyText, textX, textY);
-          // Draw "Energy" label above the bar
-        g2.setFont(new Font("Arial", Font.BOLD, 10));
-        g2.drawString("Energy", barX, barY - 2);
+    public void setCurrentHoldingTool(SRC.ITEMS.Tool tool) {
+        this.currentHoldingTool = tool;
+        System.out.println("Player is now holding: " + (tool != null ? tool.getName() : "nothing"));
+    }
+    
+    /**
+     * Check if player is holding a specific tool
+     * @param toolName Name of the tool to check
+     * @return true if holding the specified tool
+     */
+    public boolean isHolding(String toolName) {
+        return currentHoldingTool != null && currentHoldingTool.getName().equals(toolName);
+    }
+    
+    /**
+     * Check if player is holding any tool
+     * @return true if holding any tool
+     */
+    public boolean isHoldingAnyTool() {
+        return currentHoldingTool != null;
     }
 }

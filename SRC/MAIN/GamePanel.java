@@ -31,21 +31,26 @@ import SRC.OBJECT.SuperObject;
 import SRC.TIME.Time;
 import SRC.SEASON.Season;
 import SRC.WEATHER.Weather;
+import SRC.DATA.ShippingBinData;
+import SRC.UI.ShippingBinUI;
+import SRC.INVENTORY.Inventory;
 
 public class GamePanel extends JPanel implements Runnable {
-    
-    private final int originalTileSize = 16; // 16x16 tile from source image
+      private final int originalTileSize = 16; // 16x16 tile from source image
     private final int scale = 3;
     private final int tileSize = originalTileSize * scale; // 48x48 tile displayed on screen
     private final int maxScreenCol = 16; // Number of tiles horizontally on screen
     private final int maxScreenRow = 14; // Number of tiles vertically on screen
     private final int screenWidth = tileSize * maxScreenCol; // 768 pixels
     private final int screenHeight = tileSize * maxScreenRow; // 576 pixels
-    private final int FPS = 60;      // Game states
+    private final int FPS = 60;
+    
+    // Game states
     public static final int PLAY_STATE = 0;
     public static final int MAP_MENU_STATE = 1;
     public static final int INVENTORY_STATE = 2;
     public static final int SLEEP_STATE = 3;
+    public static final int SHIPPING_STATE = 4;
     private int gameState = PLAY_STATE;
       // Inventory UI properties
     private BufferedImage inventoryImage;
@@ -109,10 +114,12 @@ public class GamePanel extends JPanel implements Runnable {
     private int currentSeasonIndex = 0;
     private BufferedImage clockImage; // Image for clock display    // Weather and Season objects
     private Weather currentWeather = Weather.SUNNY;
-    private Season currentSeason = Season.SPRING;
-      // Inventory constants
+    private Season currentSeason = Season.SPRING;    // Inventory constants
     private static final int INVENTORY_ROWS = 4;
     private static final int INVENTORY_COLS = 4;
+      // Shipping Bin system
+    private ShippingBinData shippingBinData;
+    private ShippingBinUI shippingBinUI;
 
     // Getters and setters
     public int getTileSize() {
@@ -142,9 +149,22 @@ public class GamePanel extends JPanel implements Runnable {
     public int getScreenHeight() {
         return screenHeight;
     }
+      public int getFPS() {
+        return FPS;    }
+      public ShippingBinData getShippingBinData() {
+        return shippingBinData;
+    }
     
-    public int getFPS() {
-        return FPS;
+    public ShippingBinUI getShippingBinUI() {
+        return shippingBinUI;
+    }
+    
+    public void setGameState(int gameState) {
+        this.gameState = gameState;
+    }
+    
+    public int getGameState() {
+        return gameState;
     }
     
     public int getMaxWorldCol() {
@@ -408,9 +428,10 @@ public class GamePanel extends JPanel implements Runnable {
         loadMapMenuImages();
         
         // Load clock image
-        loadClockImage();
-          // Load inventory image
-        loadInventoryImage();
+        loadClockImage();        // Load inventory image
+        loadInventoryImage();        // Initialize shipping bin system
+        this.shippingBinData = new ShippingBinData();
+        this.shippingBinUI = new ShippingBinUI(this, shippingBinData, player.getPlayerAction().getInventory());
         
         // Initialize maps
         this.forestrivermap = new ForestRiverMap(this);
@@ -873,9 +894,10 @@ public class GamePanel extends JPanel implements Runnable {
             int playerScreenX = player.getWorldX() - cameraX;
             int playerScreenY = player.getWorldY() - cameraY;
             // Draw the player at their screen position
-            player.draw(g2, playerScreenX, playerScreenY);
-            // --- Draw Time Info ---
+            player.draw(g2, playerScreenX, playerScreenY);            // --- Draw Time Info ---
             drawTimeInfo(g2);
+            // --- Draw Energy and Tool Info ---
+            drawEnergyAndToolInfo(g2);
         } else if (gameState == INVENTORY_STATE) {
             // First draw the game world in the background
             g2.setColor(Color.black);
@@ -914,11 +936,21 @@ public class GamePanel extends JPanel implements Runnable {
                     // Draw larger scaled image
                     g2.drawImage(currentImage, x, y, scaledWidth, scaledHeight, null);
                     
-                }
-                else {
+                }                else {
                     g2.setColor(Color.RED);
                     g2.drawString("Error loading map image", screenWidth/2 - 80, screenHeight/2);
                 }
+            }
+        } else if (gameState == SHIPPING_STATE) {
+            // First draw the game world in the background
+            g2.setColor(Color.black);
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+            currentMap.draw(g2);
+            int playerScreenX = player.getWorldX() - cameraX;
+            int playerScreenY = player.getWorldY() - cameraY;            player.draw(g2, playerScreenX, playerScreenY);
+              // Then draw shipping bin UI overlay
+            if (shippingBinUI != null) {
+                shippingBinUI.draw(g2);
             }
         }
         
@@ -1169,21 +1201,7 @@ public class GamePanel extends JPanel implements Runnable {
         }
         System.out.println("Selected map index: " + (currentMapMenuIndex + 1));
         // Force repaint to show new selection immediately
-        repaint();
-    }
-      /**
-     * Get the current game state
-     * @return Current game state (PLAY_STATE or MAP_MENU_STATE)
-     */
-    public int getGameState() {
-        return gameState;
-    }    /**
-     * Set the current game state
-     * @param gameState The game state to set
-     */
-    public void setGameState(int gameState) {
-        this.gameState = gameState;
-    }
+        repaint();    }
       // Tambahkan method advanceGameTime
     private void advanceGameTime() {
         // Don't advance time if it's paused (during fishing)
@@ -1232,11 +1250,11 @@ public class GamePanel extends JPanel implements Runnable {
         }
         time.setHour(hour);
         time.setMinute(minute);
-    }    private void drawTimeInfo(Graphics2D g2) {
+    }    
+      private void drawTimeInfo(Graphics2D g2) {
         String hari = dayNames[dayOfWeek];
         String tanggal = String.format("%02d", day); 
         String musim = currentSeason.getDisplayName(); 
-        String cuaca = currentWeather.getDisplayName(); // Get current weather string
         int hour24 = time.getHour();
         int hour12 = hour24 % 12;
         if (hour12 == 0) hour12 = 12;
@@ -1261,7 +1279,7 @@ public class GamePanel extends JPanel implements Runnable {
             g2.setFont(originalFont.deriveFont(java.awt.Font.BOLD, 14f)); // Increased size and ensure bold
             FontMetrics goldMetrics = g2.getFontMetrics();
             int goldTextX = clockX + clockWidth - goldMetrics.stringWidth(goldText) - 13; // Right-aligned with 10px margin
-            int goldTextY = clockY + 102; // Position near bottom of clock image
+            int goldTextY = clockY + 103; // Position near bottom of clock image
             g2.drawString(goldText, goldTextX, goldTextY);
             
             g2.setFont(originalFont);
@@ -1272,9 +1290,87 @@ public class GamePanel extends JPanel implements Runnable {
             g2.setColor(Color.BLACK);
             g2.drawString(hari + ", " + tanggal, screenWidth-110, 30);
             g2.drawString(jam, screenWidth-110, 55); 
-            g2.drawString(musim, screenWidth-110, 80); // Added season display
-            g2.drawString(cuaca, screenWidth-110, 105); // Added weather display
+            g2.drawString(musim, screenWidth-110, 80); // Added season display            g2.drawString(cuaca, screenWidth-110, 105); // Added weather display
             g2.drawString(goldText, screenWidth-110, 130); // Added gold display
+        }
+    }
+    
+    /**
+     * Draw energy bar and held tool information
+     */
+    private void drawEnergyAndToolInfo(Graphics2D g2) {
+        // Draw energy bar
+        int barWidth = 200;
+        int barHeight = 20;
+        int barX = 10; // Top-left corner
+        int barY = 10;
+        
+        // Draw background (empty bar)
+        g2.setColor(new Color(50, 50, 50, 150)); // Dark gray semi-transparent
+        g2.fillRect(barX, barY, barWidth, barHeight);
+        
+        // Draw border
+        g2.setColor(Color.WHITE);
+        g2.drawRect(barX, barY, barWidth, barHeight);
+        
+        // Calculate energy fill width
+        double energyPercentage = player.getEnergyPercentage();
+        int fillWidth = (int) (barWidth * energyPercentage);
+        
+        // Draw energy fill with color based on energy level
+        if (energyPercentage > 0.6) {
+            g2.setColor(new Color(76, 175, 80)); // Green
+        } else if (energyPercentage > 0.3) {
+            g2.setColor(new Color(255, 193, 7)); // Yellow
+        } else {
+            g2.setColor(new Color(244, 67, 54)); // Red
+        }
+        
+        g2.fillRect(barX + 1, barY + 1, fillWidth - 2, barHeight - 2);
+        
+        // Draw energy text
+        g2.setColor(Color.WHITE);
+        g2.setFont(new Font("Arial", Font.BOLD, 12));
+        String energyText = player.getCurrentEnergy() + "/" + player.getMaxEnergy();
+        FontMetrics fm = g2.getFontMetrics();
+        int textX = barX + (barWidth - fm.stringWidth(energyText)) / 2;
+        int textY = barY + (barHeight + fm.getAscent()) / 2 - 2;
+        g2.drawString(energyText, textX, textY);
+        
+        // Draw "Energy" label above the bar
+        g2.setFont(new Font("Arial", Font.BOLD, 10));
+        g2.drawString("Energy", barX, barY - 2);
+        
+        // Draw held tool information below the energy bar
+        SRC.ITEMS.Tool heldTool = player.getCurrentHoldingTool();
+        if (heldTool != null) {
+            int toolInfoY = barY + barHeight + 10; // 10px gap below energy bar
+            
+            // Draw tool info background
+            int toolInfoWidth = 200;
+            int toolInfoHeight = 30;
+            g2.setColor(new Color(139, 69, 19, 180)); // Brown semi-transparent
+            g2.fillRoundRect(barX, toolInfoY, toolInfoWidth, toolInfoHeight, 10, 10);
+            
+            // Draw tool info border
+            g2.setColor(Color.WHITE);
+            g2.drawRoundRect(barX, toolInfoY, toolInfoWidth, toolInfoHeight, 10, 10);
+            
+            // Draw tool icon if available
+            if (heldTool.getImage() != null) {
+                int iconSize = 24;
+                int iconX = barX + 5;
+                int iconY = toolInfoY + (toolInfoHeight - iconSize) / 2;
+                g2.drawImage(heldTool.getImage(), iconX, iconY, iconSize, iconSize, null);
+            }
+            
+            // Draw tool name
+            g2.setColor(Color.WHITE);
+            g2.setFont(new Font("Arial", Font.BOLD, 12));
+            String toolText = "Holding: " + heldTool.getName();
+            int toolTextX = barX + (heldTool.getImage() != null ? 35 : 10);
+            int toolTextY = toolInfoY + (toolInfoHeight + fm.getAscent()) / 2 - 2;
+            g2.drawString(toolText, toolTextX, toolTextY);
         }
     }public Season getSeason() {
         return currentSeason;

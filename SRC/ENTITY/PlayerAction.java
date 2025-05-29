@@ -109,17 +109,84 @@ public class PlayerAction {
         // Interaction logic will be implemented here
         System.out.println("Player interaction at: " + worldX + ", " + worldY);
     }
-    
-    /**
-     * Handle tool usage
+      /**
+     * Handle tool holding (not immediate usage)
      */
-    public void useTool(String toolName) {
-        // Tool usage logic will be implemented here
-        System.out.println("Using tool: " + toolName);
+    public void holdTool(String toolName) {
+        // Get the tool from inventory and set it as currently holding
+        Item[] items = player.getInventoryItems();
+        for (int i = 0; i < items.length; i++) {
+            if (items[i] != null && items[i] instanceof SRC.ITEMS.Tool && 
+                items[i].getName().equals(toolName)) {
+                SRC.ITEMS.Tool tool = (SRC.ITEMS.Tool) items[i];
+                player.setCurrentHoldingTool(tool);
+                System.out.println("Now holding: " + toolName);
+                return;
+            }
+        }
+        System.out.println("Tool not found in inventory: " + toolName);
     }
-    
+
     /**
-     * Handle item usage
+     * Use the currently held tool and consume energy
+     */
+    public boolean useHeldTool() {
+        if (!player.isHoldingAnyTool()) {
+            System.out.println("No tool is currently held");
+            return false;
+        }
+        
+        SRC.ITEMS.Tool heldTool = player.getCurrentHoldingTool();
+        String toolName = heldTool.getName();
+        
+        // Check energy requirements based on tool type
+        int energyCost = getToolEnergyCost(toolName);
+        if (!hasEnoughEnergy(energyCost)) {
+            System.out.println("Not enough energy to use " + toolName);
+            return false;
+        }
+        
+        // Consume energy for tool usage
+        consumeEnergy(energyCost);
+        System.out.println("Used " + toolName + " (Energy cost: " + energyCost + ")");
+        return true;
+    }
+
+    /**
+     * Get energy cost for different tools
+     */
+    private int getToolEnergyCost(String toolName) {
+        switch (toolName) {
+            case "Fishing Rod":
+                return 5; // Fishing energy cost
+            case "Hoe":
+                return 3; // Tilling energy cost
+            case "Watering Can":
+                return 2; // Watering energy cost
+            case "Scythe":
+                return 4; // Harvesting energy cost
+            case "Pickaxe":
+                return 6; // Mining energy cost
+            default:
+        return 3; // Default energy cost
+        }
+    }
+
+    /**
+     * Drop the currently held tool
+     */
+    public void dropHeldTool() {
+        if (player.isHoldingAnyTool()) {
+            SRC.ITEMS.Tool droppedTool = player.getCurrentHoldingTool();
+            player.setCurrentHoldingTool(null);
+            System.out.println("Dropped: " + droppedTool.getName());
+        } else {
+            System.out.println("No tool is currently held");
+        }
+    }
+
+    /**
+     * Handle item usage - updated for holding system
      */
     public void useItem(String itemName, String itemCategory) {
         System.out.println("Using item: " + itemName + " (Category: " + itemCategory + ")");
@@ -127,9 +194,8 @@ public class PlayerAction {
         // Different behavior based on item category
         switch (itemCategory.toLowerCase()) {
             case "tool":
-                useTool(itemName);
-                // Consume energy for tool usage
-                consumeEnergy(5); // Tools consume 5 energy
+                // Tools are now held instead of immediately used
+                holdTool(itemName);
                 break;
             case "seed":
                 useSeeds(itemName);
@@ -199,8 +265,7 @@ public class PlayerAction {
             fishingUI.showInvalidLocation();
             return false;
         }
-        
-        System.out.println("DEBUG: All checks passed, starting fishing mini-game");
+          System.out.println("DEBUG: All checks passed, starting fishing mini-game");
         
         // Show fishing attempt message
         fishingUI.showFishingAttempt();
@@ -208,8 +273,11 @@ public class PlayerAction {
         // Pause game time
         pauseGameTime();
         
-        // Consume energy for fishing action
-        consumeEnergy(FISHING_ENERGY_COST);
+        // Use held fishing rod tool (this will consume energy)
+        if (!useHeldTool()) {
+            resumeGameTime();
+            return false;
+        }
         
         // Perform fishing with mini-game
         String caughtFish = performFishingWithMiniGame(fishingLocation);
@@ -345,14 +413,12 @@ public class PlayerAction {
         gamePanel.getMouseHandler().setHasTarget(false);
         
         System.out.println("DEBUG: Player movement stopped for action");
-    }
-
-    /**
-     * Check if player has a valid fishing rod in inventory
-     * @return true if player has fishing rod
+    }    /**
+     * Check if player is holding a valid fishing rod
+     * @return true if player is holding a fishing rod
      */
     private boolean hasValidFishingRod() {
-        return inventory.hasItem("Fishing Rod") || inventory.hasItem("Fiberglass Rod");
+        return player.isHolding("Fishing Rod") || player.isHolding("Fiberglass Rod");
     }
     
     /**
@@ -588,9 +654,7 @@ public class PlayerAction {
         
         // Set game state to sleep mode
         gamePanel.setGameState(GamePanel.SLEEP_STATE);
-    }
-    
-    /**
+    }    /**
      * Create sleep result based on current game state
      */
     private SleepData.SleepResult createSleepResult(SleepData.SleepTrigger trigger) {
@@ -599,7 +663,7 @@ public class PlayerAction {
         Weather currentWeather = gamePanel.getWeather();
         
         return SleepData.createSleepResult(trigger, currentDay, currentSeason, currentWeather);
-    }    /**
+    }/**
      * Get access to the sleep UI
      */
     public SleepUI getSleepUI() {
@@ -630,9 +694,8 @@ public class PlayerAction {
         }
         
         return false;
-    }
-      /**
-     * Perform sleep effects (restore energy, set time to 10:00 AM)
+    }    /**
+     * Perform sleep effects (restore energy, set time to 10:00 AM, process shipping bin)
      */
     private void performSleepEffects(SleepData.SleepTrigger trigger) {
         // Restore full energy
@@ -642,6 +705,37 @@ public class PlayerAction {
         Time currentTime = gamePanel.getCurrentTime();
         currentTime.setHour(10);  // Set ke jam 10
         currentTime.setMinute(0); // Set ke menit 0
+        
+        // Process shipping bin income
+        int shippingBinValue = gamePanel.getShippingBinData().calculateTotalValue();
+        if (shippingBinValue > 0) {
+            // Get current day and season for income calculation
+            int currentDay = gamePanel.getCurrentDay();
+            Season currentSeason = gamePanel.getSeason();
+            Weather currentWeather = gamePanel.getWeather();
+            
+            // Create sleep result with shipping bin income
+            SleepData.SleepResult sleepResult = SleepData.createSleepResultWithShipping(
+                trigger, currentDay, currentSeason, currentWeather, shippingBinValue);
+            
+            // Add total income to player's gold
+            player.addGold(sleepResult.getIncome());
+            
+            // Clear shipping bin after processing
+            gamePanel.getShippingBinData().clearAllItems();
+            
+            System.out.println("DEBUG: Shipping bin processed - Value: " + shippingBinValue + 
+                             ", Total income: " + sleepResult.getIncome() + " gold added");
+        } else {
+            // No shipping bin income, just add regular daily income
+            int currentDay = gamePanel.getCurrentDay();
+            Season currentSeason = gamePanel.getSeason();
+            
+            int dailyIncome = SleepData.calculateDailyIncome(currentDay, currentSeason);
+            player.addGold(dailyIncome);
+            
+            System.out.println("DEBUG: Daily income: " + dailyIncome + " gold added (no shipping bin items)");
+        }
         
         // Advance to next day if trigger is automatic (not manual)
         if (trigger == SleepData.SleepTrigger.LOW_ENERGY || 
@@ -653,7 +747,8 @@ public class PlayerAction {
         }
         
         System.out.println("DEBUG: Sleep effects applied - Energy restored, time set to 10:00 AM");
-    }    /**
+    }
+      /**
      * Transport player to house bed location (spawn beside the bed, not on it)
      */
     private void transportPlayerToHouseBed() {
@@ -661,15 +756,62 @@ public class PlayerAction {
         if (!gamePanel.getCurrentMap().getMapName().equals("House Map")) {
             gamePanel.switchToHouseMap();
         }
-          // Position player beside the bed in house map
+        
+        // Position player beside the bed in house map
         // Bed coordinates in house map
         int tileSize = gamePanel.getTileSize();
         int bedX = 5; // Bed position in house map
         int bedY = 3; // Bed position in house map
-          // Position player to the RIGHT of bed (not on top)
+        
+        // Position player to the RIGHT of bed (not on top)
         player.setWorldX(tileSize * (bedX + 2));
         player.setWorldY(tileSize * bedY);
         
         System.out.println("DEBUG: Player transported to house bed at position beside bed");
-    }    // Sleep UI instance getter already defined above
+    }    /**
+     * Check if player is near a shipping bin
+     */
+    public boolean isPlayerNearShippingBin() {
+        int playerCol = (player.getWorldX() + player.getSolidArea().x) / gamePanel.getTileSize();
+        int playerRow = (player.getWorldY() + player.getSolidArea().y) / gamePanel.getTileSize();
+        
+        // Check surrounding tiles for shipping bin
+        for (int checkRow = playerRow - 1; checkRow <= playerRow + 1; checkRow++) {
+            for (int checkCol = playerCol - 1; checkCol <= playerCol + 1; checkCol++) {
+                if (checkRow >= 0 && checkRow < gamePanel.getMaxWorldRow() && 
+                    checkCol >= 0 && checkCol < gamePanel.getMaxWorldCol()) {
+                    
+                    // Check for shipping bin object
+                    SuperObject[] objects = gamePanel.getCurrentObjects();
+                    for (int i = 0; i < objects.length; i++) {
+                        if (objects[i] != null && 
+                            objects[i].getName().equals("Shipping Bin")) {
+                            
+                            int objCol = objects[i].getWorldX() / gamePanel.getTileSize();
+                            int objRow = objects[i].getWorldY() / gamePanel.getTileSize();
+                            
+                            // Check if object position matches check position
+                            if (objRow <= checkRow && checkRow < objRow + 2 && // 2 rows high
+                                objCol <= checkCol && checkCol < objCol + 3) { // 3 cols wide
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Open shipping bin interface
+     */
+    public void openShippingBin() {
+        if (isPlayerNearShippingBin()) {
+            gamePanel.setGameState(GamePanel.SHIPPING_STATE);
+            System.out.println("Opened shipping bin");
+        } else {
+            System.out.println("No shipping bin nearby");
+        }
+    }
 }

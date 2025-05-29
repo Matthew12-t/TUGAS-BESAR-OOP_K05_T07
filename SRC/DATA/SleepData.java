@@ -110,8 +110,7 @@ public class SleepData {
      */
     public static String getSleepBackground(SleepTrigger trigger) {
         return SLEEP_BACKGROUNDS.getOrDefault(trigger, "/RES/UI/sleep_default.png");
-    }
-      /**
+    }    /**
      * Calculate daily income based on game progress
      */
     public static int calculateDailyIncome(int day, Season season) {
@@ -143,6 +142,13 @@ public class SleepData {
     }
     
     /**
+     * Calculate total income including shipping bin earnings
+     */
+    public static int calculateTotalIncome(int day, Season season, int shippingBinValue) {
+        int dailyIncome = calculateDailyIncome(day, season);
+        return dailyIncome + shippingBinValue;
+    }
+      /**
      * Create a complete sleep result
      */
     public static SleepResult createSleepResult(SleepTrigger trigger, int day, 
@@ -152,6 +158,19 @@ public class SleepData {
         int income = calculateDailyIncome(day, season);
         
         return new SleepResult(message, background, income, day, season, weather, trigger);
+    }
+    
+    /**
+     * Create a complete sleep result with shipping bin income
+     */
+    public static SleepResult createSleepResultWithShipping(SleepTrigger trigger, int day, 
+                                                          Season season, Weather weather, 
+                                                          int shippingBinValue) {
+        String message = getSleepMessage(trigger);
+        String background = getSleepBackground(trigger);
+        int totalIncome = calculateTotalIncome(day, season, shippingBinValue);
+        
+        return new SleepResult(message, background, totalIncome, day, season, weather, trigger);
     }
     
     /**

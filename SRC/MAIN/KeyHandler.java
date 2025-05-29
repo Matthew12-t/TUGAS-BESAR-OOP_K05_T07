@@ -91,20 +91,22 @@ public class KeyHandler implements KeyListener {
                         
                         gamePanel.getCurrentMap().removeObject(tileCol, tileRow);
                     }
-                }                  // 'C' key action - prioritize sleep if near bed, otherwise fishing
+                }                // 'C' key action - prioritize sleep if near bed, shipping bin if near shipping bin, otherwise fishing
                 if(code == KeyEvent.VK_C) {
                     // Check if player is near a bed for sleep action
                     if (gamePanel.getPlayer().getPlayerAction().isPlayerNearBed()) {
                         System.out.println("DEBUG: 'C' key pressed for sleep (near bed)");
                         gamePanel.getPlayer().getPlayerAction().performSleep();
+                    } else if (gamePanel.getPlayer().getPlayerAction().isPlayerNearShippingBin()) {
+                        System.out.println("DEBUG: 'C' key pressed for shipping bin");
+                        gamePanel.setGameState(GamePanel.SHIPPING_STATE);
                     } else {
                         System.out.println("DEBUG: 'C' key pressed for fishing");
                         gamePanel.getPlayer().getPlayerAction().performFishing();
                     }
                 }
               }            
-            
-            // Eating action with 'E' key - works in both PLAY_STATE and INVENTORY_STATE
+              // Eating action with 'E' key - works in both PLAY_STATE and INVENTORY_STATE
             if(code == KeyEvent.VK_E) {
                 if (gamePanel.getGameState() == GamePanel.PLAY_STATE || 
                     gamePanel.getGameState() == GamePanel.INVENTORY_STATE) {
@@ -112,6 +114,16 @@ public class KeyHandler implements KeyListener {
                     gamePanel.getPlayer().getPlayerAction().eatSelectedItem();
                     System.out.println("DEBUG: 'E' key pressed for eating in state: " + 
                                      (gamePanel.getGameState() == GamePanel.PLAY_STATE ? "PLAY" : "INVENTORY"));
+                }
+            }
+            
+            // Drop held tool with 'Q' key - works in both PLAY_STATE and INVENTORY_STATE
+            if(code == KeyEvent.VK_Q) {
+                if (gamePanel.getGameState() == GamePanel.PLAY_STATE || 
+                    gamePanel.getGameState() == GamePanel.INVENTORY_STATE) {
+                    // Drop the currently held tool
+                    gamePanel.getPlayer().getPlayerAction().dropHeldTool();
+                    System.out.println("DEBUG: 'Q' key pressed to drop held tool");
                 }
             }
             
@@ -134,10 +146,30 @@ public class KeyHandler implements KeyListener {
                 if(code == KeyEvent.VK_W) {
                     System.out.println("W key pressed in map menu");
                     gamePanel.selectPreviousMap();
-                }
-                if(code == KeyEvent.VK_S) {
+                }                if(code == KeyEvent.VK_S) {
                     System.out.println("S key pressed in map menu");
                     gamePanel.selectNextMap();
+                }
+            }
+            
+            else if (gamePanel.getGameState() == GamePanel.SHIPPING_STATE) {
+                // Shipping bin UI navigation
+                if(code == KeyEvent.VK_UP || code == KeyEvent.VK_DOWN || code == KeyEvent.VK_LEFT || code == KeyEvent.VK_RIGHT) {                    // Let the shipping bin UI handle navigation
+                    gamePanel.getShippingBinUI().handleKeyPress(code);
+                }                if(code == KeyEvent.VK_TAB) {
+                    // Let the shipping bin UI handle tab key
+                    gamePanel.getShippingBinUI().handleKeyPress(code);
+                    System.out.println("TAB key pressed in shipping bin state");
+                }
+                if(code == KeyEvent.VK_ENTER) {
+                    // Let the shipping bin UI handle enter key
+                    gamePanel.getShippingBinUI().handleKeyPress(code);
+                    System.out.println("ENTER key pressed in shipping bin state");
+                }
+                if(code == KeyEvent.VK_ESCAPE) {
+                    // Let the shipping bin UI handle escape key
+                    gamePanel.getShippingBinUI().handleKeyPress(code);
+                    System.out.println("ESC key pressed - exiting shipping bin state");
                 }
             }
         }
