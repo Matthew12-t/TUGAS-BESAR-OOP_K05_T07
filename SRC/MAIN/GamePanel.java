@@ -33,7 +33,7 @@ import SRC.SEASON.Season;
 import SRC.WEATHER.Weather;
 import SRC.DATA.ShippingBinData;
 import SRC.UI.ShippingBinUI;
-import SRC.INVENTORY.Inventory;
+import SRC.UI.StoreUI;
 
 public class GamePanel extends JPanel implements Runnable {
       private final int originalTileSize = 16; // 16x16 tile from source image
@@ -44,13 +44,13 @@ public class GamePanel extends JPanel implements Runnable {
     private final int screenWidth = tileSize * maxScreenCol; // 768 pixels
     private final int screenHeight = tileSize * maxScreenRow; // 576 pixels
     private final int FPS = 60;
-    
-    // Game states
+      // Game states
     public static final int PLAY_STATE = 0;
     public static final int MAP_MENU_STATE = 1;
     public static final int INVENTORY_STATE = 2;
     public static final int SLEEP_STATE = 3;
     public static final int SHIPPING_STATE = 4;
+    public static final int STORE_STATE = 5;
     private int gameState = PLAY_STATE;
       // Inventory UI properties
     private BufferedImage inventoryImage;
@@ -116,10 +116,11 @@ public class GamePanel extends JPanel implements Runnable {
     private Weather currentWeather = Weather.SUNNY;
     private Season currentSeason = Season.SPRING;    // Inventory constants
     private static final int INVENTORY_ROWS = 4;
-    private static final int INVENTORY_COLS = 4;
-      // Shipping Bin system
+    private static final int INVENTORY_COLS = 4;    // Shipping Bin system
     private ShippingBinData shippingBinData;
     private ShippingBinUI shippingBinUI;
+      // Store system
+    private StoreUI storeUI;
 
     // Getters and setters
     public int getTileSize() {
@@ -154,9 +155,12 @@ public class GamePanel extends JPanel implements Runnable {
       public ShippingBinData getShippingBinData() {
         return shippingBinData;
     }
-    
-    public ShippingBinUI getShippingBinUI() {
+      public ShippingBinUI getShippingBinUI() {
         return shippingBinUI;
+    }
+    
+    public StoreUI getStoreUI() {
+        return storeUI;
     }
     
     public void setGameState(int gameState) {
@@ -432,6 +436,8 @@ public class GamePanel extends JPanel implements Runnable {
         loadInventoryImage();        // Initialize shipping bin system
         this.shippingBinData = new ShippingBinData();
         this.shippingBinUI = new ShippingBinUI(this, shippingBinData, player.getPlayerAction().getInventory());
+          // Initialize store system
+        this.storeUI = new StoreUI(this, player, player.getPlayerAction().getInventory());
         
         // Initialize maps
         this.forestrivermap = new ForestRiverMap(this);
@@ -940,8 +946,7 @@ public class GamePanel extends JPanel implements Runnable {
                     g2.setColor(Color.RED);
                     g2.drawString("Error loading map image", screenWidth/2 - 80, screenHeight/2);
                 }
-            }
-        } else if (gameState == SHIPPING_STATE) {
+            }        } else if (gameState == SHIPPING_STATE) {
             // First draw the game world in the background
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
@@ -951,6 +956,18 @@ public class GamePanel extends JPanel implements Runnable {
               // Then draw shipping bin UI overlay
             if (shippingBinUI != null) {
                 shippingBinUI.draw(g2);
+            }        } else if (gameState == STORE_STATE) {
+            // First draw the game world in the background
+            g2.setColor(Color.black);
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+            currentMap.draw(g2);
+            int playerScreenX = player.getWorldX() - cameraX;
+            int playerScreenY = player.getWorldY() - cameraY;
+            player.draw(g2, playerScreenX, playerScreenY);
+            
+            // Then draw store UI overlay
+            if (this.getStoreUI() != null) {
+                this.getStoreUI().draw(g2);
             }
         }
         

@@ -76,6 +76,9 @@ public class FarmMap extends Map {
                     else if(tileValue ==5){
                         setTileInMap(col, row, Tile.TILE_TELEPORT);
                     }
+                    if (tileValue == 0) {
+                        setTileInMap(col, row, Tile.TILE_LAND); // Set sebagai land tile
+                    }
 
                     // Periksa karakter dari file asli
                     char mapChar = super.getMapFileChar(col, row, "RES/MAP_TXT/farmmap.txt");
@@ -144,7 +147,8 @@ public class FarmMap extends Map {
      * @param col Column in the map grid
      * @param row Row in the map grid
      * @return true if the tile was successfully tilled
-     */    public boolean tillSoil(int col, int row) {
+     */    
+    public boolean tillSoil(int col, int row) {
         if (col >= 0 && col < FARM_COLS && row >= 0 && row < FARM_ROWS) {
             int tileType = getTile(col, row);
             

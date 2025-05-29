@@ -22,7 +22,7 @@ public class CropData {
      * Initialize all crop items
      */
     private static void initializeCrops() {
-        crops.put("Parsnip", new Crop("Parsnip", 35, 50, 1));
+        crops.put("Parsnip", new Crop("Parsnip", 20, 50, 1));
         crops.put("Cauliflower", new Crop("Cauliflower", 150, 200, 1));
         crops.put("Potato", new Crop("Potato", 80, 0, 1)); 
         crops.put("Wheat", new Crop("Wheat", 30, 50, 3)); 

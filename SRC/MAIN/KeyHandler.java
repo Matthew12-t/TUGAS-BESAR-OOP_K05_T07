@@ -91,12 +91,15 @@ public class KeyHandler implements KeyListener {
                         
                         gamePanel.getCurrentMap().removeObject(tileCol, tileRow);
                     }
-                }                // 'C' key action - prioritize sleep if near bed, shipping bin if near shipping bin, otherwise fishing
+                }                // 'C' key action - prioritize sleep if near bed, store if in store map, shipping bin if near shipping bin, otherwise fishing
                 if(code == KeyEvent.VK_C) {
                     // Check if player is near a bed for sleep action
                     if (gamePanel.getPlayer().getPlayerAction().isPlayerNearBed()) {
                         System.out.println("DEBUG: 'C' key pressed for sleep (near bed)");
                         gamePanel.getPlayer().getPlayerAction().performSleep();
+                    } else if (gamePanel.getCurrentMap().getMapName().equals("Store Map")) {
+                        System.out.println("DEBUG: 'C' key pressed for store (in Store Map)");
+                        gamePanel.setGameState(GamePanel.STORE_STATE);
                     } else if (gamePanel.getPlayer().getPlayerAction().isPlayerNearShippingBin()) {
                         System.out.println("DEBUG: 'C' key pressed for shipping bin");
                         gamePanel.setGameState(GamePanel.SHIPPING_STATE);
@@ -149,12 +152,18 @@ public class KeyHandler implements KeyListener {
                     System.out.println("S key pressed in map menu");
                     gamePanel.selectNextMap();
                 }
-            }
-              else if (gamePanel.getGameState() == GamePanel.SHIPPING_STATE) {
+            }            else if (gamePanel.getGameState() == GamePanel.SHIPPING_STATE) {
                 // Only handle ESC key to exit shipping bin - all other controls are mouse-based
                 if(code == KeyEvent.VK_ESCAPE) {
                     gamePanel.setGameState(GamePanel.PLAY_STATE);
                     System.out.println("ESC key pressed - exiting shipping bin state");
+                }
+            }
+            else if (gamePanel.getGameState() == GamePanel.STORE_STATE) {
+                // Only handle ESC key to exit store - all other controls are mouse-based
+                if(code == KeyEvent.VK_ESCAPE) {
+                    gamePanel.setGameState(GamePanel.PLAY_STATE);
+                    System.out.println("ESC key pressed - exiting store state");
                 }
             }
         }

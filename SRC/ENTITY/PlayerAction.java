@@ -11,6 +11,7 @@ import SRC.TIME.GameTime;
 import SRC.DATA.SleepData;
 import SRC.UI.SleepUI;
 import SRC.OBJECT.SuperObject;
+import SRC.STORE.Store;
 
 /**
  * PlayerAction class handles all player action logic
@@ -29,13 +30,24 @@ public class PlayerAction {
     // Sleep system constants
     private static final int LOW_ENERGY_THRESHOLD = 20;
     private static final int LATE_NIGHT_HOUR = 2; // 02:00
+      // Store and buying system
+    private Store<Item> store;
     
-    public PlayerAction(GamePanel gamePanel, Player player) {        this.gamePanel = gamePanel;
+    public PlayerAction(GamePanel gamePanel, Player player) {
+        this.gamePanel = gamePanel;
         this.player = player;
         this.inventory = new Inventory();
         this.fishingUI = new FishingUI(gamePanel); // Initialize fishing UI
         this.sleepUI = new SleepUI(gamePanel); // Initialize sleep UI
         // Energy is now managed by Player class directly
+          // Initialize store system
+        initializeStore();
+    }    /**
+     * Initialize the store system with all available items
+     */
+    private void initializeStore() {
+        store = new Store<>("General Store");
+        System.out.println("Store system initialized");
     }
     
     /**
@@ -813,5 +825,43 @@ public class PlayerAction {
         } else {
             System.out.println("No shipping bin nearby");
         }
+    }
+      /**
+     * =====================
+     * STORE AND BUYING SYSTEM METHODS
+     * =====================
+     */
+    
+    /**
+     * Open the store interface
+     */
+    public void openStore() {
+        gamePanel.setGameState(GamePanel.STORE_STATE);
+        System.out.println("Opened store");
+    }
+    
+    /**
+     * Close the store interface
+     */
+    public void closeStore() {
+        gamePanel.setGameState(GamePanel.PLAY_STATE);
+        System.out.println("Closed store");
+    }
+    
+    /**
+     * Get the store instance
+     * @return The store
+     */
+    public Store<Item> getStore() {
+        return store;
+    }
+    
+    /**
+     * Check if player is near a store (for opening store interface)
+     * @return true if near store
+     */
+    public boolean isPlayerNearStore() {
+        // Check if player is in store map or near store object
+        return gamePanel.getCurrentMap().getMapName().equals("Store Map");
     }
 }

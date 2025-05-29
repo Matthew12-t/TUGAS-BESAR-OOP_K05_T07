@@ -73,11 +73,17 @@ public class MouseHandler extends MouseAdapter {
             handleInventoryClick(screenX, screenY);
             return;
         }
-        
-        // Check if we're in shipping bin state
+          // Check if we're in shipping bin state
         if (gamePanel.getGameState() == GamePanel.SHIPPING_STATE) {
             // Handle shipping bin clicks
             gamePanel.getShippingBinUI().handleMouseClick(screenX, screenY);
+            return;
+        }
+        
+        // Check if we're in store state
+        if (gamePanel.getGameState() == GamePanel.STORE_STATE) {
+            // Handle store clicks
+            gamePanel.getStoreUI().handleMouseClick(screenX, screenY);
             return;
         }
         

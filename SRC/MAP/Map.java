@@ -29,7 +29,9 @@ public abstract class Map {
      * @param maxCol Maximum number of columns in the map
      * @param maxRow Maximum number of rows in the map
      * @param maxObjects Maximum number of objects allowed on this map
-     */    public Map(GamePanel gp, String mapName, int maxCol, int maxRow, int maxObjects) {
+     */    
+    
+     public Map(GamePanel gp, String mapName, int maxCol, int maxRow, int maxObjects) {
         this.gp = gp;
         this.mapName = mapName;
         this.maxCol = maxCol;
@@ -50,7 +52,7 @@ public abstract class Map {
         // Default implementation: all grass tiles
         for (int col = 0; col < maxCol; col++) {
             for (int row = 0; row < maxRow; row++) {
-                mapTileData[col][row] = 0; // 0 = grass tile (default)
+                mapTileData[col][row] = 0; 
             }
         }
     }

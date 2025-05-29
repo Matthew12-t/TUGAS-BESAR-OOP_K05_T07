@@ -65,7 +65,6 @@ public class Tile {
     private static Image grassTile;
     private static Image waterTile;
     private static Image pathTile;
-    private static Image tillableTile;
     private static Image tilledTile;
     private static Image plantedTile;
     private static Image floorTile;
@@ -324,17 +323,16 @@ public class Tile {
             if (BridgeTile == null) {
                 BridgeTile = ImageIO.read(new File("RES/TILE/bridge.png"));
             }
-
-            // Load Tillable Land Tile
-            tillableTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/tillable.png"));
-            if (tillableTile == null) {
-                tillableTile = ImageIO.read(new File("RES/TILE/tillable.png"));
+            // Load Tilled Land Tile
+            tilledTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/Tillted.png"));
+            if (tilledLandTile == null) {
+                tilledLandTile = ImageIO.read(new File("RES/TILE/Tillted.png"));
             }
           
             // Load Planted Land Tile
-            plantedTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/planted.png"));
+            plantedTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/Land.png"));
             if (plantedTile == null) {
-                plantedTile = ImageIO.read(new File("RES/TILE/planted.png"));
+                plantedTile = ImageIO.read(new File("RES/TILE/Land.png"));
             }
 
             // Load Land Tile
@@ -580,7 +578,8 @@ public class Tile {
                 break;
             case TILE_WATER2:
                 drawWater2Tile(g2, screenX, screenY, tileSize);
-                break;            case TILE_PATH2:
+                break;            
+            case TILE_PATH2:
                 drawPathTile2(g2, screenX, screenY, tileSize);
                 break;
             case TILE_WATER3:
@@ -588,7 +587,8 @@ public class Tile {
                 break;
             case TILE_ISLAND:
                 drawIslandTile(g2, screenX, screenY, tileSize);
-                break;            case TILE_BRIDGE:
+                break;            
+            case TILE_BRIDGE:
                 drawBridgeTile(g2, screenX, screenY, tileSize);
                 break;
             case TILE_LAND:

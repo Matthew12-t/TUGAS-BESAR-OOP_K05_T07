@@ -9,9 +9,8 @@ public class Crop extends Item implements Edible {
         super(name, "Crop", sellPrice, buyPrice);
         this.energy = 3;
         this.cropPerHarvest = cropPerHarvest;
-        
-        // Load image untuk crop ini
-        String imagePath = "RES/CROPS/" + name.toLowerCase().replace(" ", "_") + ".png";
+          // Load image untuk crop ini
+        String imagePath = "RES/CROP/" + name.toLowerCase().replace(" ", "_") + ".png";
         loadImage(imagePath);
     }
     
