@@ -91,19 +91,28 @@ public class ShippingBinData {
         itemSellPrices.put("Carp Surprise", 150);
     }
     
-    public void addItem(Item item, int quantity) {
-        if (item == null || quantity <= 0) return;
+    public boolean addItem(Item item, int quantity) {
+        if (item == null || quantity <= 0) return false;
+        
+        // Don't allow tools in shipping bin
+        if (item instanceof SRC.ITEMS.Tool) {
+            System.out.println("Cannot add tools to shipping bin: " + item.getName());
+            return false;
+        }
         
         // Check if item already exists in shipping bin
         for (ShippingItem shippingItem : shippingBinItems) {
             if (shippingItem.item.getName().equals(item.getName())) {
                 shippingItem.quantity += quantity;
-                return;
+                System.out.println("Added " + quantity + " " + item.getName() + " to shipping bin (existing stack)");
+                return true;
             }
         }
         
         // Create new shipping item with specified quantity
         shippingBinItems.add(new ShippingItem(item, quantity));
+        System.out.println("Added " + quantity + " " + item.getName() + " to shipping bin (new item)");
+        return true;
     }
     
     public void removeItem(Item item, int quantity) {

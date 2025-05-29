@@ -107,9 +107,8 @@ public class KeyHandler implements KeyListener {
                 }
               }            
               // Eating action with 'E' key - works in both PLAY_STATE and INVENTORY_STATE
-            if(code == KeyEvent.VK_E) {
-                if (gamePanel.getGameState() == GamePanel.PLAY_STATE || 
-                    gamePanel.getGameState() == GamePanel.INVENTORY_STATE) {
+              if(code == KeyEvent.VK_E) {
+                if (gamePanel.getGameState() == GamePanel.PLAY_STATE || gamePanel.getGameState() == GamePanel.INVENTORY_STATE) {
                     // Get player from gamePanel and perform eating action
                     gamePanel.getPlayer().getPlayerAction().eatSelectedItem();
                     System.out.println("DEBUG: 'E' key pressed for eating in state: " + 
@@ -151,24 +150,10 @@ public class KeyHandler implements KeyListener {
                     gamePanel.selectNextMap();
                 }
             }
-            
-            else if (gamePanel.getGameState() == GamePanel.SHIPPING_STATE) {
-                // Shipping bin UI navigation
-                if(code == KeyEvent.VK_UP || code == KeyEvent.VK_DOWN || code == KeyEvent.VK_LEFT || code == KeyEvent.VK_RIGHT) {                    // Let the shipping bin UI handle navigation
-                    gamePanel.getShippingBinUI().handleKeyPress(code);
-                }                if(code == KeyEvent.VK_TAB) {
-                    // Let the shipping bin UI handle tab key
-                    gamePanel.getShippingBinUI().handleKeyPress(code);
-                    System.out.println("TAB key pressed in shipping bin state");
-                }
-                if(code == KeyEvent.VK_ENTER) {
-                    // Let the shipping bin UI handle enter key
-                    gamePanel.getShippingBinUI().handleKeyPress(code);
-                    System.out.println("ENTER key pressed in shipping bin state");
-                }
+              else if (gamePanel.getGameState() == GamePanel.SHIPPING_STATE) {
+                // Only handle ESC key to exit shipping bin - all other controls are mouse-based
                 if(code == KeyEvent.VK_ESCAPE) {
-                    // Let the shipping bin UI handle escape key
-                    gamePanel.getShippingBinUI().handleKeyPress(code);
+                    gamePanel.setGameState(GamePanel.PLAY_STATE);
                     System.out.println("ESC key pressed - exiting shipping bin state");
                 }
             }

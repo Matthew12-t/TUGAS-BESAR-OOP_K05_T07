@@ -61,8 +61,7 @@ public class MouseHandler extends MouseAdapter {
     public boolean isPlacingHouse() {
         return isPlacingHouse;
     }
-    
-    @Override
+      @Override
     public void mousePressed(MouseEvent e) {
         // Get mouse click position (screen coordinates)
         int screenX = e.getX();
@@ -72,6 +71,13 @@ public class MouseHandler extends MouseAdapter {
         if (gamePanel.getGameState() == GamePanel.INVENTORY_STATE) {
             // Handle inventory clicks
             handleInventoryClick(screenX, screenY);
+            return;
+        }
+        
+        // Check if we're in shipping bin state
+        if (gamePanel.getGameState() == GamePanel.SHIPPING_STATE) {
+            // Handle shipping bin clicks
+            gamePanel.getShippingBinUI().handleMouseClick(screenX, screenY);
             return;
         }
         
