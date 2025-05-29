@@ -6,7 +6,11 @@ import SRC.ITEMS.Item;
 import SRC.ENTITY.ACTION.FishingUI;
 import SRC.SEASON.Season;
 import SRC.WEATHER.Weather;
+import SRC.TIME.Time;
 import SRC.TIME.GameTime;
+import SRC.DATA.SleepData;
+import SRC.UI.SleepUI;
+import SRC.OBJECT.SuperObject;
 
 /**
  * PlayerAction class handles all player action logic
@@ -17,14 +21,20 @@ public class PlayerAction {
     private Player player;
     private Inventory inventory;
     private FishingUI fishingUI; // Add fishing UI
+    private SleepUI sleepUI; // Add sleep UI
     
     // Energy system - now delegated to Player
     private static final int MAX_ENERGY = 100;
+    
+    // Sleep system constants
+    private static final int LOW_ENERGY_THRESHOLD = 20;
+    private static final int LATE_NIGHT_HOUR = 2; // 02:00
     
     public PlayerAction(GamePanel gamePanel, Player player) {        this.gamePanel = gamePanel;
         this.player = player;
         this.inventory = new Inventory();
         this.fishingUI = new FishingUI(gamePanel); // Initialize fishing UI
+        this.sleepUI = new SleepUI(gamePanel); // Initialize sleep UI
         // Energy is now managed by Player class directly
     }
     
@@ -228,9 +238,7 @@ public class PlayerAction {
      * @return name of caught fish or null if nothing caught
      */
     private String performFishingWithMiniGame(String fishingLocation) {
-        System.out.println("DEBUG: performFishingWithMiniGame called with location=" + fishingLocation);
-        
-        // Get current game conditions directly from GamePanel (already enum types)
+        System.out.println("DEBUG: performFishingWithMiniGame called with location=" + fishingLocation);        // Get current game conditions directly from GamePanel (already enum types)
         Season currentSeason = gamePanel.getSeason();
         Weather currentWeather = gamePanel.getWeather();
         GameTime currentTime = new GameTime(
@@ -519,4 +527,149 @@ public class PlayerAction {
             gamePanel.getMouseHandler().setSelectedSlotIndex(-1);
         }
     }
+    
+    /**
+     * Handle sleep action when player is near bed and presses sleep key
+     * @return true if sleep action was performed successfully
+     */
+    public boolean performSleep() {
+        System.out.println("DEBUG: performSleep called");
+        
+        // Check if player is near a bed
+        if (!isPlayerNearBed()) {
+            System.out.println("DEBUG: Player not near bed");
+            return false;
+        }
+        
+        // Perform manual sleep
+        executeSleep(SleepData.SleepTrigger.MANUAL);
+        return true;
+    }
+    
+    /**
+     * Check if player needs automatic sleep (low energy or late time)
+     * This should be called regularly in the game loop
+     */
+    public void checkAutomaticSleep() {
+        // Check low energy sleep
+        if (player.getEnergy() <= LOW_ENERGY_THRESHOLD) {
+            System.out.println("DEBUG: Auto sleep triggered - Low energy");
+            executeSleep(SleepData.SleepTrigger.LOW_ENERGY);
+            return;
+        }
+          // Check late night sleep
+        Time currentTime = gamePanel.getCurrentTime();
+        if (currentTime.getHour() == LATE_NIGHT_HOUR && currentTime.getMinute() == 0) {
+            System.out.println("DEBUG: Auto sleep triggered - Late night");
+            executeSleep(SleepData.SleepTrigger.LATE_TIME);
+            return;
+        }
+    }
+      /**
+     * Execute sleep sequence (immediate spawn and effects)
+     */
+    private void executeSleep(SleepData.SleepTrigger trigger) {
+        System.out.println("DEBUG: Executing sleep with trigger: " + trigger);
+        
+        // Stop player movement
+        stopPlayerMovement();
+        
+        // LANGSUNG TRANSPORT PLAYER KE HOUSE BED
+        transportPlayerToHouseBed();
+        
+        // LANGSUNG PERFORM SLEEP EFFECTS (restore energy, set time to 10:00)
+        performSleepEffects(trigger);
+        
+        // Create sleep result SETELAH effects applied
+        SleepData.SleepResult sleepResult = createSleepResult(trigger);
+        
+        // Show sleep screen
+        sleepUI.showSleepResult(sleepResult);
+        
+        // Set game state to sleep mode
+        gamePanel.setGameState(GamePanel.SLEEP_STATE);
+    }
+    
+    /**
+     * Create sleep result based on current game state
+     */
+    private SleepData.SleepResult createSleepResult(SleepData.SleepTrigger trigger) {
+        int currentDay = gamePanel.getCurrentDay();
+        Season currentSeason = gamePanel.getSeason();
+        Weather currentWeather = gamePanel.getWeather();
+        
+        return SleepData.createSleepResult(trigger, currentDay, currentSeason, currentWeather);
+    }    /**
+     * Get access to the sleep UI
+     */
+    public SleepUI getSleepUI() {
+        return this.sleepUI;
+    }
+    
+    /**
+     * Check if player is near a bed (within collision distance)
+     */
+    public boolean isPlayerNearBed() {
+        SRC.MAP.Map currentMap = gamePanel.getCurrentMap();
+        
+        // Get player position in tiles
+        int tileSize = gamePanel.getTileSize();
+        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
+        int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
+        
+        // Check surrounding tiles for bed objects
+        for (int row = playerRow - 2; row <= playerRow + 2; row++) {
+            for (int col = playerCol - 2; col <= playerCol + 2; col++) {
+                if (currentMap.hasObjectAt(col, row)) {
+                    SuperObject obj = currentMap.getObjectAt(col, row);
+                    if (obj instanceof SRC.OBJECT.OBJ_Bed) {
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+      /**
+     * Perform sleep effects (restore energy, set time to 10:00 AM)
+     */
+    private void performSleepEffects(SleepData.SleepTrigger trigger) {
+        // Restore full energy
+        player.setEnergy(MAX_ENERGY);
+        
+        // Set time to 10:00 AM instead of 6:00 AM
+        Time currentTime = gamePanel.getCurrentTime();
+        currentTime.setHour(10);  // Set ke jam 10
+        currentTime.setMinute(0); // Set ke menit 0
+        
+        // Advance to next day if trigger is automatic (not manual)
+        if (trigger == SleepData.SleepTrigger.LOW_ENERGY || 
+            trigger == SleepData.SleepTrigger.LATE_TIME) {
+            gamePanel.advanceToNextDay();
+            // Reset time to 10:00 again after day advancement
+            currentTime.setHour(10);
+            currentTime.setMinute(0);
+        }
+        
+        System.out.println("DEBUG: Sleep effects applied - Energy restored, time set to 10:00 AM");
+    }    /**
+     * Transport player to house bed location (spawn beside the bed, not on it)
+     */
+    private void transportPlayerToHouseBed() {
+        // Switch to house map if not already there
+        if (!gamePanel.getCurrentMap().getMapName().equals("House Map")) {
+            gamePanel.switchToHouseMap();
+        }
+          // Position player beside the bed in house map
+        // Bed coordinates in house map
+        int tileSize = gamePanel.getTileSize();
+        int bedX = 5; // Bed position in house map
+        int bedY = 3; // Bed position in house map
+          // Position player to the RIGHT of bed (not on top)
+        player.setWorldX(tileSize * (bedX + 2));
+        player.setWorldY(tileSize * bedY);
+        
+        System.out.println("DEBUG: Player transported to house bed at position beside bed");
+    }    // Sleep UI instance getter already defined above
 }
