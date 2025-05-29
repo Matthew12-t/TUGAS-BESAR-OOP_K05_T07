@@ -3,6 +3,7 @@ package SRC.MAIN;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -529,7 +530,8 @@ public class GamePanel extends JPanel implements Runnable {
             if (System.currentTimeMillis() - lastTimeUpdate >= 1000) {
                 advanceGameTime();
                 lastTimeUpdate = System.currentTimeMillis();
-            }            if (delta >= 1) {
+            }            
+            if (delta >= 1) {
                 update();
                 
                 // Check for automatic sleep triggers (low energy and late time)
@@ -547,7 +549,8 @@ public class GamePanel extends JPanel implements Runnable {
                 System.out.println("FPS: " + drawCount);
                 drawCount = 0;
                 timer = 0;
-            }        }
+            }        
+        }
     }
       /**
      * Center the camera on a map with specific dimensions
@@ -1239,34 +1242,41 @@ public class GamePanel extends JPanel implements Runnable {
         if (hour12 == 0) hour12 = 12;
         String ampm = (hour24 < 12 || hour24 == 24) ? "AM" : "PM";
         String jam = String.format("%02d:%02d %s", hour12, time.getMinute(), ampm);
-        
-        if (clockImage != null) {
+        String goldText = String.valueOf(player.getGold());
+
+          if (clockImage != null) {
             int clockWidth = 128;
-            int clockHeight = 128;
             int clockX = screenWidth - clockWidth - 10; 
             int clockY = 10; 
-            g2.drawImage(clockImage, clockX, clockY, clockWidth, clockHeight, null);
-            
-            // Draw time text centered on the clock
+            g2.drawImage(clockImage, clockX, clockY, 128, 128, null); // Keep original clock image size            // Draw time text centered on the clock
             int textX = clockX + (clockWidth / 2) - 15;
-            int textY = clockY + (clockHeight / 2) + 5;
+            int textY = clockY + (128 / 2) + 5; // Use original clock image center
             g2.setColor(Color.BLACK);
             java.awt.Font originalFont = g2.getFont();
             java.awt.Font boldFont = originalFont.deriveFont(java.awt.Font.BOLD, originalFont.getSize() + 2);
             g2.setFont(boldFont);
             g2.drawString(hari + ", " + tanggal, textX, textY - 43); 
-            g2.drawString(jam, textX, textY);
-            g2.setFont(originalFont);        
+            g2.drawString(jam, textX, textY);            // Draw gold text inside the clock (assuming there's space in the bottom area)
+            g2.setColor(new Color(206, 82, 82)); // Custom red-brown color for gold text
+            g2.setFont(originalFont.deriveFont(java.awt.Font.BOLD, 14f)); // Increased size and ensure bold
+            FontMetrics goldMetrics = g2.getFontMetrics();
+            int goldTextX = clockX + clockWidth - goldMetrics.stringWidth(goldText) - 13; // Right-aligned with 10px margin
+            int goldTextY = clockY + 102; // Position near bottom of clock image
+            g2.drawString(goldText, goldTextX, goldTextY);
+            
+            g2.setFont(originalFont);
         } else {
             // Fallback to original method if image failed to load
             g2.setColor(new Color(0,0,0,180));
-            g2.fillRoundRect(screenWidth-120, 10, 110, 100, 15, 15); // Made taller to fit season and weather
+            g2.fillRoundRect(screenWidth-120, 10, 110, 130, 15, 15); // Made taller to fit gold
             g2.setColor(Color.BLACK);
             g2.drawString(hari + ", " + tanggal, screenWidth-110, 30);
             g2.drawString(jam, screenWidth-110, 55); 
             g2.drawString(musim, screenWidth-110, 80); // Added season display
             g2.drawString(cuaca, screenWidth-110, 105); // Added weather display
-        }    }    public Season getSeason() {
+            g2.drawString(goldText, screenWidth-110, 130); // Added gold display
+        }
+    }public Season getSeason() {
         return currentSeason;
     }
 

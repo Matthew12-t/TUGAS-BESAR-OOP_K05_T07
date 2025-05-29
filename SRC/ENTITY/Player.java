@@ -17,10 +17,10 @@ import SRC.MAIN.MouseHandler;
 public class Player extends Entity {
     private GamePanel gp;
     private KeyHandler keyH;
-    private MouseHandler mouseHandler;
-    private PlayerAction playerAction;
+    private MouseHandler mouseHandler;    private PlayerAction playerAction;
     private int energy;
     private final int MAX_ENERGY = 100; // Maximum energy value
+    private int gold; // Player's gold amount
     private final int TOTAL_FRAMES = 8;
 
     // --- Variabel Entitas (Deklarasikan jika tidak di Entity) ---
@@ -49,10 +49,10 @@ public class Player extends Entity {
     // ----------------------------------    //contructor
     public Player(GamePanel gp, KeyHandler keyH, MouseHandler mouseHandler) {
         super(gp, 100, 100); // Panggil konstruktor Entity dengan posisi awal
-        this.gp = gp;
-        this.keyH = keyH;
+        this.gp = gp;        this.keyH = keyH;
         this.mouseHandler = mouseHandler;
         this.energy = 100; 
+        this.gold = 500; // Initialize gold with 500
         this.playerAction = new PlayerAction(gp, this);
         
         // Hitung ukuran visual player berdasarkan skala
@@ -83,8 +83,7 @@ public class Player extends Entity {
     // --- Getter dan Setter untuk atribut baru ---
     public int getEnergy() {
         return energy;
-    }   
-    public void setEnergy(int energy) {
+    }     public void setEnergy(int energy) {
         if (energy < 0) {
             this.energy = 0; // Prevent negative energy
         } else if (energy > MAX_ENERGY) {
@@ -92,7 +91,35 @@ public class Player extends Entity {
         } else {
             this.energy = energy;
         }
-    }    public void addItemToInventory(Item item) {
+    }
+
+    public int getGold() {
+        return gold;
+    }
+
+    public void setGold(int gold) {
+        if (gold < 0) {
+            this.gold = 0; // Prevent negative gold
+        } else {
+            this.gold = gold;
+        }
+    }
+
+    public void addGold(int amount) {
+        if (amount > 0) {
+            this.gold += amount;
+        }
+    }
+
+    public boolean spendGold(int amount) {
+        if (amount > 0 && this.gold >= amount) {
+            this.gold -= amount;
+            return true; // Successfully spent gold
+        }
+        return false; // Not enough gold
+    }
+
+    public void addItemToInventory(Item item) {
         playerAction.addItemToInventory(item);
     }
     

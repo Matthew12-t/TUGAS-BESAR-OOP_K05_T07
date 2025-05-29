@@ -17,7 +17,7 @@ import SRC.OBJECT.SuperObject;
  * including inventory management, movement, and interactions
  */
 public class PlayerAction {
-      private GamePanel gamePanel;
+    private GamePanel gamePanel;
     private Player player;
     private Inventory inventory;
     private FishingUI fishingUI; // Add fishing UI
