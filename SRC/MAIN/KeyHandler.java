@@ -2,6 +2,7 @@ package SRC.MAIN;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import SRC.ENTITY.NPCEntity;
 
 public class KeyHandler implements KeyListener {
 
@@ -111,6 +112,13 @@ public class KeyHandler implements KeyListener {
                 if(code == KeyEvent.VK_T) {
                     // Talking
                     gamePanel.tryTalkToNearbyNPC();
+                }
+                if(code == KeyEvent.VK_P) {
+                    // Propose (lamaran)
+                    NPCEntity nearbyNPC = gamePanel.getNearbyNPC(1);
+                    if (nearbyNPC != null) {
+                        nearbyNPC.performAction(gamePanel.getPlayer(), "propose");
+                    } 
                 }
             }
             // --- INVENTORY STATE GIFTING ---

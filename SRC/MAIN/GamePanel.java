@@ -1612,7 +1612,7 @@ public class GamePanel extends JPanel implements Runnable {
     /**
      * Returns the first NPC exactly 'distance' tiles away from the player, or null if none.
      */
-    private NPCEntity getNearbyNPC(int distance) {
+    public NPCEntity getNearbyNPC(int distance) {
         SRC.MAP.Map currentMap = getCurrentMap();
         if (currentMap instanceof SRC.MAP.NPC_HOUSE.NPCHouseMap) {
             java.util.ArrayList<NPCEntity> npcs = null;

@@ -119,15 +119,58 @@ public class NPCEntity extends Entity implements NPC {
     
     @Override
     public void performAction(Player player, String action) {
-        switch (action.toLowerCase()) {            case "chat":
+        switch (action.toLowerCase()) {
+            case "chat":
                 System.out.println(name + " chats with player");
                 break;
             case "gift":
                 System.out.println(name + " received a gift from player");
                 break;
+            case "propose": {
+                String message;
+                boolean hasRing = false;
+                Item[] items = player.getInventoryItems();
+                for (Item item : items) {
+                    if (item != null && item.getName().equalsIgnoreCase("Proposal Ring")) {
+                        hasRing = true;
+                        break;
+                    }
+                }
+                if (!hasRing) {
+                    message = "Kamu harus punya Proposal Ring untuk melamar!";
+                    System.out.println(message);
+                    showMessageToUI(message);
+                    break;
+                }
+                if (heartPoints >= MAX_HEART_POINTS) {
+                    if (!relationshipStatus.equals("fiance") && !relationshipStatus.equals("spouse")) {
+                        relationshipStatus = "fiance";
+                        player.setEnergy(player.getEnergy() - 10);
+                        message = name + " menerima lamaranmu! Status: FIANCE. Energi -10.";
+                    } else {
+                        message = name + " sudah menjadi " + relationshipStatus + ".";
+                    }
+                } else {
+                    player.setEnergy(player.getEnergy() - 20);
+                    message = name + " menolak lamaranmu. Energi -20.";
+                }
+                System.out.println(message);
+                showMessageToUI(message);
+                break;
+            }
             default:
                 System.out.println("Unknown action: " + action);
                 break;
+        }
+    }
+
+    /**
+     * Helper untuk menampilkan pesan ke UI (bisa dihubungkan ke GamePanel/MessagePanel)
+     */
+    private void showMessageToUI(String message) {
+        // Contoh: jika ada GamePanel, bisa panggil gp.showMessagePanel(message);
+        if (gp != null) {
+            gp.showMessagePanel(message);
         }
     }
     

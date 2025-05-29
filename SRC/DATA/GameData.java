@@ -205,7 +205,8 @@ public class GameData {
             addTool("Hoe", 1),
             addTool("Watering Can", 1),
             addTool("Pickaxe", 1),
-            addTool("Fishing Rod", 1)
+            addTool("Fishing Rod", 1),
+            addTool("Proposal Ring", 2)
         };
     }
     
