@@ -7,6 +7,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import SRC.MAIN.GamePanel;
+import SRC.DATA.GameData;
+import SRC.ITEMS.Item;
 import java.awt.Graphics2D;
 
 /**
@@ -30,25 +32,32 @@ public class MayorTadiEntity extends NPCEntity {
         
         loadSprite();
         setSpeed(0);
-    }
-
-    /**
+    }    /**
      * Set up Mayor Tadi's item preferences
      */
     private void setItemPreferences() {
-        Set<String> lovedItems = Set.of("Legend");
-        for (String item : lovedItems) {
-            addLovedItem(item);
-        }
-        Set<String> likedItems = Set.of("Angler", "Crimsonfish", "Glacierfish");
-        for (String item : likedItems) {
-            addLikedItem(item);
+        Set<String> lovedItemNames = Set.of("Legend");
+        for (String itemName : lovedItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null) {
+                addLovedItem(item);
+            }
         }
         
-        // BLOM BENER PLISS atur2 aja
-        Set<String> hatedItems = Set.of("Hot Pepper", "Cauliflower", "Coal", "Wood", "Grape", "Wheat");
-        for (String item : hatedItems) {
-            addHatedItem(item);
+        Set<String> likedItemNames = Set.of("Angler", "Crimsonfish", "Glacierfish");
+        for (String itemName : likedItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null) {
+                addLikedItem(item);
+            }
+        }
+        
+        Set<String> hatedItemNames = Set.of("Hot Pepper", "Cauliflower", "Coal", "Wood", "Grape", "Wheat");
+        for (String itemName : hatedItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null) {
+                addHatedItem(item);
+            }
         }
     }
     
@@ -143,14 +152,13 @@ public class MayorTadiEntity extends NPCEntity {
             setRelationshipStatus("single");
         }
     }
-    
-    /**
+      /**
      * Custom method to handle gift giving
-     * @param itemName the name of the item being given
+     * @param item the item being given
      */
     @Override
-    public void receiveGift(String itemName) {
-        super.receiveGift(itemName);
+    public void receiveGift(Item item) {
+        super.receiveGift(item);
         updateRelationshipStatus();
     }
     

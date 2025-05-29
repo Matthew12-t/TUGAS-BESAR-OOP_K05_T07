@@ -7,6 +7,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import SRC.MAIN.GamePanel;
+import SRC.DATA.GameData;
+import SRC.ITEMS.Item;
 import java.awt.Graphics2D;
 
 /**
@@ -28,24 +30,34 @@ public class DascoEntity extends NPCEntity {
         loadSprite();
         
         setSpeed(0);
-    }
-      /**
+    }    /**
      * Set up Dasco's item preferences
      */
     private void setItemPreferences() {
-        Set<String> lovedItems = Set.of("The Legends of Spakbor", "Cooked Pig's Head", "Wine", "Fugu", "Spakbor Salad");
-        for (String item : lovedItems) {
-            addLovedItem(item);
+        Set<String> lovedItemNames = Set.of("The Legends of Spakbor", "Cooked Pig's Head", "Wine", "Fugu", "Spakbor Salad");
+        for (String itemName : lovedItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null) {
+                addLovedItem(item);
+            }
         }
-        Set<String> likedItems = Set.of("Fish Sandwich", "Fish Stew", "Baguette", "Fish n' Chips");
-        for (String item : likedItems) {
-            addLikedItem(item);
+        
+        Set<String> likedItemNames = Set.of("Fish Sandwich", "Fish Stew", "Baguette", "Fish n' Chips");
+        for (String itemName : likedItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null) {
+                addLikedItem(item);
+            }
         }
-        Set<String> hatedItems = Set.of("Legend", "Grape", "Cauliflower", "Wheat", "Pufferfish", "Salmon");
-        for (String item : hatedItems) {
-            addHatedItem(item);
+        
+        Set<String> hatedItemNames = Set.of("Legend", "Grape", "Cauliflower", "Wheat", "Pufferfish", "Salmon");
+        for (String itemName : hatedItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null) {
+                addHatedItem(item);
+            }
         }
-    }    
+    }
     private void loadSprite() {
         String[] pathsToTry = {
             "RES/ENTITY/NPC/dasco.png",
@@ -141,14 +153,13 @@ public class DascoEntity extends NPCEntity {
         if (getHeartPoints() < 100) {
             setRelationshipStatus("single");}
         
-    }
-      /**
+    }    /**
      * Custom method to handle gift giving
-     * @param itemName the name of the item being given
+     * @param item the item being given
      */
     @Override
-    public void receiveGift(String itemName) {
-        super.receiveGift(itemName);
+    public void receiveGift(Item item) {
+        super.receiveGift(item);
         updateRelationshipStatus();
     }
       /**

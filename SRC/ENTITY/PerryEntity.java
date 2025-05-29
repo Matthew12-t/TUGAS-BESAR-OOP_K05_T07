@@ -7,6 +7,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import SRC.MAIN.GamePanel;
+import SRC.DATA.GameData;
+import SRC.ITEMS.Item;
 import java.awt.Graphics2D;
 
 /**
@@ -29,22 +31,32 @@ public class PerryEntity extends NPCEntity {
         setItemPreferences();
         loadSprite();
         setSpeed(0);
-    }
-    private void setItemPreferences() {
-        Set<String> lovedItems = Set.of("Cranberry", "Blueberry");
-        for (String item : lovedItems) {
-            addLovedItem(item);
+    }    private void setItemPreferences() {
+        Set<String> lovedItemNames = Set.of("Cranberry", "Blueberry");
+        for (String itemName : lovedItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null) {
+                addLovedItem(item);
+            }
         }
         
-        Set<String> likedItems = Set.of("Wine");
-        for (String item : likedItems) {
-            addLikedItem(item);
+        Set<String> likedItemNames = Set.of("Wine");
+        for (String itemName : likedItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null) {
+                addLikedItem(item);
+            }
         }
-        Set<String> hatedItems = Set.of("Fish", "Fish Sandwich", "Fish Stew", "Fish n' Chips",
+        
+        Set<String> hatedItemNames = Set.of("Carp", "Bullhead", "Chub", "Fish Sandwich", "Fish Stew", "Fish n' Chips",
                                        "Pufferfish", "Salmon", "Legend", "Angler", "Crimsonfish",
-                                       "Glacierfish", "Catfish", "Sardine");
-        for (String item : hatedItems) {
-            addHatedItem(item);
+                                       "Glacierfish", "Catfish", "Sardine", "Flounder", "Halibut", 
+                                       "Octopus", "Super Cucumber", "Fugu", "Sashimi");
+        for (String itemName : hatedItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null) {
+                addHatedItem(item);
+            }
         }
     }
     
@@ -125,14 +137,13 @@ public class PerryEntity extends NPCEntity {
             setRelationshipStatus("single");
         }
     }
-    
-    /**
+      /**
      * Custom method to handle gift giving
-     * @param itemName the name of the item being given
+     * @param item the item being given
      */
     @Override
-    public void receiveGift(String itemName) {
-        super.receiveGift(itemName);
+    public void receiveGift(Item item) {
+        super.receiveGift(item);
         updateRelationshipStatus();
     }
     
