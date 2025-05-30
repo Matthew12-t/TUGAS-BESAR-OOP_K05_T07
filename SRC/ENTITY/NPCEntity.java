@@ -204,8 +204,10 @@ public class NPCEntity extends Entity implements NPC {
      * Helper untuk menampilkan pesan ke UI (bisa dihubungkan ke GamePanel/MessagePanel)
      */
     private void showMessageToUI(String message) {
-        // Contoh: jika ada GamePanel, bisa panggil gp.showMessagePanel(message);
-        if (gp != null) {
+        // Use NPCUi for message panel if available
+        if (gp != null && gp.getNPCUi() != null) {
+            gp.getNPCUi().showMessagePanel(message);
+        } else if (gp != null) {
             gp.showMessagePanel(message);
         }
     }
