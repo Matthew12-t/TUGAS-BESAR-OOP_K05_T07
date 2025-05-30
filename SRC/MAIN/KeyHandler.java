@@ -148,7 +148,6 @@ public class KeyHandler implements KeyListener {
                     gamePanel.tryTalkToNearbyNPC();
                 }
                 if(code == KeyEvent.VK_P) {
-                    // Propose/Married (lamaran/menikah)
                     NPCEntity nearbyNPC = gamePanel.getNearbyNPC(1);
                     if (nearbyNPC != null) {
                         String status = nearbyNPC.getRelationshipStatus();
@@ -157,9 +156,7 @@ public class KeyHandler implements KeyListener {
                         } else {
                             nearbyNPC.performAction(gamePanel.getPlayer(), "propose");
                         }
-                    } else {
-                        gamePanel.showMessagePanel("Tidak ada NPC di dekatmu untuk dilamar/menikah.");
-                    }
+                    } 
                 }
             }
             // --- INVENTORY STATE GIFTING ---
