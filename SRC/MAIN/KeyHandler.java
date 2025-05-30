@@ -45,11 +45,35 @@ public class KeyHandler implements KeyListener {
                     gamePanel.setGameState(GamePanel.INVENTORY_STATE);
                     System.out.println("Opened inventory");
                 }
-            }
-            
-            // Handle different key inputs depending on game state
+            }            // Handle different key inputs depending on game state
             if (gamePanel.getGameState() == GamePanel.PLAY_STATE) {
-                // Movement keys - only active in play state
+                // Check if NPC interaction menu is open - if so, only allow NPC interaction keys
+                if (gamePanel.isNPCInteractionMenuOpen()) {
+                    // Only handle NPC interaction keys when menu is open
+                    if (code == KeyEvent.VK_T) {
+                        gamePanel.getNPCUi().handleTalkKey();
+                    } else if (code == KeyEvent.VK_G) {
+                        gamePanel.getNPCUi().handleGiftKey();
+                    } else if (code == KeyEvent.VK_P) {
+                        gamePanel.getNPCUi().handleProposeKey();
+                    } else if (code == KeyEvent.VK_ENTER) {
+                        gamePanel.getNPCUi().handleEnterKey();
+                    } else if (code == KeyEvent.VK_ESCAPE) {
+                        gamePanel.closeNPCInteractionMenu();
+                    }
+                    return; // Don't process any other keys when NPC menu is open
+                }
+                  // Check if message panel is active - if so, ignore all input except Enter to dismiss
+                if (gamePanel.isMessagePanelActive()) {
+                    if (code == KeyEvent.VK_ENTER || code == KeyEvent.VK_SPACE) {
+                        // Dismiss message panel by clearing it
+                        gamePanel.getNPCUi().clearMessagePanel();
+                        System.out.println("Message panel dismissed");
+                    }
+                    return; // Don't process any other keys when message panel is active
+                }
+                
+                // Movement keys - only active in play state and when NPC menu is closed
                 if(code == KeyEvent.VK_W) {
                     upPressed = true;
                 }
@@ -204,8 +228,7 @@ public class KeyHandler implements KeyListener {
                 }                if(code == KeyEvent.VK_S) {
                     System.out.println("S key pressed in map menu");
                     gamePanel.selectNextMap();
-                }
-            }            else if (gamePanel.getGameState() == GamePanel.SHIPPING_STATE) {
+                }            }            else if (gamePanel.getGameState() == GamePanel.SHIPPING_STATE) {
                 // Only handle ESC key to exit shipping bin - all other controls are mouse-based
                 if(code == KeyEvent.VK_ESCAPE) {
                     gamePanel.setGameState(GamePanel.PLAY_STATE);
@@ -217,21 +240,6 @@ public class KeyHandler implements KeyListener {
                     gamePanel.setGameState(GamePanel.PLAY_STATE);
                     System.out.println("ESC key pressed - exiting store state");
                 }
-            }
-            // Handle NPC interaction keys when menu is open
-            else if (gamePanel.isNPCInteractionMenuOpen()) {
-                if (code == KeyEvent.VK_T) {
-                    gamePanel.getNPCUi().handleTalkKey();
-                } else if (code == KeyEvent.VK_G) {
-                    gamePanel.getNPCUi().handleGiftKey();
-                } else if (code == KeyEvent.VK_P) {
-                    gamePanel.getNPCUi().handleProposeKey();
-                } else if (code == KeyEvent.VK_ENTER) {
-                    gamePanel.getNPCUi().handleEnterKey();
-                } else if (code == KeyEvent.VK_ESCAPE) {
-                    gamePanel.closeNPCInteractionMenu();
-                }
-                return;
             }
         }
         else {
