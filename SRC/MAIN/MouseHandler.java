@@ -79,13 +79,20 @@ public class MouseHandler extends MouseAdapter {
             gamePanel.getShippingBinUI().handleMouseClick(screenX, screenY);
             return;
         }
-        
-        // Check if we're in store state
-        if (gamePanel.getGameState() == GamePanel.STORE_STATE) {
-            // Handle store clicks
+          // Check if we're in store state
+        if (gamePanel.getGameState() == GamePanel.STORE_STATE) {            // Handle store clicks
             gamePanel.getStoreUI().handleMouseClick(screenX, screenY);
             return;
-        }        // Only handle map clicks in PLAY_STATE and when NOT interacting with NPC
+        }
+        
+        // Check if we're in cooking state
+        if (gamePanel.getGameState() == GamePanel.COOKING_STATE) {
+            // Handle cooking UI clicks
+            gamePanel.getCookingUI().processMouseClick(screenX, screenY);
+            return;
+        }
+        
+        // Only handle map clicks in PLAY_STATE
         if (gamePanel.getGameState() == GamePanel.PLAY_STATE) {
             // Check if NPC interaction menu is open - if so, ignore map clicks
             if (gamePanel.isNPCInteractionMenuOpen()) {

@@ -12,7 +12,6 @@ public class MiscData {
         miscItems.put("Coal", new MiscItem("Coal",  10, 20, "Buat Masak"));
         miscItems.put("Egg", new MiscItem("Egg", 5, 10, "Telor ayam"));
         miscItems.put("Eggplant", new MiscItem("Eggplant", 15, 30, "Terong"));
-        System.out.println("MiscData: Initialized " + miscItems.size() + " miscellaneous items");
     }
     public static MiscItem getMiscItem(String itemName) {
         return miscItems.get(itemName);

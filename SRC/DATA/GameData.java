@@ -9,8 +9,7 @@ import java.util.Set;
  * Central data management class that provides unified access to all game items
  */
 public class GameData {
-    
-    // Static initializer to ensure all data classes are loaded
+      // Static initializer to ensure all data classes are loaded
     static {
         // Force initialization of all data classes
         SeedData.getAllSeeds();
@@ -18,6 +17,7 @@ public class GameData {
         CropData.getAllCrops();
         FishData.getAllFish();
         FoodData.getAllFoods();
+        MiscData.getAllMiscItems();
         
         System.out.println("GameData: All item data initialized successfully!");
     }
@@ -73,6 +73,16 @@ public class GameData {
     }
     
     /**
+     * Add misc item to inventory via MiscData
+     * @param miscName Name of the misc item
+     * @param quantity Quantity to add
+     * @return Item ready to be added to inventory
+     */
+    public static Item addMisc(String miscName, int quantity) {
+        return MiscData.addMiscItem(miscName, quantity);
+    }
+    
+    /**
      * Get an item by name from any category
      * @param itemName Name of the item
      * @param category Category of the item (optional, for faster lookup)
@@ -104,10 +114,15 @@ public class GameData {
                     if (FishData.hasFish(itemName)) {
                         return FishData.getFish(itemName);
                     }
-                    break;
-                case "food":
+                    break;                case "food":
                     if (FoodData.hasFood(itemName)) {
                         return FoodData.getFood(itemName);
+                    }
+                    break;
+                case "misc":
+                case "miscellaneous":
+                    if (MiscData.hasMiscItem(itemName)) {
+                        return MiscData.getMiscItem(itemName);
                     }
                     break;
             }
@@ -117,8 +132,7 @@ public class GameData {
         // search all categories
         return getItem(itemName, 1);
     }
-    
-    /**
+      /**
      * Get an item by name with default quantity of 1
      * @param itemName Name of the item
      * @param quantity Quantity (ignored, kept for compatibility)
@@ -141,6 +155,9 @@ public class GameData {
         if (FoodData.hasFood(itemName)) {
             return FoodData.getFood(itemName);
         }
+        if (MiscData.hasMiscItem(itemName)) {
+            return MiscData.getMiscItem(itemName);
+        }
         
         System.err.println("Item not found: " + itemName);
         return null;
@@ -156,8 +173,7 @@ public class GameData {
     public static Item getItem(String itemName, String category, int quantity) {
         return getItem(itemName, category);
     }
-    
-    /**
+      /**
      * Check if an item exists in any category
      * @param itemName Name of the item to check
      * @return true if item exists
@@ -167,10 +183,10 @@ public class GameData {
                ToolData.hasTool(itemName) || 
                CropData.hasCrop(itemName) || 
                FishData.hasFish(itemName) || 
-               FoodData.hasFood(itemName);
+               FoodData.hasFood(itemName) ||
+               MiscData.hasMiscItem(itemName);
     }
-    
-    /**
+      /**
      * Get all items from all categories
      * @return Map of all items with their categories
      */
@@ -191,6 +207,9 @@ public class GameData {
         
         // Add food
         FoodData.getAllFoods().forEach((name, food) -> allItems.put(name, "Food"));
+        
+        // Add misc items
+        MiscData.getAllMiscItems().forEach((name, misc) -> allItems.put(name, "Misc"));
         
         return allItems;
     }

@@ -818,16 +818,14 @@ public class PlayerAction {
      */
     public boolean isPlayerNearBed() {
         SRC.MAP.Map currentMap = gamePanel.getCurrentMap();
-        
+
         // Get player position in tiles
-        int tileSize = gamePanel.getTileSize();
-        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
+        int tileSize = gamePanel.getTileSize();        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
         int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
         
         // Check all objects on the map for beds
         SuperObject[] objects = currentMap.getObjects();
-        for (SuperObject obj : objects) {
-            if (obj instanceof SRC.OBJECT.OBJ_Bed) {
+        for (SuperObject obj : objects) {            if (obj instanceof SRC.OBJECT.OBJ_Bed) {
                 SRC.OBJECT.OBJ_Bed bed = (SRC.OBJECT.OBJ_Bed) obj;
                 
                 int bedCol = obj.getPosition().getWorldX() / tileSize;
@@ -963,7 +961,9 @@ public class PlayerAction {
         player.setWorldY(tileSize * bedY);
         
         System.out.println("DEBUG: Player transported to house bed at position beside bed");
-    }    /**
+    }   
+    
+    /**
      * Check if player is near a shipping bin
      */
     public boolean isPlayerNearShippingBin() {
@@ -1211,7 +1211,8 @@ public class PlayerAction {
         String cropName = tileManager.harvestCrop(playerCol, playerRow);
         if (cropName != null) {
             // Add crop to inventory
-            try {                SRC.ITEMS.Crop crop = SRC.DATA.CropData.getCrop(cropName);
+            try {                
+                SRC.ITEMS.Crop crop = SRC.DATA.CropData.getCrop(cropName);
                 if (crop != null) {
                     // Add multiple crops to inventory
                     int harvestQuantity = crop.getCropPerHarvest();
@@ -1225,8 +1226,6 @@ public class PlayerAction {
             } catch (Exception e) {
                 System.out.println("DEBUG: Error adding crop to inventory: " + e.getMessage());
             }
-            
-            // Add time for harvesting (2 minutes)
             addGameTime(2);
             
             System.out.println("DEBUG: Successfully harvested " + cropName + " at (" + playerCol + ", " + playerRow + ")");
@@ -1266,9 +1265,8 @@ public class PlayerAction {
         int tileSize = gamePanel.getTileSize();
         int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
         int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
-        
-        // Initialize TileManager if needed
-        SRC.TILES.TileManager tileManager = new SRC.TILES.TileManager(gamePanel);
+          // Initialize TileManager if needed
+        SRC.TILES.TileManager tileManager = gamePanel.getTileManager();
         
         // Check if there's a plant at this position
         if (!tileManager.hasPlantAt(playerCol, playerRow)) {
@@ -1297,6 +1295,59 @@ public class PlayerAction {
             System.out.println("DEBUG: Failed to water plant at (" + playerCol + ", " + playerRow + ")");
             return false;
         }
+    }
+    
+    /**
+     * Check if player is near a stove for cooking
+     */
+    public boolean isPlayerNearStove() {
+        int playerCol = (player.getWorldX() + player.getSolidArea().x) / gamePanel.getTileSize();
+        int playerRow = (player.getWorldY() + player.getSolidArea().y) / gamePanel.getTileSize();
+        
+        // Check surrounding tiles for stove
+        for (int checkRow = playerRow - 1; checkRow <= playerRow + 1; checkRow++) {
+            for (int checkCol = playerCol - 1; checkCol <= playerCol + 1; checkCol++) {
+                if (checkRow >= 0 && checkRow < gamePanel.getMaxWorldRow() && 
+                    checkCol >= 0 && checkCol < gamePanel.getMaxWorldCol()) {
+                    
+                    // Check for stove object
+                    SuperObject[] objects = gamePanel.getCurrentObjects();
+                    for (int i = 0; i < objects.length; i++) {
+                        if (objects[i] != null && 
+                            objects[i].getName().equals("stove")) {
+                            
+                            int objCol = objects[i].getWorldX() / gamePanel.getTileSize();
+                            int objRow = objects[i].getWorldY() / gamePanel.getTileSize();
+                            
+                            // Check if object position matches check position (stove is 1x1)
+                            if (objRow == checkRow && objCol == checkCol) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Perform cooking action when player presses 'C' key near a stove
+     * @return true if cooking action was performed successfully
+     */
+    public boolean performCooking() {
+        System.out.println("DEBUG: performCooking called");
+        
+        // Check if player is near a stove
+        if (!isPlayerNearStove()) {
+            System.out.println("DEBUG: Player not near stove");
+            return false;
+        }
+        
+        // Open cooking UI
+        gamePanel.setGameState(GamePanel.COOKING_STATE);
+        System.out.println("DEBUG: Opened cooking interface");
+        return true;
     }
     
     /**

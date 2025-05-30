@@ -25,14 +25,13 @@ public class TileManager {
         public int daysToGrow;         // Total hari untuk harvest
         public boolean isWatered;      // Apakah sudah disiram hari ini
         public int lastWateredDay;     // Hari terakhir disiram
-        
-        public PlantedTileInfo(String seedName, int plantedDay, int plantedHour, int daysToGrow) {
+          public PlantedTileInfo(String seedName, int plantedDay, int plantedHour, int daysToGrow) {
             this.seedName = seedName;
             this.plantedDay = plantedDay;
             this.plantedHour = plantedHour;
             this.daysToGrow = daysToGrow;
-            this.isWatered = false;
-            this.lastWateredDay = plantedDay; // Mulai dari hari ditanam
+            this.isWatered = true; // Start with watered status (free watering on planting day)
+            this.lastWateredDay = plantedDay; // Last watered day is the planting day
         }
     }
     
@@ -116,11 +115,11 @@ public class TileManager {
         return true;
     }
       // ===== PLANTED TILE GROWTH LOGIC =====
-    
-    /**
+      /**
      * Calculate growth stage based on current time and watering status
+     * Growth happens after 24 hours have passed since planting (if watered)
      * @param plantInfo plant information
-     * @return growth stage (0 = newly planted, daysToGrow+1 = ready to harvest)
+     * @return growth stage (1 = newly planted, daysToGrow+1 = ready to harvest)
      */
     private int calculateGrowthStage(PlantedTileInfo plantInfo) {
         // Get current game time
@@ -131,47 +130,61 @@ public class TileManager {
         // Update watering status berdasarkan weather
         updateWateringFromWeather(plantInfo, currentDay);
         
-        // Hitung berapa hari sudah berlalu sejak ditanam
-        int daysPassed = currentDay - plantInfo.plantedDay;
+        // Calculate total hours passed since planting
+        int totalHoursPassed = ((currentDay - plantInfo.plantedDay) * 24) + (currentHour - plantInfo.plantedHour);
         
-        // Jika belum 24 jam sejak ditanam, masih stage 0
-        if (daysPassed == 0 && currentHour < plantInfo.plantedHour) {
-            return 0;
+        // If less than 0 hours (should not happen), return stage 1
+        if (totalHoursPassed < 0) {
+            return 1;
         }
         
-        // Hitung growth stage berdasarkan watering
-        int actualGrowthDays = 0;
+        // Calculate how many 24-hour periods have passed
+        int full24HourPeriods = totalHoursPassed / 24;
         
-        // Loop dari hari ditanam sampai hari ini
-        for (int day = plantInfo.plantedDay; day <= currentDay; day++) {
-            // Cek apakah di hari tersebut tanaman sudah disiram
-            boolean wasWateredOnDay = wasPlantWateredOnDay(plantInfo, day);
+        // Growth stage calculation:
+        // - Stage 1: Just planted (0-23 hours since planting)
+        // - Stage 2: After first 24 hours (if watered)
+        // - Stage 3: After second 24 hours (if watered)
+        // - etc.
+        
+        int growthStage = 1; // Start at stage 1 (newly planted)
+        
+        // For each completed 24-hour period, check if plant was watered
+        // and advance growth stage if it was
+        for (int period = 0; period < full24HourPeriods; period++) {
+            // Calculate which day this 24-hour period corresponds to
+            int dayToCheck = plantInfo.plantedDay + period;
             
-            if (wasWateredOnDay) {
-                actualGrowthDays++;
+            // Check if plant was watered during this period
+            if (wasPlantWateredOnDay(plantInfo, dayToCheck)) {
+                growthStage++;
             }
-            // Jika tidak disiram, growth tidak bertambah untuk hari itu
+            // If not watered, growth stage doesn't advance for this period
+            
+            // Stop if we've reached maximum growth stage
+            if (growthStage > plantInfo.daysToGrow + 1) {
+                break;
+            }
         }
         
-        // Growth stage = actualGrowthDays, maksimal daysToGrow + 1 (untuk harvest)
-        return Math.min(actualGrowthDays, plantInfo.daysToGrow + 1);
+        // Cap at maximum growth stage (daysToGrow + 1 for harvest stage)
+        return Math.min(growthStage, plantInfo.daysToGrow + 1);
     }
-    
-    /**
+      /**
      * Cek apakah tanaman disiram pada hari tertentu
      */
     private boolean wasPlantWateredOnDay(PlantedTileInfo plantInfo, int day) {
         // Tanaman dianggap disiram jika:
         // 1. Hari pertama ditanam (gratis watering)
-        // 2. Hari terakhir disiram manual adalah hari tersebut
+        // 2. Hari terakhir disiram manual adalah hari tersebut (exact match)
         // 3. Weather rainy di hari tersebut (semua tanaman auto-watered)
         
         if (day == plantInfo.plantedDay) {
             return true; // Hari pertama gratis watering
         }
         
-        if (plantInfo.lastWateredDay >= day) {
-            return true; // Sudah disiram manual
+        if (plantInfo.lastWateredDay == day) {
+            return true; // Sudah disiram manual pada hari tersebut
         }
         
         // Cek weather history (untuk implementasi sederhana, anggap rainy random)
