@@ -690,6 +690,7 @@ public class GamePanel extends JPanel implements Runnable {
             
             // Center camera on the store map
             centerCameraOnMap(StoreMap.STORE_COLS, StoreMap.STORE_ROWS);
+            ((StoreMap)storeMap).ensureNPCsVisible();
         } else if (targetMapName.equals("Abigail's House")) {
             switchToAbigailHouse();
             if (!isInitializedAbigailHouse) {
@@ -711,8 +712,8 @@ public class GamePanel extends JPanel implements Runnable {
             player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 2));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 4));
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);  
-            ((CarolineHouseMap)carolineHouseMap).ensureNPCsVisible();} 
-        else if (targetMapName.equals("Dasco's House")) {
+            ((CarolineHouseMap)carolineHouseMap).ensureNPCsVisible();
+        } else if (targetMapName.equals("Dasco's House")) {
             switchToDascoHouse();
             if (!isInitializedDascoHouse) {
                 dascoHouseMap.setupInitialObjects();

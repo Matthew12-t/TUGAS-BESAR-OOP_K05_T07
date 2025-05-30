@@ -231,6 +231,7 @@ public class Player extends Entity {
      */
     private boolean checkNPCCollision() {
         SRC.MAP.Map currentMap = gp.getCurrentMap();
+        // Check for NPC collision in NPCHouseMap subclasses
         if (currentMap instanceof SRC.MAP.NPC_HOUSE.NPCHouseMap) {
             SRC.MAP.NPC_HOUSE.NPCHouseMap npcHouseMap = (SRC.MAP.NPC_HOUSE.NPCHouseMap) currentMap;
             java.util.ArrayList<NPCEntity> npcs = null;
@@ -255,7 +256,18 @@ public class Player extends Entity {
                 }
             }
         }
-        
+        // Check for NPC collision in StoreMap
+        else if (currentMap instanceof SRC.MAP.StoreMap) {
+            SRC.MAP.StoreMap storeMap = (SRC.MAP.StoreMap) currentMap;
+            java.util.ArrayList<NPCEntity> npcs = storeMap.getNPCs();
+            if (npcs != null) {
+                for (NPCEntity npc : npcs) {
+                    if (npc.isSolid() && checkCollisionWithNPC(npc)) {
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
     }
     

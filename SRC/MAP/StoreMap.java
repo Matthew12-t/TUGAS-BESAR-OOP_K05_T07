@@ -1,4 +1,6 @@
 package SRC.MAP;
+import java.util.ArrayList;
+import SRC.ENTITY.NPCEntity;
 import SRC.MAIN.GamePanel;
 import SRC.OBJECT.ObjectDeployer;
 import SRC.TILES.Tile;
@@ -10,6 +12,9 @@ public class StoreMap extends Map {    // Size of the store map
     // Object deployer for placing objects on the map
     private ObjectDeployer objDeployer;
 
+    // List to store NPCs in the store
+    private ArrayList<NPCEntity> npcs;
+
     /**
      * Constructor for the StoreMap
      * @param gp GamePanel reference
@@ -20,7 +25,34 @@ public class StoreMap extends Map {    // Size of the store map
 
         // Initialize object deployer
         objDeployer = new ObjectDeployer(gp);
-    }    /**
+        // InitiaIze NPC list
+        npcs = new ArrayList<>();
+    }
+
+    /**
+     * Get the list of NPCs in the store
+     * @return ArrayList of NPCEntity
+     */
+    public ArrayList<NPCEntity> getNPCs() {
+        return npcs;
+    }
+
+    /**
+     * Set the list of NPCs in the store
+     * @param npcs ArrayList of NPCEntity
+     */
+    public void setNPCs(ArrayList<NPCEntity> npcs) {
+        this.npcs = npcs;
+    }
+
+    /**
+     * Add a single NPC to the store
+     */
+    public void addNPC(NPCEntity npc) {
+        this.npcs.add(npc);
+    }
+
+    /**
      * Initialize the store map with various types of tiles from store.txt
      */
     @Override
@@ -90,27 +122,75 @@ public class StoreMap extends Map {    // Size of the store map
      */
     @Override
     public void setupInitialObjects() {
-        // Deploy objects at specific positions based on the store layout
-        // These positions correspond to the top-left corner of each object
-        
-        // StoreDecoration4 (1x1) - 'S' at position (5,1)
+        setupObjectsFromFile("store.txt");
+    }
+
+    /**
+     * Deploy objects and NPCs in the store based on store.txt
+     */
+    protected void setupObjectsFromFile(String mapFileName) {
+        // Deploy store objects as before
         objDeployer.deployStoreDecoration4(5, 1);
-        System.out.println("Deployed StoreDecoration4 at (5,1)");
-        
-        // StoreDecoration3 (3x1) - 's s s' at position (3,2)
         objDeployer.deployStoreDecoration3(3, 2);
-        System.out.println("Deployed StoreDecoration3 at (3,2)");
-        
-        // StoreDecoration2 (1x5) - 'd' column at position (1,3)
         objDeployer.deployStoreDecoration2(1, 3);
-        System.out.println("Deployed StoreDecoration2 at (1,3)");
-        
-        // StoreDecoration1 (3x2) - multiple 'c c c' blocks
-        // First block at (7,2)
         objDeployer.deployStoreDecoration1(7, 2);
-        System.out.println("Deployed StoreDecoration1 at (7,2)");
-        
-        // Second block at (7,5)
         objDeployer.deployStoreDecoration1(7, 5);
-        System.out.println("Deployed StoreDecoration1 at (7,5)");
-    }}
+
+        // Deploy NPCs at 'n' positions
+        npcs.clear();
+        for (int row = 0; row < STORE_ROWS; row++) {
+            for (int col = 0; col < STORE_COLS; col++) {
+                char mapChar = super.getMapFileChar(col, row, "RES/MAP_TXT/" + mapFileName);
+                if (mapChar == 'n') {
+                    int worldX = col * gp.getTileSize();
+                    int worldY = row * gp.getTileSize();
+                    // For now, always deploy Emily at 'n' in store
+                    SRC.ENTITY.EmilyEntity emily = new SRC.ENTITY.EmilyEntity(gp, worldX, worldY);
+                    npcs.add(emily);
+                    System.out.println("Placed Emily NPC at position (" + col + "," + row + ") - worldX: " + worldX + ", worldY: " + worldY);
+                    ensureNPCsVisible(); // Ensure NPC is visible in camera view
+                }
+            }
+        }
+    }
+
+    /**
+     * Draw the store map and its NPCs
+     */
+    @Override
+    public void draw(java.awt.Graphics2D g2) {
+        super.draw(g2); // Draw tiles and objects
+        for (NPCEntity npc : npcs) {
+            npc.draw(g2);
+        }
+    }
+
+    /**
+     * Update all NPCs in the store
+     */
+    public void updateNPCs() {
+        for (NPCEntity npc : npcs) {
+            npc.update();
+        }
+    }
+
+    /**
+     * Ensure NPCs are placed in visible camera area
+     * Call this after initializing NPCs and centering camera
+     */
+    public void ensureNPCsVisible() {
+        int cameraX = gp.getCameraX();
+        int cameraY = gp.getCameraY();
+        int screenWidth = gp.getScreenWidth();
+        int screenHeight = gp.getScreenHeight();
+        for (NPCEntity npc : npcs) {
+                // Place NPC in the center of visible area
+                System.out.println("Repositioning NPC " + npc.getNPCName() + " to be visible in camera view");
+                int centerWorldX = cameraX + (screenWidth / 2) - (gp.getTileSize() / 2);
+                int centerWorldY = cameraY + (screenHeight / 2) - (gp.getTileSize() / 2);
+                npc.setWorldX(centerWorldX - (gp.getTileSize()*2));
+                npc.setWorldY(centerWorldY);
+            
+        }
+    }
+}

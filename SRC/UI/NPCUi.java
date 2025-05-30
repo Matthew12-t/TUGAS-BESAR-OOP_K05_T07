@@ -30,7 +30,7 @@ public class NPCUi {
                 return;
             }
             int panelWidth = 625;
-            int panelHeight = 60;
+            int panelHeight = 100;
             int x = (gamePanel.getScreenWidth() - panelWidth) / 2;
             int y = gamePanel.getScreenHeight() - panelHeight - 125;
             g2.setColor(new Color(0,0,0,200));
@@ -117,6 +117,15 @@ public class NPCUi {
                         return npc;
                     }
                 }
+            }
+        } else if (currentMap instanceof SRC.MAP.StoreMap) {
+            java.util.ArrayList<NPCEntity> npcs = ((SRC.MAP.StoreMap) currentMap).getNPCs();
+            int playerTileX = gamePanel.getPlayer().getWorldX() / gamePanel.getTileSize();
+            int playerTileY = gamePanel.getPlayer().getWorldY() / gamePanel.getTileSize();
+            for (NPCEntity npc : npcs) {
+                if ((playerTileX == 2 && playerTileY == 3)) {
+                        return npc;
+                    }
             }
         }
         return null;
