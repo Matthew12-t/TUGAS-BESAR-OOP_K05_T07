@@ -169,41 +169,7 @@ public class FarmMap extends Map {
         }
         return false;
     }
-    
-    /**
-     * Check if a tile is tilled/farmable
-     * @param col Column in the map grid
-     * @param row Row in the map grid
-     * @return true if the tile is tilled
-     */
-    public boolean isTilled(int col, int row) {
-        if (col >= 0 && col < FARM_COLS && row >= 0 && row < FARM_ROWS) {
-            return tilled[col][row];
-        }
-        return false;
-    }
-    
-    /**
-     * Menanam seed di tilled land
-     * @param col Column in the map grid
-     * @param row Row in the map grid
-     * @return true if the seed was successfully planted
-     */
-    public boolean plantSeed(int col, int row) {
-        if (col >= 0 && col < FARM_COLS && row >= 0 && row < FARM_ROWS) {
-            int tileType = getTile(col, row);
-            
-            // Hanya bisa menanam di TILE_TILLED
-            if (tileType != Tile.TILE_TILLED) {
-                return false;
-            }
-            
-            // Set tile sebagai planted land
-            setTileInMap(col, row, Tile.TILE_PLANTED);
-            return true;
-        }
-        return false;
-    }
+   
 
     public int getTeleportToHouseCol() {
         return teleportToHouseCol;

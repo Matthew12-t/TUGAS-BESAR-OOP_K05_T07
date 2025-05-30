@@ -6,10 +6,12 @@ public class Seed extends Item {
     public Seed(String name, int sellPrice, int buyPrice, String season, int daysToHarvest) {
         super(name, "Seed", sellPrice, buyPrice);
         this.season = season;
-        this.daysToHarvest = daysToHarvest;
-        
-        // Load image untuk seed ini
-        String imagePath = "RES/SEEDS/" + name.toLowerCase().replace(" ", "_") + ".png";
+        this.daysToHarvest = daysToHarvest;        // Load image untuk seed ini
+        // Extract crop name from seed name (remove "Seed" suffix and trim)
+        String cropName = name.replace(" Seed", "").trim();
+        String folderName = cropName.toUpperCase().replace(" ", ""); // Remove spaces for folder
+        String fileName = cropName.toLowerCase().replace(" ", "_"); // Use underscores for file
+        String imagePath = "RES/SEED/" + folderName + "/" + fileName + "_seed.png";
         loadImage(imagePath);
     }
     // Getters

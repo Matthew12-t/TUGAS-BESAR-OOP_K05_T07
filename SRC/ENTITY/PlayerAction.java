@@ -223,15 +223,110 @@ public class PlayerAction {
                 break;
         }
     }
-    
-    /**
+      /**
      * Handle seed usage for planting
      */
     private void useSeeds(String seedName) {
         System.out.println("Preparing to plant: " + seedName);
         // TODO: Implement planting logic
         // This could set a "planting mode" where the player can click on tillable soil
-    }    /**
+    }
+
+    /**
+     * Perform tilling action when player presses 'C' key and holds a Hoe
+     * @return true if tilling action was performed successfully
+     */
+    public boolean performTilling() {
+        System.out.println("DEBUG: performTilling called");
+        
+        // Check if we're in Farm Map
+        if (!gamePanel.getCurrentMap().getMapName().equals("Farm Map")) {
+            System.out.println("DEBUG: Tilling only available in Farm Map");
+            return false;
+        }
+        
+        // Check if player is holding a Hoe
+        if (!player.isHolding("Hoe")) {
+            System.out.println("DEBUG: Player must be holding a Hoe to till land");
+            return false;
+        }
+        
+        // Check if player has enough energy for tilling (5 energy)
+        final int TILLING_ENERGY_COST = 5;
+        if (!hasEnoughEnergy(TILLING_ENERGY_COST)) {
+            System.out.println("DEBUG: Not enough energy for tilling");
+            return false;
+        }
+        
+        // Get player's current position in tile coordinates
+        int tileSize = gamePanel.getTileSize();
+        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
+        int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
+        
+        // Initialize TileManager if needed
+        SRC.TILES.TileManager tileManager = new SRC.TILES.TileManager(gamePanel);
+        
+        // Attempt to till the tile at player's position
+        if (tileManager.tillTile(playerCol, playerRow)) {
+            // Consume energy and time for successful tilling
+            consumeEnergy(TILLING_ENERGY_COST);
+            addGameTime(5); // Add 5 minutes to game time
+            System.out.println("DEBUG: Successfully tilled land at (" + playerCol + ", " + playerRow + ")");
+            return true;
+        } else {
+            System.out.println("DEBUG: Failed to till land at (" + playerCol + ", " + playerRow + ")");
+            return false;
+        }
+    }
+
+    /**
+     * Perform land recovery action when player holds a Pickaxe
+     * @return true if land recovery action was performed successfully
+     */
+    public boolean performLandRecovery() {
+        System.out.println("DEBUG: performLandRecovery called");
+        
+        // Check if we're in Farm Map
+        if (!gamePanel.getCurrentMap().getMapName().equals("Farm Map")) {
+            System.out.println("DEBUG: Land recovery only available in Farm Map");
+            return false;
+        }
+        
+        // Check if player is holding a Pickaxe
+        if (!player.isHolding("Pickaxe")) {
+            System.out.println("DEBUG: Player must be holding a Pickaxe to recover land");
+            return false;
+        }
+        
+        // Check if player has enough energy for land recovery (5 energy)
+        final int LAND_RECOVERY_ENERGY_COST = 5;
+        if (!hasEnoughEnergy(LAND_RECOVERY_ENERGY_COST)) {
+            System.out.println("DEBUG: Not enough energy for land recovery");
+            return false;
+        }
+        
+        // Get player's current position in tile coordinates
+        int tileSize = gamePanel.getTileSize();
+        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
+        int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
+        
+        // Initialize TileManager if needed
+        SRC.TILES.TileManager tileManager = new SRC.TILES.TileManager(gamePanel);
+        
+        // Attempt to recover the land at player's position
+        if (tileManager.recoverLand(playerCol, playerRow)) {
+            // Consume energy and time for successful land recovery
+            consumeEnergy(LAND_RECOVERY_ENERGY_COST);
+            addGameTime(5); // Add 5 minutes to game time
+            System.out.println("DEBUG: Successfully recovered land at (" + playerCol + ", " + playerRow + ")");
+            return true;
+        } else {
+            System.out.println("DEBUG: Failed to recover land at (" + playerCol + ", " + playerRow + ")");
+            return false;
+        }
+    }
+
+    /**
      * Handle fishing action when player is on fishable water
      * @return true if fishing action was performed successfully
      */
@@ -863,5 +958,193 @@ public class PlayerAction {
     public boolean isPlayerNearStore() {
         // Check if player is in store map or near store object
         return gamePanel.getCurrentMap().getMapName().equals("Store Map");
+    }
+    
+    /**
+     * Perform planting action when player presses 'P' key and holds a Seed
+     * @return true if planting action was performed successfully
+     */
+    public boolean performPlanting() {
+        System.out.println("DEBUG: performPlanting called");
+        
+        // Check if we're in Farm Map
+        if (!gamePanel.getCurrentMap().getMapName().equals("Farm Map")) {
+            System.out.println("DEBUG: Planting only available in Farm Map");
+            return false;
+        }
+        
+        // Check if player is holding a seed
+        String heldSeedName = getHeldSeedName();
+        if (heldSeedName == null) {
+            System.out.println("DEBUG: Player must be holding a seed to plant");
+            return false;
+        }
+        
+        // Check if player has enough energy for planting (5 energy)
+        final int PLANTING_ENERGY_COST = 5;
+        if (!hasEnoughEnergy(PLANTING_ENERGY_COST)) {
+            System.out.println("DEBUG: Not enough energy for planting");
+            return false;
+        }
+        
+        // Get player's current position in tile coordinates
+        int tileSize = gamePanel.getTileSize();
+        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
+        int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
+        
+        // Get seed growth days from SeedData
+        int daysToGrow = getSeedGrowthDays(heldSeedName);
+        if (daysToGrow == -1) {
+            System.out.println("DEBUG: Invalid seed data for " + heldSeedName);
+            return false;
+        }
+        
+        // Initialize TileManager if needed
+        SRC.TILES.TileManager tileManager = new SRC.TILES.TileManager(gamePanel);
+        
+        // Attempt to plant the seed at player's position
+        if (tileManager.plantSeed(playerCol, playerRow, heldSeedName, daysToGrow)) {
+            // Consume energy and time for successful planting
+            consumeEnergy(PLANTING_ENERGY_COST);
+            addGameTime(5); // Add 5 minutes to game time
+            
+            // Remove one seed from inventory
+            removeSeedFromInventory(heldSeedName);
+            
+            System.out.println("DEBUG: Successfully planted " + heldSeedName + " at (" + playerCol + ", " + playerRow + ")");
+            return true;
+        } else {
+            System.out.println("DEBUG: Failed to plant " + heldSeedName + " at (" + playerCol + ", " + playerRow + ")");
+            return false;
+        }
+    }
+      /**
+     * Get the name of the seed currently being held by the player
+     * @return seed name if holding a seed, null otherwise
+     */
+    public String getHeldSeedName() {
+        // Check if player has a selected item that is a seed
+        int selectedSlotIndex = gamePanel.getMouseHandler().getSelectedSlotIndex();
+        if (selectedSlotIndex >= 0) {
+            Item[] items = player.getInventoryItems();
+            if (selectedSlotIndex < items.length && items[selectedSlotIndex] != null) {
+                Item selectedItem = items[selectedSlotIndex];
+                if (selectedItem.getCategory().equals("Seed")) {
+                    return selectedItem.getName();
+                }
+            }
+        }
+          // Also check if player is holding a tool that might be a seed (alternative approach)
+        if (player.isHoldingAnyTool()) {
+            // For seeds, we might need to check inventory instead of held tools
+        }
+        
+        return null; // Not holding any seed
+    }
+    
+    /**
+     * Get growth days for a specific seed from SeedData
+     * @param seedName name of the seed
+     * @return number of days to grow, or -1 if not found
+     */
+    private int getSeedGrowthDays(String seedName) {
+        try {
+            // Access SeedData to get growth information
+            SRC.ITEMS.Seed seed = SRC.DATA.SeedData.getSeed(seedName);
+            if (seed != null) {
+                return seed.getDaysToHarvest();
+            }
+        } catch (Exception e) {
+            System.out.println("DEBUG: Error accessing seed data for " + seedName + ": " + e.getMessage());
+        }
+        return -1; // Default or error case
+    }
+    
+    /**
+     * Remove one seed from inventory after planting
+     * @param seedName name of the seed to remove
+     */
+    private void removeSeedFromInventory(String seedName) {
+        Item[] items = player.getInventoryItems();
+        int[] quantities = player.getInventoryQuantities();
+        
+        for (int i = 0; i < items.length; i++) {
+            if (items[i] != null && items[i].getName().equals(seedName)) {
+                if (quantities[i] > 1) {
+                    quantities[i]--; // Reduce quantity
+                } else {
+                    player.removeItemFromInventory(i); // Remove item completely
+                    // Reset selection if this was the selected item
+                    if (gamePanel.getMouseHandler().getSelectedSlotIndex() == i) {
+                        gamePanel.getMouseHandler().setSelectedSlotIndex(-1);
+                    }
+                }
+                System.out.println("DEBUG: Removed 1x " + seedName + " from inventory");
+                return;
+            }
+        }
+        System.out.println("DEBUG: Could not find " + seedName + " in inventory to remove");
+    }
+
+    /**
+     * Perform harvesting action when player presses 'H' key on a ready crop
+     * @return true if harvesting action was performed successfully
+     */
+    public boolean performHarvesting() {
+        System.out.println("DEBUG: performHarvesting called");
+        
+        // Check if we're in Farm Map
+        if (!gamePanel.getCurrentMap().getMapName().equals("Farm Map")) {
+            System.out.println("DEBUG: Harvesting only available in Farm Map");
+            return false;
+        }
+        
+        // Get player's current position in tile coordinates
+        int tileSize = gamePanel.getTileSize();
+        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
+        int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
+        
+        // Initialize TileManager if needed
+        SRC.TILES.TileManager tileManager = new SRC.TILES.TileManager(gamePanel);
+        
+        // Check if there's a plant at this position that's ready to harvest
+        if (!tileManager.hasPlantAt(playerCol, playerRow)) {
+            System.out.println("DEBUG: No plant at this location");
+            return false;
+        }
+        
+        if (!tileManager.isPlantReadyToHarvest(playerCol, playerRow)) {
+            System.out.println("DEBUG: Plant is not ready to harvest yet");
+            return false;
+        }
+        
+        // Attempt to harvest the crop
+        String cropName = tileManager.harvestCrop(playerCol, playerRow);
+        if (cropName != null) {
+            // Add crop to inventory
+            try {                SRC.ITEMS.Crop crop = SRC.DATA.CropData.getCrop(cropName);
+                if (crop != null) {
+                    // Add multiple crops to inventory
+                    int harvestQuantity = crop.getCropPerHarvest();
+                    for (int i = 0; i < harvestQuantity; i++) {
+                        player.addItemToInventory(crop);
+                    }
+                    System.out.println("DEBUG: Harvested " + harvestQuantity + "x " + cropName);
+                } else {
+                    System.out.println("DEBUG: Could not find crop data for " + cropName);
+                }
+            } catch (Exception e) {
+                System.out.println("DEBUG: Error adding crop to inventory: " + e.getMessage());
+            }
+            
+            // Add time for harvesting (2 minutes)
+            addGameTime(2);
+            
+            System.out.println("DEBUG: Successfully harvested " + cropName + " at (" + playerCol + ", " + playerRow + ")");
+            return true;
+        } else {
+            System.out.println("DEBUG: Failed to harvest crop at (" + playerCol + ", " + playerRow + ")");
+            return false;
+        }
     }
 }

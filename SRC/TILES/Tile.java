@@ -420,10 +420,29 @@ public class Tile {
 
     public static void drawTilledTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
         g2.drawImage(tilledLandTile, screenX, screenY, tileSize, tileSize, null);
-    }
-
-    public static void drawPlantedTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+    }    public static void drawPlantedTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
         g2.drawImage(plantedLandTile, screenX, screenY, tileSize, tileSize, null);
+    }
+    
+    /**
+     * Draw planted tile dengan dynamic growth - delegate ke TileManager
+     * @param g2 Graphics context
+     * @param screenX screen X position
+     * @param screenY screen Y position
+     * @param tileSize tile size
+     * @param tileManager TileManager instance untuk handle growth logic
+     * @param col tile column
+     * @param row tile row
+     */
+    public static void drawPlantedTileGrowth(Graphics2D g2, int screenX, int screenY, int tileSize, 
+                                           Object tileManager, int col, int row) {
+        if (tileManager != null && tileManager instanceof SRC.TILES.TileManager) {
+            // Delegate ke TileManager untuk dynamic growth rendering
+            ((SRC.TILES.TileManager) tileManager).drawPlantedTileGrowth(g2, screenX, screenY, col, row);
+        } else {
+            // Fallback ke static planted tile jika TileManager tidak tersedia
+            drawPlantedTile(g2, screenX, screenY, tileSize);
+        }
     }
 
     public static void drawLandTile(Graphics2D g2, int screenX, int screenY, int tileSize) {

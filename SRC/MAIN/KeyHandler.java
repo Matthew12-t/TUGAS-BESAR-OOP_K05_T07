@@ -74,12 +74,24 @@ public class KeyHandler implements KeyListener {
                 if(code == KeyEvent.VK_3) {
                     gamePanel.switchToHouseMap();
                     System.out.println("Switched to House Map");
-                }
-                  // Object placement mode                
+                }                  // Object placement mode vs Planting mode
                 if(code == KeyEvent.VK_P) {
-                    boolean isPlacing = gamePanel.getMouseHandler().isPlacingHouse();
-                    gamePanel.getMouseHandler().setPlacingHouse(!isPlacing);
-                    System.out.println("House placement mode: " + (!isPlacing ? "ON" : "OFF"));
+                    // Check if player has a seed selected for planting
+                    if (gamePanel.getPlayer().getPlayerAction().getHeldSeedName() != null) {
+                        System.out.println("DEBUG: 'P' key pressed for planting (holding seed)");
+                        gamePanel.getPlayer().getPlayerAction().performPlanting();
+                    } else {
+                        // Default behavior - house placement mode
+                        boolean isPlacing = gamePanel.getMouseHandler().isPlacingHouse();
+                        gamePanel.getMouseHandler().setPlacingHouse(!isPlacing);
+                        System.out.println("House placement mode: " + (!isPlacing ? "ON" : "OFF"));
+                    }
+                }
+                
+                // Harvesting with 'H' key
+                if(code == KeyEvent.VK_H) {
+                    System.out.println("DEBUG: 'H' key pressed for harvesting");
+                    gamePanel.getPlayer().getPlayerAction().performHarvesting();
                 }
                   // Remove object under cursor
                 if(code == KeyEvent.VK_DELETE || code == KeyEvent.VK_BACK_SPACE) {
@@ -91,7 +103,7 @@ public class KeyHandler implements KeyListener {
                         
                         gamePanel.getCurrentMap().removeObject(tileCol, tileRow);
                     }
-                }                // 'C' key action - prioritize sleep if near bed, store if in store map, shipping bin if near shipping bin, otherwise fishing
+                }                // 'C' key action - prioritize sleep if near bed, store if in store map, shipping bin if near shipping bin, tilling/land recovery if in farm map, otherwise fishing
                 if(code == KeyEvent.VK_C) {
                     // Check if player is near a bed for sleep action
                     if (gamePanel.getPlayer().getPlayerAction().isPlayerNearBed()) {
@@ -103,6 +115,14 @@ public class KeyHandler implements KeyListener {
                     } else if (gamePanel.getPlayer().getPlayerAction().isPlayerNearShippingBin()) {
                         System.out.println("DEBUG: 'C' key pressed for shipping bin");
                         gamePanel.setGameState(GamePanel.SHIPPING_STATE);
+                    } else if (gamePanel.getCurrentMap().getMapName().equals("Farm Map") && 
+                               gamePanel.getPlayer().isHolding("Hoe")) {
+                        System.out.println("DEBUG: 'C' key pressed for tilling (holding hoe in farm map)");
+                        gamePanel.getPlayer().getPlayerAction().performTilling();
+                    } else if (gamePanel.getCurrentMap().getMapName().equals("Farm Map") && 
+                               gamePanel.getPlayer().isHolding("Pickaxe")) {
+                        System.out.println("DEBUG: 'C' key pressed for land recovery (holding pickaxe in farm map)");
+                        gamePanel.getPlayer().getPlayerAction().performLandRecovery();
                     } else {
                         System.out.println("DEBUG: 'C' key pressed for fishing");
                         gamePanel.getPlayer().getPlayerAction().performFishing();

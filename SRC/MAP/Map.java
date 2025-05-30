@@ -100,8 +100,7 @@ public abstract class Map {
             }
         }
     }
-    
-    /**
+      /**
      * Draw a specific tile at the given position
      * @param g2 Graphics2D object for drawing
      * @param col Column in the map grid
@@ -122,8 +121,17 @@ public abstract class Map {
             worldY + gp.getTileSize() > gp.getCameraY() &&
             worldY - gp.getTileSize() < gp.getCameraY() + gp.getScreenHeight()) {
             
-            // Draw the appropriate tile type using the Tile class utility method
-            Tile.drawTileByType(g2, screenX, screenY, gp.getTileSize(), tileType);
+            // Special handling for planted tiles to use dynamic growth system
+            if (tileType == Tile.TILE_PLANTED) {
+                // Create TileManager instance for growth rendering
+                SRC.TILES.TileManager tileManager = new SRC.TILES.TileManager(gp);
+                
+                // Use delegation method for dynamic growth rendering
+                Tile.drawPlantedTileGrowth(g2, screenX, screenY, gp.getTileSize(), tileManager, col, row);
+            } else {
+                // Draw other tile types using the standard method
+                Tile.drawTileByType(g2, screenX, screenY, gp.getTileSize(), tileType);
+            }
         }
     }
     

@@ -1,9 +1,6 @@
 package SRC.DATA;
 
 import SRC.ITEMS.Seed;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import javax.imageio.ImageIO;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,20 +20,20 @@ public class SeedData {
      */
     private static void initializeSeeds() {
        
-        seeds.put("Parsnip Seeds", new Seed("Parsnip Seeds", 10, 20, "Spring", 4)); // Sell Price: Setengah dari Buy Price
-        seeds.put("Cauliflower Seeds", new Seed("Cauliflower Seeds", 40, 80, "Spring", 5)); 
-        seeds.put("Potato Seeds", new Seed("Potato Seeds", 25, 50, "Spring", 3));
-        seeds.put("Wheat Seeds", new Seed("Wheat Seeds", 30, 60, "Spring", 1));
+        seeds.put("Parsnip Seeds", new Seed("Parsnip Seed", 10, 20, "Spring", 4)); // Sell Price: Setengah dari Buy Price
+        seeds.put("Cauliflower Seeds", new Seed("Cauliflower Seed", 40, 80, "Spring", 5)); 
+        seeds.put("Potato Seeds", new Seed("Potato Seed", 25, 50, "Spring", 3));
+        seeds.put("Wheat Seeds", new Seed("Wheat Seed", 30, 60, "Spring", 1));
 
-        seeds.put("Blueberry Seeds", new Seed("Blueberry Seeds", 40, 80, "Summer", 7));
-        seeds.put("Tomato Seeds", new Seed("Tomato Seeds", 25, 50, "Summer", 3));
-        seeds.put("Hot Pepper Seeds", new Seed("Hot Pepper Seeds", 20, 40, "Summer", 1));
-        seeds.put("Melon Seeds", new Seed("Melon Seeds", 40, 80, "Summer", 4));
+        seeds.put("Blueberry Seeds", new Seed("Blueberry Seed", 40, 80, "Summer", 7));
+        seeds.put("Tomato Seeds", new Seed("Tomato Seed", 25, 50, "Summer", 3));
+        seeds.put("Hot Pepper Seeds", new Seed("Hot Pepper Seed", 20, 40, "Summer", 1));
+        seeds.put("Melon Seeds", new Seed("Melon Seed", 40, 80, "Summer", 4));
 
-        seeds.put("Cranberry Seeds", new Seed("Cranberry Seeds", 50, 100, "Fall", 2));
-        seeds.put("Pumpkin Seeds", new Seed("Pumpkin Seeds", 75, 150, "Fall", 7));
-        seeds.put("Wheat Seeds", new Seed("Wheat Seeds", 30, 60, "Fall", 1));
-        seeds.put("Grape Seeds", new Seed("Grape Seeds", 30, 60, "Fall", 3));
+        seeds.put("Cranberry Seeds", new Seed("Cranberry Seed", 50, 100, "Fall", 2));
+        seeds.put("Pumpkin Seeds", new Seed("Pumpkin Seed", 75, 150, "Fall", 7));
+        seeds.put("Wheat Seeds", new Seed("Wheat Seed", 30, 60, "Fall", 1));
+        seeds.put("Grape Seeds", new Seed("Grape Seed", 30, 60, "Fall", 3));
         System.out.println("SeedData: Initialized " + seeds.size() + " seed types");
     }
     
