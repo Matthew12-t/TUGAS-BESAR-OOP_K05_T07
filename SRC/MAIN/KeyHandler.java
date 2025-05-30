@@ -130,25 +130,13 @@ public class KeyHandler implements KeyListener {
                     }
                 }
                 
-                // --- NPC INTERACTION KEYS ---
-                if(code == KeyEvent.VK_G) {
-                    // Gifting
-                    gamePanel.tryGiftToNearbyNPC();
-                }
-                if(code == KeyEvent.VK_T) {
-                    // Talking
-                    gamePanel.tryTalkToNearbyNPC();
-                }
-                if(code == KeyEvent.VK_P) {
+               
+                if(code == KeyEvent.VK_Q) {
                     NPCEntity nearbyNPC = gamePanel.getNearbyNPC(1);
                     if (nearbyNPC != null) {
-                        String status = nearbyNPC.getRelationshipStatus();
-                        if (status.equals("fiance")) {
-                            nearbyNPC.performAction(gamePanel.getPlayer(), "married");
-                        } else {
-                            nearbyNPC.performAction(gamePanel.getPlayer(), "propose");
-                        }
-                    } 
+                        gamePanel.showNPCInteractionMenu(nearbyNPC);
+                        return;
+                    }
                 }
             }
             // --- INVENTORY STATE GIFTING ---
@@ -209,13 +197,27 @@ public class KeyHandler implements KeyListener {
                     gamePanel.setGameState(GamePanel.PLAY_STATE);
                     System.out.println("ESC key pressed - exiting shipping bin state");
                 }
-            }
-            else if (gamePanel.getGameState() == GamePanel.STORE_STATE) {
+            }            else if (gamePanel.getGameState() == GamePanel.STORE_STATE) {
                 // Only handle ESC key to exit store - all other controls are mouse-based
                 if(code == KeyEvent.VK_ESCAPE) {
                     gamePanel.setGameState(GamePanel.PLAY_STATE);
                     System.out.println("ESC key pressed - exiting store state");
                 }
+            }
+            // Handle NPC interaction keys when menu is open
+            else if (gamePanel.isNPCInteractionMenuOpen()) {
+                if (code == KeyEvent.VK_T) {
+                    gamePanel.getNPCUi().handleTalkKey();
+                } else if (code == KeyEvent.VK_G) {
+                    gamePanel.getNPCUi().handleGiftKey();
+                } else if (code == KeyEvent.VK_P) {
+                    gamePanel.getNPCUi().handleProposeKey();
+                } else if (code == KeyEvent.VK_ENTER) {
+                    gamePanel.getNPCUi().handleEnterKey();
+                } else if (code == KeyEvent.VK_ESCAPE) {
+                    gamePanel.closeNPCInteractionMenu();
+                }
+                return;
             }
         }
         else {

@@ -47,7 +47,8 @@ public class GamePanel extends JPanel implements Runnable {
     private final int screenWidth = tileSize * maxScreenCol; // 768 pixels
     private final int screenHeight = tileSize * maxScreenRow; // 576 pixels
     private final int FPS = 60;
-      // Game states
+    
+    // Game states
     public static final int PLAY_STATE = 0;
     public static final int MAP_MENU_STATE = 1;
     public static final int INVENTORY_STATE = 2;
@@ -102,17 +103,22 @@ public class GamePanel extends JPanel implements Runnable {
     private Map dascoHouseMap;     // Dasco's house instance
     private Map emilyHouseMap;     // Emily's house instance
     private Map mayorTadiHouseMap; // Mayor Tadi's house instance
-    private Map perryHouseMap;     // Perry's house instance
-      // CAMERA
+    private Map perryHouseMap;     // Perry's house instance    // CAMERA
     private int cameraX = 0; 
     private int cameraY = 0;
     
     // Clock UI system
-    private ClockUI clockUI;// Inventory constants
+    private ClockUI clockUI;
+    
+    // Inventory constants
     private static final int INVENTORY_ROWS = 4;
-    private static final int INVENTORY_COLS = 4;    // Shipping Bin system
+    private static final int INVENTORY_COLS = 4;
+    
+    // Shipping Bin system
     private ShippingBin ShippingBin;
-    private ShippingBinUI shippingBinUI;    // Store system
+    private ShippingBinUI shippingBinUI;
+    
+    // Store system
     private StoreUI storeUI;
 
     // Getters and setters
@@ -139,13 +145,15 @@ public class GamePanel extends JPanel implements Runnable {
     public int getScreenWidth() {
         return screenWidth;
     }
-    
-    public int getScreenHeight() {
+      public int getScreenHeight() {
         return screenHeight;
     }
-      public int getFPS() {
-        return FPS;    }
-      public ShippingBin getShippingBin() {
+    
+    public int getFPS() {
+        return FPS;
+    }
+    
+    public ShippingBin getShippingBin() {
         return ShippingBin;
     }
       public ShippingBinUI getShippingBinUI() {
@@ -949,8 +957,7 @@ public class GamePanel extends JPanel implements Runnable {
             // Then draw store UI overlay
             if (this.getStoreUI() != null) {
                 this.getStoreUI().draw(g2);
-            }
-        }
+            }        }
         
         npcUi.drawMessagePanel(g2);
         g2.dispose(); // Release system resources
@@ -1539,5 +1546,25 @@ public class GamePanel extends JPanel implements Runnable {
      */
     public void showMessagePanel(String text) {
         npcUi.showMessagePanel(text);
+    }    // --- NPC INTERACTION MENU ---
+    /**
+     * Show the NPC interaction menu if near an NPC
+     */
+    public void showNPCInteractionMenu(SRC.ENTITY.NPCEntity npc) {
+        // Use the new NPCUi system for interaction menu
+        if (npc != null) {
+            npcUi.openNPCInteractionMenu(npc);
+        }
+        repaint();
+    }    public void closeNPCInteractionMenu() {
+        // Use the new NPCUi system to close the menu
+        npcUi.closeNPCInteractionMenu();
+        repaint();
+    }    public boolean isNPCInteractionMenuOpen() {
+        return npcUi.isNPCInteractionMenuOpen();
+    }
+
+    public SRC.ENTITY.NPCEntity getNPCInteractionTarget() {
+        return npcUi.getNPCInteractionTarget();
     }
 }
