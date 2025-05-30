@@ -62,8 +62,7 @@ public class KeyHandler implements KeyListener {
                         gamePanel.closeNPCInteractionMenu();
                     }
                     return; // Don't process any other keys when NPC menu is open
-                }
-                  // Check if message panel is active - if so, ignore all input except Enter to dismiss
+                }                // Check if message panel is active - if so, ignore all input except Enter to dismiss
                 if (gamePanel.isMessagePanelActive()) {
                     if (code == KeyEvent.VK_ENTER || code == KeyEvent.VK_SPACE) {
                         // Dismiss message panel by clearing it
@@ -71,6 +70,15 @@ public class KeyHandler implements KeyListener {
                         System.out.println("Message panel dismissed");
                     }
                     return; // Don't process any other keys when message panel is active
+                }
+                
+                // Check if player is watching TV - if so, only allow escape to stop watching
+                if (gamePanel.getPlayer().getPlayerAction().getTvUI().isWatching()) {
+                    if (code == KeyEvent.VK_ESCAPE) {
+                        gamePanel.getPlayer().getPlayerAction().getTvUI().handleEscapePress();
+                        System.out.println("DEBUG: Escape pressed - stopped watching TV");
+                    }
+                    return; // Don't process any other keys when watching TV
                 }
                 
                 // Movement keys - only active in play state and when NPC menu is closed
@@ -128,7 +136,7 @@ public class KeyHandler implements KeyListener {
                         
                         gamePanel.getCurrentMap().removeObject(tileCol, tileRow);
                     }
-                }                // 'C' key action - prioritize sleep if near bed, store if in store map, shipping bin if near shipping bin, watering/planting/tilling/land recovery if in farm map, otherwise fishing
+                }                // 'C' key action - prioritize sleep if near bed, store if in store map, shipping bin if near shipping bin, TV if near TV, watering/planting/tilling/land recovery if in farm map, otherwise fishing
                 if(code == KeyEvent.VK_C) {
                     // Check if player is near a bed for sleep action
                     if (gamePanel.getPlayer().getPlayerAction().isPlayerNearBed()) {
@@ -140,6 +148,9 @@ public class KeyHandler implements KeyListener {
                     } else if (gamePanel.getPlayer().getPlayerAction().isPlayerNearShippingBin()) {
                         System.out.println("DEBUG: 'C' key pressed for shipping bin");
                         gamePanel.setGameState(GamePanel.SHIPPING_STATE);
+                    } else if (gamePanel.getPlayer().getPlayerAction().isPlayerNearTV()) {
+                        System.out.println("DEBUG: 'C' key pressed for TV watching (near TV)");
+                        gamePanel.getPlayer().getPlayerAction().performWatchTV();
                       } else if (gamePanel.getCurrentMap().getMapName().equals("Farm Map") && 
                                gamePanel.getPlayer().isHolding("Watering Can")) {
                         System.out.println("DEBUG: 'C' key pressed for watering (holding watering can in farm map)");

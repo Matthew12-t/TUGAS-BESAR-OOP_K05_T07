@@ -18,10 +18,10 @@ import SRC.STORE.Store;
  */
 public class PlayerAction {
     private GamePanel gamePanel;
-    private Player player;
-    private Inventory inventory;
+    private Player player;    private Inventory inventory;
     private FishingUI fishingUI; // Add fishing UI
     private SleepUI sleepUI; // Add sleep UI
+    private SRC.UI.TvUI tvUI; // Add TV UI
     
     // Energy system - now delegated to Player
     private static final int MAX_ENERGY = 100;
@@ -31,17 +31,17 @@ public class PlayerAction {
     private static final int LATE_NIGHT_HOUR = 2; // 02:00
       // Store and buying system
     private Store<Item> store;
-    
-    public PlayerAction(GamePanel gamePanel, Player player) {
+      public PlayerAction(GamePanel gamePanel, Player player) {
         this.gamePanel = gamePanel;
         this.player = player;
         this.inventory = new Inventory();
         this.fishingUI = new FishingUI(gamePanel); // Initialize fishing UI
         this.sleepUI = new SleepUI(gamePanel); // Initialize sleep UI
+        this.tvUI = new SRC.UI.TvUI(gamePanel); // Initialize TV UI
         // Energy is now managed by Player class directly
           // Initialize store system
         initializeStore();
-    }    /**
+    }/**
      * Initialize the store system with all available items
      */
     private void initializeStore() {
@@ -640,20 +640,23 @@ public class PlayerAction {
     public double getEnergyPercentage() {
         return player.getEnergyPercentage();
     }
-    
-    /**
-     * Update PlayerAction - including fishing UI
+      /**
+     * Update PlayerAction - including fishing UI, sleep UI, and TV UI
      */
     public void update() {
         fishingUI.update();
+        sleepUI.update();
+        tvUI.update();
     }
-    
+
     /**
      * Draw PlayerAction UI elements
      * @param g2 Graphics2D object for drawing
      */
     public void draw(java.awt.Graphics2D g2) {
         fishingUI.draw(g2);
+        sleepUI.draw(g2);
+        tvUI.draw(g2);
     }
     
     /**
@@ -849,7 +852,48 @@ public class PlayerAction {
         }
         
         return false;
-    }/**
+    }    /**
+     * Check if player is near a TV (within interaction distance)
+     * TV is 1x1 tile, so check adjacent tiles around it
+     */
+    public boolean isPlayerNearTV(){
+        SRC.MAP.Map currentMap = gamePanel.getCurrentMap();
+        
+        // Get player position in tiles
+        int tileSize = gamePanel.getTileSize();
+        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
+        int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
+        
+        // Check all objects on the map for TV
+        SuperObject[] objects = currentMap.getObjects();
+        for (SuperObject obj : objects) {
+            if (obj instanceof SRC.OBJECT.OBJ_Tv) {
+                SRC.OBJECT.OBJ_Tv tv = (SRC.OBJECT.OBJ_Tv) obj;
+                
+                int tvCol = obj.getPosition().getWorldX() / tileSize;
+                int tvRow = obj.getPosition().getWorldY() / tileSize;
+                int tvWidth = tv.getTvWidth(); 
+                int tvHeight = tv.getTvHeight(); 
+                boolean nearLeftSide = (playerCol == tvCol - 1) && 
+                                     (playerRow >= tvRow - 1) && (playerRow <= tvRow + tvHeight);
+                boolean nearRightSide = (playerCol == tvCol + tvWidth) && 
+                                      (playerRow >= tvRow - 1) && (playerRow <= tvRow + tvHeight);
+                boolean nearTopSide = (playerRow == tvRow - 1) && 
+                                    (playerCol >= tvCol - 1) && (playerCol <= tvCol + tvWidth);
+                boolean nearBottomSide = (playerRow == tvRow + tvHeight) && 
+                                       (playerCol >= tvCol - 1) && (playerCol <= tvCol + tvWidth);
+                
+                if (nearLeftSide || nearRightSide || nearTopSide || nearBottomSide) {
+                    System.out.println("DEBUG: Player near TV at (" + tvCol + "," + tvRow + ") - " +
+                                     "Size: " + tvWidth + "x" + tvHeight + " - Player at (" + playerCol + "," + playerRow + ")");
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    /**
      * Perform sleep effects (restore energy, set time to 10:00 AM, process shipping bin)
      */
     private void performSleepEffects(SleepUI.SleepTrigger trigger) {
@@ -1253,5 +1297,43 @@ public class PlayerAction {
             System.out.println("DEBUG: Failed to water plant at (" + playerCol + ", " + playerRow + ")");
             return false;
         }
+    }
+    
+    /**
+     * Perform TV watching action when player is near TV and presses 'C' key
+     * @return true if TV watching action was performed successfully
+     */
+    public boolean performWatchTV() {
+        System.out.println("DEBUG: performWatchTV called");
+        
+        // Check if player is near a TV
+        if (!isPlayerNearTV()) {
+            System.out.println("DEBUG: Player not near TV");
+            return false;
+        }
+        
+        // Check if player has enough energy for watching TV (5 energy)
+        final int WATCHING_ENERGY_COST = 5;
+        if (!hasEnoughEnergy(WATCHING_ENERGY_COST)) {
+            System.out.println("DEBUG: Not enough energy for watching TV");
+            return false;
+        }
+          // Consume energy for watching TV
+        consumeEnergy(WATCHING_ENERGY_COST);        // Start watching TV
+        tvUI.startWatchingTV();
+        
+        // Switch game state to TV watching state
+        gamePanel.setGameState(GamePanel.TV_STATE);
+        
+        System.out.println("DEBUG: Started watching TV - consumed " + WATCHING_ENERGY_COST + " energy");
+        return true;
+    }
+    
+    /**
+     * Get the TV UI instance
+     * @return TvUI instance
+     */
+    public SRC.UI.TvUI getTvUI() {
+        return tvUI;
     }
 }
