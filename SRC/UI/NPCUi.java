@@ -1,7 +1,6 @@
 package SRC.UI;
 
 import SRC.ENTITY.NPCEntity;
-import SRC.ENTITY.Player;
 import SRC.ITEMS.Item;
 import SRC.MAIN.GamePanel;
 import java.awt.*;
@@ -114,8 +113,6 @@ public class NPCUi {
                 int playerTileX = gamePanel.getPlayer().getWorldX() / gamePanel.getTileSize();
                 int playerTileY = gamePanel.getPlayer().getWorldY() / gamePanel.getTileSize();
                 for (NPCEntity npc : npcs) {
-                    int npcTileX = npc.getWorldX() / gamePanel.getTileSize();
-                    int npcTileY = npc.getWorldY() / gamePanel.getTileSize();
                     if ((playerTileX == 4 && playerTileY == 3)) {
                         return npc;
                     }

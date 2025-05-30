@@ -61,7 +61,7 @@ public class GamePanel extends JPanel implements Runnable {
     // Map menu
     private BufferedImage[] mapMenuImages;
     private int currentMapMenuIndex = 0;
-    private final int TOTAL_WORLD_MAPS = 10; // Total world map options in menu
+    private final int TOTAL_WORLD_MAPS = 9; // Total world map options in menu
     
     // WORLD SETTINGS
     // Default world dimensions (for WorldMap)
@@ -969,7 +969,8 @@ public class GamePanel extends JPanel implements Runnable {
         repaint();
     }    /**
      * Exit map menu mode and enter the selected map
-     */    public void exitMapMenuState() {
+     */    
+    public void exitMapMenuState() {
         System.out.println("Exiting map menu state");
         
         // Save the selected map index before changing state
@@ -1451,77 +1452,34 @@ public class GamePanel extends JPanel implements Runnable {
      * @param minutes Minutes to add
      */
     public void addGameTime(int minutes) {
-        int currentMinute = time.getMinute() + minutes;
-        int currentHour = time.getHour();
-        
-        if (currentMinute >= 60) {
-            currentHour += currentMinute / 60;
-            currentMinute = currentMinute % 60;
-        }
-        
-        if (currentHour >= 24) {
-            currentHour = currentHour % 24;
-            // Could also advance day here if needed
-        }
-        
-        time.setHour(currentHour);
-        time.setMinute(currentMinute);
+        clockUI.addGameTime(minutes);
     }
     /**
      * Tambah waktu dalam menit
      */
     public void addMinutes(int minutes) {
-        int totalMinutes = time.getHour() * 60 + time.getMinute() + minutes;
-        int hour = (totalMinutes / 60) % 24;
-        int minute = totalMinutes % 60;
-        if (totalMinutes >= 24 * 60) {
-            day++;
-            dayOfWeek = (dayOfWeek + 1) % 7;
-            // Update weather dan season jika perlu
-            currentWeather = (Math.random() < 0.3) ? Weather.RAINY : Weather.SUNNY;
-            if ((day - 1) % 10 == 0 && day != 1) {
-                currentSeasonIndex = (currentSeasonIndex + 1) % seasons.length;
-                Season[] seasonValues = Season.values();
-                if (currentSeasonIndex < seasonValues.length) {
-                    currentSeason = seasonValues[currentSeasonIndex];
-                } else {
-                    currentSeasonIndex = 0;
-                    currentSeason = Season.SPRING;
-                }
-            }
-            if (day > 30) {
-                day = 1;
-                month++;
-                if (month > 12) {
-                    month = 1;
-                }
-                currentSeason = Season.SPRING;
-                currentSeasonIndex = 0;
-                currentWeather = Weather.SUNNY;
-            }
-        }
-        time.setHour(hour);
-        time.setMinute(minute);
+        clockUI.addGameTime(minutes);
     }
 
     /**
      * Tambah waktu dalam jam
      */
     public void addHours(int hours) {
-        addMinutes(hours * 60);
+        clockUI.addGameTime(hours * 60);
     }
 
     /**
      * Timeskip ke jam dan menit tertentu, dan teleport ke rumah jika married
      */
     public void timeskipTo(int hour, int minute, boolean teleportHomeIfMarried) {
-        time.setHour(hour);
-        time.setMinute(minute);
-        if (teleportHomeIfMarried && player.isMarried()) {
-            teleportToMap("House Map");
-        }
+        Time t = clockUI.getCurrentTime();
+        t.setHour(hour);
+        t.setMinute(minute);
+        // Teleport logic if needed
+        // ...
     }
-      /**
+
+    /**
      * Get current time object
      * @return Current Time object
      */
@@ -1535,7 +1493,9 @@ public class GamePanel extends JPanel implements Runnable {
      */
     public int getCurrentDay() {
         return clockUI.getCurrentDay();
-    }    /**
+    }
+
+    /**
      * Advance to next day (doesn't change time)
      */
     public void advanceToNextDay() {
@@ -1545,15 +1505,6 @@ public class GamePanel extends JPanel implements Runnable {
     // --- Message Pane for NPC interaction ---
     // Removed drawMessagePanel(Graphics2D g2) as it's now handled by NPCUi
     private NPCUi npcUi;
-    private String messagePanelText = null;
-    private long messagePanelTimestamp = 0;
-    private static final int MESSAGE_PANE_DURATION_MS = 3500;
-
-    public void showMessagePanel(String text) {
-        messagePanelText = text;
-        messagePanelTimestamp = System.currentTimeMillis();
-        repaint();
-    }
 
     // --- PLAYER-NPC INTERACTION (GIFT/TALK) ---
     public void tryGiftToNearbyNPC() {
@@ -1581,5 +1532,11 @@ public class GamePanel extends JPanel implements Runnable {
 
     public NPCUi getNPCUi() {
         return npcUi;
+    }
+    /**
+     * Tampilkan pesan ke message panel NPC (UI)
+     */
+    public void showMessagePanel(String text) {
+        npcUi.showMessagePanel(text);
     }
 }
