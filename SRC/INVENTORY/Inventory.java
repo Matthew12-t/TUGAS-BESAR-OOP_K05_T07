@@ -55,6 +55,10 @@ public class Inventory {
         if (fishingRodItem != null) {
             addItem(fishingRodItem, 1);
         }
+        Item proposalRingItem = GameData.addTool("Proposal Ring", 2);
+        if (proposalRingItem != null) {
+            addItem(proposalRingItem, 2);
+        }
     }
     
     /**
@@ -92,6 +96,22 @@ public class Inventory {
                 System.out.println("Removed " + itemSlots[slotIndex].getName() + " x" + quantitySlots[slotIndex]);
                 itemSlots[slotIndex] = null;
                 quantitySlots[slotIndex] = 0;
+            }
+        }
+    }
+    
+    /**
+     * Remove one item from specific slot (decrement quantity by 1, remove if 0)
+     */
+    public void removeOneItem(int slotIndex) {
+        if (slotIndex >= 0 && slotIndex < MAX_INVENTORY_SLOTS) {
+            if (itemSlots[slotIndex] != null) {
+                if (quantitySlots[slotIndex] > 1) {
+                    quantitySlots[slotIndex]--;
+                } else {
+                    itemSlots[slotIndex] = null;
+                    quantitySlots[slotIndex] = 0;
+                }
             }
         }
     }

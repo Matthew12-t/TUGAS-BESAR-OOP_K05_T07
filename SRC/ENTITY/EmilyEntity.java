@@ -7,6 +7,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import SRC.MAIN.GamePanel;
+import SRC.DATA.GameData;
+import SRC.ITEMS.Item;
 import java.awt.Graphics2D;
 
 /**
@@ -29,24 +31,32 @@ public class EmilyEntity extends NPCEntity {
         setItemPreferences();
         loadSprite();
         setSpeed(0);
-    }
-
-    /**
+    }    /**
      * Set up Emily's item preferences
      */
     private void setItemPreferences() {
-        Set<String> lovedItems = Set.of("Seeds");
-        for (String item : lovedItems) {
-            addLovedItem(item);
-        }
-        Set<String> likedItems = Set.of("Catfish", "Salmon", "Sardine");
-        for (String item : likedItems) {
-            addLikedItem(item);
+        Set<String> lovedItemNames = Set.of("Parsnip Seeds", "Cauliflower Seeds", "Potato Seeds", "Blueberry Seeds");
+        for (String itemName : lovedItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null) {
+                addLovedItem(item);
+            }
         }
         
-        Set<String> hatedItems = Set.of("Coal", "Wood");
-        for (String item : hatedItems) {
-            addHatedItem(item);
+        Set<String> likedItemNames = Set.of("Catfish", "Salmon", "Sardine");
+        for (String itemName : likedItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null) {
+                addLikedItem(item);
+            }
+        }
+        
+        Set<String> hatedItemNames = Set.of("Coal", "Wood");
+        for (String itemName : hatedItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null) {
+                addHatedItem(item);
+            }
         }
     }
     
@@ -129,6 +139,7 @@ public class EmilyEntity extends NPCEntity {
      */
     @Override
     public void interact(Player player) {
+        super.interact(player);
         System.out.println("Emily says: I just planted some new seeds in my garden! Have you caught any interesting fish lately?");
  
         updateRelationshipStatus();
@@ -142,15 +153,23 @@ public class EmilyEntity extends NPCEntity {
             setRelationshipStatus("single");
         }
     }
-    
-    /**
+      /**
      * Custom method to handle gift giving
-     * @param itemName the name of the item being given
+     * @param item the item being given
      */
     @Override
-    public void receiveGift(String itemName) {
-        super.receiveGift(itemName);
+    public String receiveGift(Item item) {
+        String baseMsg = super.receiveGift(item);
         updateRelationshipStatus();
+        if (baseMsg.contains("loves")) {
+            return "Emily: Ini bahan masakan favoritku! " + baseMsg;
+        } else if (baseMsg.contains("likes")) {
+            return "Emily: Terima kasih, aku bisa memasak dengan ini! " + baseMsg;
+        } else if (baseMsg.contains("hates")) {
+            return "Emily: Oh, aku tidak suka ini... " + baseMsg;
+        } else {
+            return "Emily: Terima kasih, tapi aku harap lain kali lebih enak! " + baseMsg;
+        }
     }
     
     /**

@@ -12,6 +12,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import SRC.ENTITY.Player;
+import SRC.ENTITY.NPCEntity;
 import SRC.ITEMS.Item;
 import SRC.MAP.FarmMap;
 import SRC.MAP.ForestRiverMap;
@@ -31,6 +32,7 @@ import SRC.OBJECT.SuperObject;
 import SRC.TIME.Time;
 import SRC.SEASON.Season;
 import SRC.WEATHER.Weather;
+import SRC.UI.NPCUi; // NPCUi has been moved to SRC.UI, so update the import and field
 import SRC.SHIPPINGBIN.ShippingBin;
 import SRC.SHIPPINGBIN.ShippingBinUI;
 import SRC.UI.StoreUI;
@@ -485,6 +487,7 @@ public class GamePanel extends JPanel implements Runnable {
         this.perryHouseMap.setActive(false);
         
         this.houseMap.setActive(true);
+        this.npcUi = new NPCUi(this);
     }
     
     /**
@@ -579,7 +582,7 @@ public class GamePanel extends JPanel implements Runnable {
             cameraX = -centerX;
             cameraY = -centerY;
             
-            System.out.println("Map centered with camera at: " + cameraX + ", " + cameraY);
+            //System.out.println("Map centered with camera at: " + cameraX + ", " + cameraY);
         } else {
             // If map is larger than the screen, use default camera centering on player
             cameraX = player.getWorldX() - screenWidth / 2 + player.getPlayerVisualWidth() / 2;
@@ -948,6 +951,7 @@ public class GamePanel extends JPanel implements Runnable {
             }
         }
         
+        npcUi.drawMessagePanel(g2);
         g2.dispose(); // Release system resources
     }
       /**
@@ -1447,8 +1451,77 @@ public class GamePanel extends JPanel implements Runnable {
      * @param minutes Minutes to add
      */
     public void addGameTime(int minutes) {
-        clockUI.addGameTime(minutes);
-    }    /**
+        int currentMinute = time.getMinute() + minutes;
+        int currentHour = time.getHour();
+        
+        if (currentMinute >= 60) {
+            currentHour += currentMinute / 60;
+            currentMinute = currentMinute % 60;
+        }
+        
+        if (currentHour >= 24) {
+            currentHour = currentHour % 24;
+            // Could also advance day here if needed
+        }
+        
+        time.setHour(currentHour);
+        time.setMinute(currentMinute);
+    }
+    /**
+     * Tambah waktu dalam menit
+     */
+    public void addMinutes(int minutes) {
+        int totalMinutes = time.getHour() * 60 + time.getMinute() + minutes;
+        int hour = (totalMinutes / 60) % 24;
+        int minute = totalMinutes % 60;
+        if (totalMinutes >= 24 * 60) {
+            day++;
+            dayOfWeek = (dayOfWeek + 1) % 7;
+            // Update weather dan season jika perlu
+            currentWeather = (Math.random() < 0.3) ? Weather.RAINY : Weather.SUNNY;
+            if ((day - 1) % 10 == 0 && day != 1) {
+                currentSeasonIndex = (currentSeasonIndex + 1) % seasons.length;
+                Season[] seasonValues = Season.values();
+                if (currentSeasonIndex < seasonValues.length) {
+                    currentSeason = seasonValues[currentSeasonIndex];
+                } else {
+                    currentSeasonIndex = 0;
+                    currentSeason = Season.SPRING;
+                }
+            }
+            if (day > 30) {
+                day = 1;
+                month++;
+                if (month > 12) {
+                    month = 1;
+                }
+                currentSeason = Season.SPRING;
+                currentSeasonIndex = 0;
+                currentWeather = Weather.SUNNY;
+            }
+        }
+        time.setHour(hour);
+        time.setMinute(minute);
+    }
+
+    /**
+     * Tambah waktu dalam jam
+     */
+    public void addHours(int hours) {
+        addMinutes(hours * 60);
+    }
+
+    /**
+     * Timeskip ke jam dan menit tertentu, dan teleport ke rumah jika married
+     */
+    public void timeskipTo(int hour, int minute, boolean teleportHomeIfMarried) {
+        time.setHour(hour);
+        time.setMinute(minute);
+        if (teleportHomeIfMarried && player.isMarried()) {
+            teleportToMap("House Map");
+        }
+    }
+      /**
      * Get current time object
      * @return Current Time object
      */
@@ -1467,5 +1540,46 @@ public class GamePanel extends JPanel implements Runnable {
      */
     public void advanceToNextDay() {
         clockUI.advanceToNextDay();
+    }
+    
+    // --- Message Pane for NPC interaction ---
+    // Removed drawMessagePanel(Graphics2D g2) as it's now handled by NPCUi
+    private NPCUi npcUi;
+    private String messagePanelText = null;
+    private long messagePanelTimestamp = 0;
+    private static final int MESSAGE_PANE_DURATION_MS = 3500;
+
+    public void showMessagePanel(String text) {
+        messagePanelText = text;
+        messagePanelTimestamp = System.currentTimeMillis();
+        repaint();
+    }
+
+    // --- PLAYER-NPC INTERACTION (GIFT/TALK) ---
+    public void tryGiftToNearbyNPC() {
+        npcUi.tryGiftToNearbyNPC();
+    }
+
+    public void tryTalkToNearbyNPC() {
+        npcUi.tryTalkToNearbyNPC();
+    }
+
+    public void confirmGiftFromInventory() {
+        npcUi.confirmGiftFromInventory();
+    }
+
+    public NPCEntity getGiftingTargetNPC() {
+        return npcUi.getGiftingTargetNPC();
+    }
+
+    /**
+     * Returns the first NPC exactly 'distance' tiles away from the player, or null if none.
+     */
+    public NPCEntity getNearbyNPC(int distance) {
+        return npcUi.getNearbyNPC(distance);
+    }
+
+    public NPCUi getNPCUi() {
+        return npcUi;
     }
 }

@@ -3,6 +3,7 @@ package SRC.DATA;
 import SRC.ITEMS.Item;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Central data management class that provides unified access to all game items
@@ -204,7 +205,8 @@ public class GameData {
             addTool("Hoe", 1),
             addTool("Watering Can", 1),
             addTool("Pickaxe", 1),
-            addTool("Fishing Rod", 1)
+            addTool("Fishing Rod", 1),
+            addTool("Proposal Ring", 2)
         };
     }
     
@@ -214,5 +216,8 @@ public class GameData {
      */
     public static int[] getStarterQuantities() {
         return new int[] { 15, 1, 1, 1, 1 };
+    }
+    public static Set<String> getAllItemNames() {
+        return getAllItemsWithCategories().keySet();
     }
 }

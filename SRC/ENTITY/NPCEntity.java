@@ -7,19 +7,19 @@ import java.awt.Color;
 import java.awt.Rectangle;
 
 import SRC.MAIN.GamePanel;
+import SRC.ITEMS.Item;
 
 public class NPCEntity extends Entity implements NPC {
     // Basic NPC properties
     private String name;
     private String location;
     private String description;
-    
-    private int heartPoints;
+      private int heartPoints;
     private static final int MAX_HEART_POINTS = 150;
     private String relationshipStatus; 
-    private List<String> lovedItems;
-    private List<String> likedItems;
-    private List<String> hatedItems;
+    private List<Item> lovedItems;
+    private List<Item> likedItems;
+    private List<Item> hatedItems;
     
     private Rectangle solidArea;
     private boolean isSolid = true; 
@@ -93,8 +93,8 @@ public class NPCEntity extends Entity implements NPC {
     }
       @Override
     public void interact(Player player) {
-        // Basic interaction logic - can be overridden by specific NPC types
-        System.out.println(name + " says: Hello, player!");
+        setHeartPoints(getHeartPoints() + 10); 
+        player.setEnergy(player.getEnergy() - 10);        
     }
     
     @Override
@@ -102,33 +102,113 @@ public class NPCEntity extends Entity implements NPC {
         return "Relationship with player: " + relationshipStatus + 
                " (Heart Points: " + heartPoints + "/" + MAX_HEART_POINTS + ")";
     }
-    
-    @Override
-    public List<String> getLovedItems() {
+      @Override
+    public List<Item> getLovedItems() {
         return lovedItems;
     }
     
     @Override
-    public List<String> getLikedItems() {
+    public List<Item> getLikedItems() {
         return likedItems;
     }
     
     @Override
-    public List<String> getHatedItems() {
+    public List<Item> getHatedItems() {
         return hatedItems;
     }
     
     @Override
     public void performAction(Player player, String action) {
-        switch (action.toLowerCase()) {            case "chat":
+        switch (action.toLowerCase()) {
+            case "chat":
                 System.out.println(name + " chats with player");
                 break;
             case "gift":
                 System.out.println(name + " received a gift from player");
                 break;
+            case "propose": {
+                String message;
+                boolean hasRing = false;
+                Item[] items = player.getInventoryItems();
+                for (Item item : items) {
+                    if (item != null && item.getName().equalsIgnoreCase("Proposal Ring")) {
+                        hasRing = true;
+                        break;
+                    }
+                }
+                if (!hasRing) {
+                    message = "Kamu harus punya Proposal Ring untuk melamar!";
+                    System.out.println(message);
+                    showMessageToUI(message);
+                    gp.addHours(1);
+                    break;
+                }
+                if (relationshipStatus.equals("single")) {
+                    if (heartPoints >= MAX_HEART_POINTS) {
+                        relationshipStatus = "fiance";
+                        player.setEnergy(player.getEnergy() - 10);
+                        message = name + " menerima lamaranmu! Status: FIANCE. Energi -10.";
+                    } else {
+                        player.setEnergy(player.getEnergy() - 20);
+                        message = name + " menolak lamaranmu. Energi -20.";
+                    }
+                } else if (relationshipStatus.equals("fiance")) {
+                    // Sudah tunangan, lanjutkan ke married jika player tekan P lagi
+                    message = name + " sudah menjadi tunanganmu. Tekan P lagi untuk menikah!";
+                } else {
+                    message = name + " sudah menjadi " + relationshipStatus + ".";
+                }
+                System.out.println(message);
+                showMessageToUI(message);
+                gp.addHours(1); // Advance time by 1 hour after proposing
+                break;
+            }
+            case "married": {
+                String message;
+                boolean hasRing = false;
+                Item[] items = player.getInventoryItems();
+                for (Item item : items) {
+                    if (item != null && item.getName().equalsIgnoreCase("Proposal Ring")) {
+                        hasRing = true;
+                        break;
+                    }
+                }
+                if (!hasRing) {
+                    message = "Kamu harus punya Proposal Ring untuk menikah!";
+                    System.out.println(message);
+                    showMessageToUI(message);
+                    break;
+                }
+                if (relationshipStatus.equals("fiance")) {
+                    relationshipStatus = "spouse";
+                    player.setEnergy(player.getEnergy() - 80);
+                    message = name + " sekarang menjadi pasanganmu! Status: SPOUSE. Energi -80.";
+                } else if (relationshipStatus.equals("spouse")) {
+                    message = name + " sudah menjadi pasanganmu.";
+                } else {
+                    message = "Kamu harus melamar dulu sebelum menikah!";
+                }
+                System.out.println(message);
+                showMessageToUI(message);
+                player.setMarried(true);
+                gp.timeskipTo(22, 00, hasRing);
+                break;
+            }
             default:
                 System.out.println("Unknown action: " + action);
                 break;
+        }
+    }
+
+    /**
+     * Helper untuk menampilkan pesan ke UI (bisa dihubungkan ke GamePanel/MessagePanel)
+     */
+    private void showMessageToUI(String message) {
+        // Use NPCUi for message panel if available
+        if (gp != null && gp.getNPCUi() != null) {
+            gp.getNPCUi().showMessagePanel(message);
+        } else if (gp != null) {
+            gp.showMessagePanel(message);
         }
     }
     
@@ -159,46 +239,50 @@ public class NPCEntity extends Entity implements NPC {
             throw new IllegalArgumentException("Invalid relationship status. Must be 'single', 'fiance', or 'spouse'");
         }
     }
-    
-    public void addLovedItem(String item) {
+      public void addLovedItem(Item item) {
         lovedItems.add(item);
     }
     
-    public void addLikedItem(String item) {
+    public void addLikedItem(Item item) {
         likedItems.add(item);
     }
     
-    public void addHatedItem(String item) {
+    public void addHatedItem(Item item) {
         hatedItems.add(item);
     }
     
-    public void removeLovedItem(String item) {
+    public void removeLovedItem(Item item) {
         lovedItems.remove(item);
     }
     
-    public void removeLikedItem(String item) {
+    public void removeLikedItem(Item item) {
         likedItems.remove(item);
     }
     
-    public void removeHatedItem(String item) {
+    public void removeHatedItem(Item item) {
         hatedItems.remove(item);
     }
     
-    
-    public void receiveGift(String itemName) {        
-        if (lovedItems.contains(itemName)) {
+      /**
+     * Player memberikan hadiah ke NPC, return pesan reaksi untuk UI
+     */
+    public String receiveGift(Item item) {        
+        String reactionMsg;
+        if (lovedItems.contains(item)) {
             increaseHeartPoints(25);
-            System.out.println(name + " loves this gift!");
-        } else if (likedItems.contains(itemName)) {
+            reactionMsg = name + " loves this gift!";
+        } else if (likedItems.contains(item)) {
             increaseHeartPoints(20);
-            System.out.println(name + " likes this gift.");
-        } else if (hatedItems.contains(itemName)) {
+            reactionMsg = name + " likes this gift.";
+        } else if (hatedItems.contains(item)) {
             decreaseHeartPoints(25);
-            System.out.println(name + " hates this gift...");
+            reactionMsg = name + " hates this gift.";
         } else {
             increaseHeartPoints(0);
-            System.out.println(name + " accepts your gift.");
+            reactionMsg = name + " accepts your gift.";
         }
+        System.out.println(reactionMsg);
+        return reactionMsg;
     }
     
     /**

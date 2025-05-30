@@ -20,6 +20,7 @@ public class Player extends Entity {
     private final int MAX_ENERGY = 100; // Maximum energy value
     private int gold; // Player's gold amount
     private final int TOTAL_FRAMES = 8;
+    private boolean married;
 
     // --- Variabel Entitas (Deklarasikan jika tidak di Entity) ---
     private Rectangle solidArea; // Collision area for the player
@@ -47,7 +48,9 @@ public class Player extends Entity {
     // ----------------------------------    //contructor
     public Player(GamePanel gp, KeyHandler keyH, MouseHandler mouseHandler) {
         super(gp, 100, 100); // Panggil konstruktor Entity dengan posisi awal
-        this.gp = gp;        this.keyH = keyH;
+        this.gp = gp;        
+        this.keyH = keyH;
+        this.married = false;
         this.mouseHandler = mouseHandler;
         this.energy = 100; 
         this.gold = 500; // Initialize gold with 500
@@ -123,6 +126,10 @@ public class Player extends Entity {
     
     public void removeItemFromInventory(int slotIndex) {
         playerAction.removeInventoryItem(slotIndex);
+    }
+    
+    public void removeOneItemFromInventory(int slotIndex) {
+        playerAction.removeOneInventoryItem(slotIndex);
     }
     
     public Item[] getInventoryItems() {
@@ -613,5 +620,12 @@ public class Player extends Entity {
      */
     public boolean isHoldingAnyTool() {
         return currentHoldingTool != null;
+    }
+    public boolean isMarried() {
+        return married;
+    }
+
+    public void setMarried(boolean married) {
+        this.married = married;
     }
 }

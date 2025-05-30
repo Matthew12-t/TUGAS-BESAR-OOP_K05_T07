@@ -2,6 +2,7 @@ package SRC.MAIN;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import SRC.ENTITY.NPCEntity;
 
 public class KeyHandler implements KeyListener {
 
@@ -128,7 +129,40 @@ public class KeyHandler implements KeyListener {
                         gamePanel.getPlayer().getPlayerAction().performFishing();
                     }
                 }
-              }            
+                
+                // --- NPC INTERACTION KEYS ---
+                if(code == KeyEvent.VK_G) {
+                    // Gifting
+                    gamePanel.tryGiftToNearbyNPC();
+                }
+                if(code == KeyEvent.VK_T) {
+                    // Talking
+                    gamePanel.tryTalkToNearbyNPC();
+                }
+                if(code == KeyEvent.VK_P) {
+                    // Propose/Married (lamaran/menikah)
+                    NPCEntity nearbyNPC = gamePanel.getNearbyNPC(1);
+                    if (nearbyNPC != null) {
+                        String status = nearbyNPC.getRelationshipStatus();
+                        if (status.equals("fiance")) {
+                            nearbyNPC.performAction(gamePanel.getPlayer(), "married");
+                        } else {
+                            nearbyNPC.performAction(gamePanel.getPlayer(), "propose");
+                        }
+                    } else {
+                        gamePanel.showMessagePanel("Tidak ada NPC di dekatmu untuk dilamar/menikah.");
+                    }
+                }
+            }
+            // --- INVENTORY STATE GIFTING ---
+            else if (gamePanel.getGameState() == GamePanel.INVENTORY_STATE) {
+                if (code == KeyEvent.VK_G) {
+                    // Only confirm gift if giftingTargetNPC is set
+                    if (gamePanel.getGiftingTargetNPC() != null) {
+                        gamePanel.confirmGiftFromInventory();
+                    }
+                }
+            }            
               // Eating action with 'E' key - works in both PLAY_STATE and INVENTORY_STATE
               if(code == KeyEvent.VK_E) {
                 if (gamePanel.getGameState() == GamePanel.PLAY_STATE || gamePanel.getGameState() == GamePanel.INVENTORY_STATE) {

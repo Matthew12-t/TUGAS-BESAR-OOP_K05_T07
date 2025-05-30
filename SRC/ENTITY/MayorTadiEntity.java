@@ -7,6 +7,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import SRC.MAIN.GamePanel;
+import SRC.DATA.GameData;
+import SRC.ITEMS.Item;
 import java.awt.Graphics2D;
 
 /**
@@ -30,25 +32,31 @@ public class MayorTadiEntity extends NPCEntity {
         
         loadSprite();
         setSpeed(0);
-    }
-
-    /**
+    }    /**
      * Set up Mayor Tadi's item preferences
      */
     private void setItemPreferences() {
-        Set<String> lovedItems = Set.of("Legend");
-        for (String item : lovedItems) {
-            addLovedItem(item);
+        Set<String> lovedItemNames = Set.of("Legend");
+        for (String itemName : lovedItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null) {
+                addLovedItem(item);
+            }
         }
-        Set<String> likedItems = Set.of("Angler", "Crimsonfish", "Glacierfish");
-        for (String item : likedItems) {
-            addLikedItem(item);
+        Set<String> likedItemNames = Set.of("Angler", "Crimsonfish", "Glacierfish");
+        for (String itemName : likedItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null) {
+                addLikedItem(item);
+            }
         }
-        
-        // BLOM BENER PLISS atur2 aja
-        Set<String> hatedItems = Set.of("Hot Pepper", "Cauliflower", "Coal", "Wood", "Grape", "Wheat");
-        for (String item : hatedItems) {
-            addHatedItem(item);
+        // Mayor Tadi membenci semua item yang bukan loved/liked
+        Set<String> allItemNames = GameData.getAllItemNames();
+        for (String itemName : allItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null && !lovedItemNames.contains(itemName) && !likedItemNames.contains(itemName)) {
+                addHatedItem(item);
+            }
         }
     }
     
@@ -131,7 +139,8 @@ public class MayorTadiEntity extends NPCEntity {
      */
     @Override
     public void interact(Player player) {
-        System.out.println("Mayor Tadi says: Have you caught any legendary fish lately?");
+        super.interact(player);
+        System.out.println("Mayor Tadi says: Kenal WOWO ga lu");
         updateRelationshipStatus();
     }
     
@@ -143,15 +152,23 @@ public class MayorTadiEntity extends NPCEntity {
             setRelationshipStatus("single");
         }
     }
-    
-    /**
+      /**
      * Custom method to handle gift giving
-     * @param itemName the name of the item being given
+     * @param item the item being given
      */
     @Override
-    public void receiveGift(String itemName) {
-        super.receiveGift(itemName);
+    public String receiveGift(Item item) {
+        String baseMsg = super.receiveGift(item);
         updateRelationshipStatus();
+        if (baseMsg.contains("loves")) {
+            return "Mayor Tadi: Luar biasa! Ini hadiah yang sangat mewah! " + baseMsg;
+        } else if (baseMsg.contains("likes")) {
+            return "Mayor Tadi: Aku suka jenis ikan ini! " + baseMsg;
+        } else if (baseMsg.contains("hates")) {
+            return "Mayor Tadi: Cuih, Ini... tidak cocok untukku, dasar rakyat miskin. " + baseMsg;
+        } else {
+            return "Mayor Tadi: Terima kasih, tapi aku harap lain kali lebih spesial. " + baseMsg;
+        }
     }
     
     /**

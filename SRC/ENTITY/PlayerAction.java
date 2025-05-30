@@ -71,7 +71,15 @@ public class PlayerAction {
     }
     
     /**
-     * Handle item removal from inventory
+     * Remove one item (decrement quantity by 1, remove if 0) from inventory
+     */
+    public void removeOneInventoryItem(int slotIndex) {
+        inventory.removeOneItem(slotIndex);
+        System.out.println("Removed one item from slot " + slotIndex);
+    }
+    
+    /**
+     * Handle item removal from inventory (removes entire stack)
      */
     public void removeInventoryItem(int slotIndex) {
         inventory.removeItem(slotIndex);

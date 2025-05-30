@@ -7,6 +7,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import SRC.MAIN.GamePanel;
+import SRC.DATA.GameData;
+import SRC.ITEMS.Item;
 import java.awt.Graphics2D;
 
 /**
@@ -29,23 +31,32 @@ public class CarolineEntity extends NPCEntity {
         setItemPreferences();
         loadSprite();
         setSpeed(0);
-    }
-
-    /**
+    }    /**
      * Set up Caroline's item preferences
      */
     private void setItemPreferences() {
-        Set<String> lovedItems = Set.of("Firewood", "Coal");
-        for (String item : lovedItems) {
-            addLovedItem(item);
+        Set<String> lovedItemNames = Set.of("Wood", "Coal");
+        for (String itemName : lovedItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null) {
+                addLovedItem(item);
+            }
         }
-        Set<String> likedItems = Set.of("Potato", "Wheat");
-        for (String item : likedItems) {
-            addLikedItem(item);
+        
+        Set<String> likedItemNames = Set.of("Potato", "Wheat");
+        for (String itemName : likedItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null) {
+                addLikedItem(item);
+            }
         }
-        Set<String> hatedItems = Set.of("Hot Pepper");
-        for (String item : hatedItems) {
-            addHatedItem(item);
+        
+        Set<String> hatedItemNames = Set.of("Hot Pepper");
+        for (String itemName : hatedItemNames) {
+            Item item = GameData.getItem(itemName, 1);
+            if (item != null) {
+                addHatedItem(item);
+            }
         }
     }
     
@@ -127,6 +138,7 @@ public class CarolineEntity extends NPCEntity {
      */
     @Override
     public void interact(Player player) {
+        super.interact(player);
         System.out.println("Caroline says: I've been collecting firewood all day!");
         updateRelationshipStatus();
     }
@@ -139,15 +151,23 @@ public class CarolineEntity extends NPCEntity {
             setRelationshipStatus("single");
         }
     }
-    
-    /**
+      /**
      * Custom method to handle gift giving
-     * @param itemName the name of the item being given
+     * @param item the item being given
      */
     @Override
-    public void receiveGift(String itemName) {
-        super.receiveGift(itemName);
+    public String receiveGift(Item item) {
+        String baseMsg = super.receiveGift(item);
         updateRelationshipStatus();
+        if (baseMsg.contains("loves")) {
+            return "Caroline: Wah, akan uubah menjadi suatu karya seni. " + baseMsg;
+        } else if (baseMsg.contains("likes")) {
+            return "Caroline: Terima kasih, aku suka ini! " + baseMsg;
+        } else if (baseMsg.contains("hates")) {
+            return "Caroline: Hmm... aku tidak suka Makanan PEDASSS!. " + baseMsg;
+        } else {
+            return "Caroline: Terima kasih, tapi aku lebih suka sesuatu yang lain. " + baseMsg;
+        }
     }
     
     /**
