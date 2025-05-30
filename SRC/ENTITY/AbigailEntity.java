@@ -141,17 +141,17 @@ public class AbigailEntity extends NPCEntity {
     public void interact(Player player) {
         super.interact(player);
         if (getHeartPoints() <= 25) {
-            System.out.println("Abigail: Siapa lu, gw kenalnya cuma si wowok.");
+            System.out.println("Abigail: Eh, kamu siapa? Jangan-jangan kamu alien ya?");
         } else if (getHeartPoints() <= 50) {
-            System.out.println("Abigail: Kamu adalah seorang warga yang baik.");
+            System.out.println("Abigail: Halo! Aku lagi cari makanan, kamu punya?");
         } else if (getHeartPoints() <= 75) {
-            System.out.println("Abigail: Aku punya teman yang bernama Wowok, dia sangat baik.");
-        }else if (getHeartPoints() <= 100) {
-            System.out.println("Abigail: we wok detok not onle tok de tok.");
+            System.out.println("Abigail: Kadang aku suka main ke gunung, kamu mau ikut nggak?");
+        } else if (getHeartPoints() <= 100) {
+            System.out.println("Abigail: Kamu tau nggak, aku suka kamu... eh, bercanda ya!");
         } else if (getHeartPoints() <= 125) {
-            System.out.println("Abigail: Hubungan kita ini apaa sih?? .");
-        } else{
-            System.out.println("Abigail: Pliss nikahin aku dong  :)");
+            System.out.println("Abigail: Kalau kita balapan, siapa yang menang ya? Kamu sih, kan juara di hatiku!");
+        } else {
+            System.out.println("Abigail: Duh, ngobrol sama kamu tuh seru banget. Kapan-kapan kita nikah yuk!");
         }
         updateRelationshipStatus();
     }

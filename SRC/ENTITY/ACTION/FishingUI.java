@@ -140,12 +140,15 @@ public class FishingUI {
     public boolean playGUIMiniGame(String fishType, int targetNumber, int maxRange, int maxAttempts) {
         System.out.println("DEBUG: playGUIMiniGame called with fishType=" + fishType + ", targetNumber=" + targetNumber + ", maxRange=" + maxRange + ", maxAttempts=" + maxAttempts);
         
+        final int ENERGY_PER_ATTEMPT = 5; // Energy cost per fishing attempt
+        
         // Simple approach - directly use JOptionPane without threading complications
         try {
             javax.swing.JOptionPane.showMessageDialog(null, 
                 "A " + fishType + " fish is on the line!\n" +
                 "Guess a number between 1 and " + maxRange + "\n" +
-                "You have " + maxAttempts + " attempts!",
+                "You have " + maxAttempts + " attempts!\n" +
+                "Each attempt costs " + ENERGY_PER_ATTEMPT + " energy!",
                 "Fishing Mini-Game", 
                 javax.swing.JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
@@ -155,6 +158,21 @@ public class FishingUI {
         }
         
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            // Check if player has enough energy for this attempt
+            if (!gp.getPlayer().hasEnoughEnergy(ENERGY_PER_ATTEMPT)) {
+                javax.swing.JOptionPane.showMessageDialog(null, 
+                    "Not enough energy for another attempt!\n" +
+                    "The fish got away...",
+                    "Insufficient Energy", 
+                    javax.swing.JOptionPane.WARNING_MESSAGE);
+                return false;
+            }
+            
+            // Consume energy for this attempt
+            gp.getPlayer().consumeEnergy(ENERGY_PER_ATTEMPT);
+            System.out.println("DEBUG: Consumed " + ENERGY_PER_ATTEMPT + " energy for attempt " + attempt + 
+                             ". Remaining energy: " + gp.getPlayer().getCurrentEnergy());
+            
             String input = javax.swing.JOptionPane.showInputDialog(null,
                 "Attempt " + attempt + "/" + maxAttempts + "\n" +
                 "Guess a number between 1 and " + maxRange + ":",

@@ -140,18 +140,19 @@ public class CarolineEntity extends NPCEntity {
     public void interact(Player player) {
         super.interact(player);
         if (getHeartPoints() <= 25) {
-            System.out.println("Caroline: Siapa lu, gw kenalnya cuma si wowok.");
+            System.out.println("Caroline: Eh, kamu siapa? Jangan-jangan kamu?");
         } else if (getHeartPoints() <= 50) {
-            System.out.println("Caroline: Kamu adalah seorang warga yang baik.");
+            System.out.println("Caroline: Oh, kamu yang sering lewat depan rumah ya? Santai aja, aku nggak gigit kok!");
         } else if (getHeartPoints() <= 75) {
-            System.out.println("Caroline: Aku punya teman yang bernama Wowok, dia sangat baik.");
-        }else if (getHeartPoints() <= 100) {
-            System.out.println("Caroline: we wok detok not onle tok de tok.");
+            System.out.println("Caroline: Aku lagi nyari kayu nih, kamu punya? Atau cuma numpang ngobrol doang?");
+        } else if (getHeartPoints() <= 100) {
+            System.out.println("Caroline: Wah, makin sering ketemu nih. Jangan-jangan kamu ngefans sama aku ya?");
         } else if (getHeartPoints() <= 125) {
-            System.out.println("Caroline: Hubungan kita ini apaa sih?? .");
-        } else{
-            System.out.println("Caroline: Pliss nikahin aku dong  :)");
+            System.out.println("Caroline: Kalau tiap hari ngobrol gini, nanti aku baper lho!");
+        } else {
+            System.out.println("Caroline: Duh, kamu lucu deh. Gimana kalau kita duet joget TikTok?");
         }
+        
         updateRelationshipStatus();
     }
     

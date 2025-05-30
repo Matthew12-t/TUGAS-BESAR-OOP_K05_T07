@@ -143,11 +143,11 @@ public class EmilyEntity extends NPCEntity {
         if (getHeartPoints() <= 25) {
             System.out.println("Emily: Mau kupukul pakai kayu?");
         } else if (getHeartPoints() <= 50) {
-            System.out.println("Emily: Kamu adalah seorang warga yang baik.");
+            System.out.println("Emily: Kamu pelanggan toko yang baik.");
         } else if (getHeartPoints() <= 75) {
-            System.out.println("Emily: Aku punya teman yang bernama Wowok, dia sangat baik.");
+            System.out.println("Emily: Mau kubuatkan KUE?");
         }else if (getHeartPoints() <= 100) {
-            System.out.println("Emily: we wok detok not onle tok de tok.");
+            System.out.println("Emily: kamu adalah orang yang baik, aku sayang kamu, EH.");
         } else if (getHeartPoints() <= 125) {
             System.out.println("Emily: Hubungan kita ini apaa sih?? .");
         } else{

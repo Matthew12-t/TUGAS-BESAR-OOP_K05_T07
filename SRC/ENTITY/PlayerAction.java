@@ -362,9 +362,7 @@ public class PlayerAction {
             System.out.println("DEBUG: Failed to recover land at (" + playerCol + ", " + playerRow + ")");
             return false;
         }
-    }
-
-    /**
+    }    /**
      * Handle fishing action when player is on fishable water
      * @return true if fishing action was performed successfully
      */
@@ -374,7 +372,7 @@ public class PlayerAction {
         // Stop player movement during fishing
         stopPlayerMovement();
         
-        // Check if player has enough energy for fishing (reduced to 5)
+        // Check if player has enough energy for at least one fishing attempt (5 energy)
         final int FISHING_ENERGY_COST = 5;
         if (!hasEnoughEnergy(FISHING_ENERGY_COST)) {
             System.out.println("DEBUG: Not enough energy");
@@ -418,11 +416,8 @@ public class PlayerAction {
         // Pause game time
         pauseGameTime();
         
-        // Use held fishing rod tool (this will consume energy)
-        if (!useHeldTool()) {
-            resumeGameTime();
-            return false;
-        }
+        // NOTE: Energy consumption is now handled per attempt in the mini-game
+        // No need to consume energy here as it will be consumed for each attempt
         
         // Perform fishing with mini-game
         String caughtFish = performFishingWithMiniGame(fishingLocation);
@@ -445,7 +440,7 @@ public class PlayerAction {
         }
         
         return true;
-    }    /**
+    }/**
      * Perform fishing with mini-game based on current location and conditions
      * @param fishingLocation The location where fishing is taking place
      * @return name of caught fish or null if nothing caught
