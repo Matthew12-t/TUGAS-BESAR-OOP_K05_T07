@@ -34,9 +34,10 @@ import SRC.WEATHER.Weather;
 import SRC.SHIPPINGBIN.ShippingBin;
 import SRC.SHIPPINGBIN.ShippingBinUI;
 import SRC.UI.StoreUI;
+import SRC.UI.ClockUI;
 
 public class GamePanel extends JPanel implements Runnable {
-      private final int originalTileSize = 16; // 16x16 tile from source image
+    private final int originalTileSize = 16; // 16x16 tile from source image
     private final int scale = 3;
     private final int tileSize = originalTileSize * scale; // 48x48 tile displayed on screen
     private final int maxScreenCol = 16; // Number of tiles horizontally on screen
@@ -100,26 +101,16 @@ public class GamePanel extends JPanel implements Runnable {
     private Map emilyHouseMap;     // Emily's house instance
     private Map mayorTadiHouseMap; // Mayor Tadi's house instance
     private Map perryHouseMap;     // Perry's house instance
-    
-    // CAMERA
+      // CAMERA
     private int cameraX = 0; 
-    private int cameraY = 0;      // TIME SYSTEM
-    private Time time = new Time(6, 0); // Mulai jam 6:00 pagi
-    private int day = 1;
-    private int month = 1;
-    private String[] dayNames = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-    private int dayOfWeek = 0;    
-    private long lastTimeUpdate = System.currentTimeMillis();
-    private String[] seasons = {"Spring", "Summer", "Fall", "Winter"};
-    private int currentSeasonIndex = 0;
-    private BufferedImage clockImage; // Image for clock display    // Weather and Season objects
-    private Weather currentWeather = Weather.SUNNY;
-    private Season currentSeason = Season.SPRING;    // Inventory constants
+    private int cameraY = 0;
+    
+    // Clock UI system
+    private ClockUI clockUI;// Inventory constants
     private static final int INVENTORY_ROWS = 4;
     private static final int INVENTORY_COLS = 4;    // Shipping Bin system
     private ShippingBin ShippingBin;
-    private ShippingBinUI shippingBinUI;
-      // Store system
+    private ShippingBinUI shippingBinUI;    // Store system
     private StoreUI storeUI;
 
     // Getters and setters
@@ -431,9 +422,11 @@ public class GamePanel extends JPanel implements Runnable {
         mapMenuImages = new BufferedImage[TOTAL_WORLD_MAPS];
         loadMapMenuImages();
         
-        // Load clock image
-        loadClockImage();        // Load inventory image
-        loadInventoryImage();        // Initialize shipping bin system
+        // Initialize clock UI
+        this.clockUI = new ClockUI(screenWidth, screenHeight);
+        
+        // Load inventory image
+        loadInventoryImage();// Initialize shipping bin system
         this.ShippingBin = new ShippingBin();
         this.shippingBinUI = new ShippingBinUI(this, ShippingBin, player.getPlayerAction().getInventory());
           // Initialize store system
@@ -508,22 +501,7 @@ public class GamePanel extends JPanel implements Runnable {
             e.printStackTrace();
         }
     }
-    
-    /**
-     * Load clock image from resources
-     */
-    private void loadClockImage() {
-        try {
-            String imagePath = "RES/OBJECT/clock.png";
-            clockImage = ImageIO.read(new File(imagePath));
-            System.out.println("Loaded clock image: " + imagePath);
-        } catch (Exception e) {
-            System.err.println("Error loading clock image: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    /**
+      /**
      * Load the inventory background image
      */
     private void loadInventoryImage() {
@@ -537,8 +515,7 @@ public class GamePanel extends JPanel implements Runnable {
     public void startGameThread() {
         gameThread = new Thread(this);
         gameThread.start();    }
-    
-    @Override
+      @Override
     public void run(){
         double drawInterval = 1000000000.0 / FPS; 
         double delta = 0;
@@ -553,11 +530,9 @@ public class GamePanel extends JPanel implements Runnable {
             timer += (currentTime - lastTime);
             lastTime = currentTime;
 
-            // Update time every 1 second (real world)
-            if (System.currentTimeMillis() - lastTimeUpdate >= 1000) {
-                advanceGameTime();
-                lastTimeUpdate = System.currentTimeMillis();
-            }            
+            // Update clock UI time every 1 second (real world)
+            clockUI.updateIfNeeded();
+            
             if (delta >= 1) {
                 update();
                 
@@ -898,10 +873,12 @@ public class GamePanel extends JPanel implements Runnable {
             // --- Draw Player ---
             // Calculate player's screen position (relative to camera)
             int playerScreenX = player.getWorldX() - cameraX;
-            int playerScreenY = player.getWorldY() - cameraY;
-            // Draw the player at their screen position
-            player.draw(g2, playerScreenX, playerScreenY);            // --- Draw Time Info ---
-            drawTimeInfo(g2);
+            int playerScreenY = player.getWorldY() - cameraY;            // Draw the player at their screen position
+            player.draw(g2, playerScreenX, playerScreenY);
+            
+            // --- Draw Time Info ---
+            clockUI.drawTimeInfo(g2, player);
+            
             // --- Draw Energy and Tool Info ---
             drawEnergyAndToolInfo(g2);
         } else if (gameState == INVENTORY_STATE) {
@@ -1219,100 +1196,7 @@ public class GamePanel extends JPanel implements Runnable {
         System.out.println("Selected map index: " + (currentMapMenuIndex + 1));
         // Force repaint to show new selection immediately
         repaint();    }
-      // Tambahkan method advanceGameTime
-    private void advanceGameTime() {
-        // Don't advance time if it's paused (during fishing)
-        if (isTimePaused) {
-            return;
-        }
-        
-        // Tambah 5 menit setiap detik
-        int minute = time.getMinute() + 5;
-        int hour = time.getHour();
-        if (minute >= 60) {
-            minute -= 60;
-            hour++;
-        }        if (hour >= 24) {
-            hour = 0;
-            minute = 0;
-            day++;
-            dayOfWeek = (dayOfWeek + 1) % 7;
-            
-            // Update weather randomly each day
-            currentWeather = (Math.random() < 0.3) ? Weather.RAINY : Weather.SUNNY;
-            
-            if ((day - 1) % 10 == 0 && day != 1) {
-                currentSeasonIndex = (currentSeasonIndex + 1) % seasons.length;
-                // Update current season based on index
-                Season[] seasonValues = Season.values();
-                if (currentSeasonIndex < seasonValues.length) {
-                    currentSeason = seasonValues[currentSeasonIndex];
-                } else {
-                    currentSeasonIndex = 0;
-                    currentSeason = Season.SPRING;
-                }
-            }
-            
-            if (day > 30) {
-                day = 1;
-                month++;
-                if (month > 12) {
-                    month = 1;
-                    // Year progression could be tracked here if needed
-                }
-                currentSeason = Season.SPRING;
-                currentSeasonIndex = 0;
-                currentWeather = Weather.SUNNY;
-            }
-        }
-        time.setHour(hour);
-        time.setMinute(minute);
-    }    
-      private void drawTimeInfo(Graphics2D g2) {
-        String hari = dayNames[dayOfWeek];
-        String tanggal = String.format("%02d", day); 
-        String musim = currentSeason.getDisplayName(); 
-        int hour24 = time.getHour();
-        int hour12 = hour24 % 12;
-        if (hour12 == 0) hour12 = 12;
-        String ampm = (hour24 < 12 || hour24 == 24) ? "AM" : "PM";
-        String jam = String.format("%02d:%02d %s", hour12, time.getMinute(), ampm);
-        String goldText = String.valueOf(player.getGold());
-
-          if (clockImage != null) {
-            int clockWidth = 128;
-            int clockX = screenWidth - clockWidth - 10; 
-            int clockY = 10; 
-            g2.drawImage(clockImage, clockX, clockY, 128, 128, null); // Keep original clock image size            // Draw time text centered on the clock
-            int textX = clockX + (clockWidth / 2) - 15;
-            int textY = clockY + (128 / 2) + 5; // Use original clock image center
-            g2.setColor(Color.BLACK);
-            java.awt.Font originalFont = g2.getFont();
-            java.awt.Font boldFont = originalFont.deriveFont(java.awt.Font.BOLD, originalFont.getSize() + 2);
-            g2.setFont(boldFont);
-            g2.drawString(hari + ", " + tanggal, textX, textY - 43); 
-            g2.drawString(jam, textX, textY);            // Draw gold text inside the clock (assuming there's space in the bottom area)
-            g2.setColor(new Color(206, 82, 82)); // Custom red-brown color for gold text
-            g2.setFont(originalFont.deriveFont(java.awt.Font.BOLD, 14f)); // Increased size and ensure bold
-            FontMetrics goldMetrics = g2.getFontMetrics();
-            int goldTextX = clockX + clockWidth - goldMetrics.stringWidth(goldText) - 13; // Right-aligned with 10px margin
-            int goldTextY = clockY + 103; // Position near bottom of clock image
-            g2.drawString(goldText, goldTextX, goldTextY);
-            
-            g2.setFont(originalFont);
-        } else {
-            // Fallback to original method if image failed to load
-            g2.setColor(new Color(0,0,0,180));
-            g2.fillRoundRect(screenWidth-120, 10, 110, 130, 15, 15); // Made taller to fit gold
-            g2.setColor(Color.BLACK);
-            g2.drawString(hari + ", " + tanggal, screenWidth-110, 30);
-            g2.drawString(jam, screenWidth-110, 55); 
-            g2.drawString(musim, screenWidth-110, 80); // Added season display            g2.drawString(cuaca, screenWidth-110, 105); // Added weather display
-            g2.drawString(goldText, screenWidth-110, 130); // Added gold display
-        }
-    }
-    
-    /**
+      /**
      * Draw energy bar and held tool information
      */
     private void drawEnergyAndToolInfo(Graphics2D g2) {
@@ -1388,30 +1272,31 @@ public class GamePanel extends JPanel implements Runnable {
             int toolTextX = barX + (heldTool.getImage() != null ? 35 : 10);
             int toolTextY = toolInfoY + (toolInfoHeight + fm.getAscent()) / 2 - 2;
             g2.drawString(toolText, toolTextX, toolTextY);
-        }
-    }public Season getSeason() {
-        return currentSeason;
+        }    }
+
+    // Delegate clock-related methods to ClockUI
+    public Season getSeason() {
+        return clockUI.getCurrentSeason();
     }
 
     public String getCurrentSeasonName() {
-        return currentSeason.getDisplayName();
+        return clockUI.getCurrentSeason().getDisplayName();
     }
 
     public Weather getWeather() {
-        return currentWeather;
+        return clockUI.getCurrentWeather();
     }
 
     public boolean isRainy() {
-        return currentWeather == Weather.RAINY;
+        return clockUI.getCurrentWeather() == Weather.RAINY;
     }
-    
 
     public boolean isSunny() {
-        return currentWeather == Weather.SUNNY;
+        return clockUI.getCurrentWeather() == Weather.SUNNY;
     }
 
     public String getWeatherString() {
-        return currentWeather.getDisplayName();
+        return clockUI.getCurrentWeather().getDisplayName();
     }
     
     /**
@@ -1543,22 +1428,18 @@ public class GamePanel extends JPanel implements Runnable {
         int useButtonTextWidth = g2.getFontMetrics().stringWidth(useButtonText);
         int useButtonTextX = useButtonX + (useButtonWidth - useButtonTextWidth) / 2;        g2.drawString(useButtonText, useButtonTextX, useButtonY + 20);
     }
-    
-    // Time management for fishing system
-    private boolean isTimePaused = false;
-    
-    /**
+      /**
      * Pause the game time during fishing
      */
     public void pauseTime() {
-        isTimePaused = true;
+        clockUI.pauseTime();
     }
     
     /**
      * Resume the game time after fishing
      */
     public void resumeTime() {
-        isTimePaused = false;
+        clockUI.resumeTime();
     }
     
     /**
@@ -1566,28 +1447,13 @@ public class GamePanel extends JPanel implements Runnable {
      * @param minutes Minutes to add
      */
     public void addGameTime(int minutes) {
-        int currentMinute = time.getMinute() + minutes;
-        int currentHour = time.getHour();
-        
-        if (currentMinute >= 60) {
-            currentHour += currentMinute / 60;
-            currentMinute = currentMinute % 60;
-        }
-        
-        if (currentHour >= 24) {
-            currentHour = currentHour % 24;
-            // Could also advance day here if needed
-        }
-        
-        time.setHour(currentHour);
-        time.setMinute(currentMinute);
-    }
-      /**
+        clockUI.addGameTime(minutes);
+    }    /**
      * Get current time object
      * @return Current Time object
      */
     public Time getCurrentTime() {
-        return time;
+        return clockUI.getCurrentTime();
     }
     
     /**
@@ -1595,44 +1461,11 @@ public class GamePanel extends JPanel implements Runnable {
      * @return Current day
      */
     public int getCurrentDay() {
-        return day;
-    }
-      /**
+        return clockUI.getCurrentDay();
+    }    /**
      * Advance to next day (doesn't change time)
      */
     public void advanceToNextDay() {
-        // Advance to next day (but don't change time - that is handled by sleep effects)
-        day++;
-        dayOfWeek = (dayOfWeek + 1) % 7;
-        
-        // Update weather randomly each day
-        currentWeather = (Math.random() < 0.3) ? Weather.RAINY : Weather.SUNNY;
-        
-        // Check for season change every 10 days
-        if ((day - 1) % 10 == 0 && day != 1) {
-            currentSeasonIndex = (currentSeasonIndex + 1) % seasons.length;
-            // Update current season based on index
-            Season[] seasonValues = Season.values();
-            if (currentSeasonIndex < seasonValues.length) {
-                currentSeason = seasonValues[currentSeasonIndex];
-            } else {
-                currentSeasonIndex = 0;
-                currentSeason = Season.SPRING;
-            }
-        }
-        
-        // Check for month/year progression
-        if (day > 30) {
-            day = 1;
-            month++;
-            if (month > 12) {
-                month = 1;
-            }
-            currentSeason = Season.SPRING;
-            currentSeasonIndex = 0;
-            currentWeather = Weather.SUNNY;
-        }
-        
-        System.out.println("Advanced to next day: Day " + day);
+        clockUI.advanceToNextDay();
     }
 }

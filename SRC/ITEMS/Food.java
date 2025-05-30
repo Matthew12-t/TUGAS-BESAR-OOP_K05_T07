@@ -3,7 +3,9 @@ package SRC.ITEMS;
 import SRC.ENTITY.Player;
 
 public class Food extends Item implements Edible {
-    private int energy;    public Food(String name, int sellPrice, int buyPrice, int energy) {
+    private int energy;    
+    
+    public Food(String name, int sellPrice, int buyPrice, int energy) {
         super(name, "Food", sellPrice, buyPrice);
         this.energy = energy;
         
