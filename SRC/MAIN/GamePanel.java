@@ -35,6 +35,7 @@ import SRC.UI.NPCUi; // NPCUi has been moved to SRC.UI, so update the import and
 import SRC.SHIPPINGBIN.ShippingBin;
 import SRC.SHIPPINGBIN.ShippingBinUI;
 import SRC.UI.StoreUI;
+import SRC.UI.CookingUI;
 import SRC.UI.ClockUI;
 import SRC.UI.DayUI;
 import SRC.UI.EnergyUI;
@@ -50,14 +51,14 @@ public class GamePanel extends JPanel implements Runnable {
     private final int screenWidth = tileSize * maxScreenCol; // 768 pixels
     private final int screenHeight = tileSize * maxScreenRow; // 576 pixels
     private final int FPS = 60;
-    
-    // Game states
+      // Game states
     public static final int PLAY_STATE = 0;
     public static final int MAP_MENU_STATE = 1;
     public static final int INVENTORY_STATE = 2;
     public static final int SLEEP_STATE = 3;
     public static final int SHIPPING_STATE = 4;
     public static final int STORE_STATE = 5;
+    public static final int COOKING_STATE = 6;
     private int gameState = PLAY_STATE;
       // Inventory UI properties
     private BufferedImage inventoryImage;
@@ -127,9 +128,11 @@ public class GamePanel extends JPanel implements Runnable {
     // Shipping Bin system
     private ShippingBin ShippingBin;
     private ShippingBinUI shippingBinUI;
-    
-    // Store system
+      // Store system
     private StoreUI storeUI;
+    
+    // Cooking system
+    private CookingUI cookingUI;
 
     // Getters and setters
     public int getTileSize() {
@@ -169,9 +172,12 @@ public class GamePanel extends JPanel implements Runnable {
       public ShippingBinUI getShippingBinUI() {
         return shippingBinUI;
     }
-    
-    public StoreUI getStoreUI() {
+      public StoreUI getStoreUI() {
         return storeUI;
+    }
+    
+    public CookingUI getCookingUI() {
+        return cookingUI;
     }
     
     public void setGameState(int gameState) {
@@ -458,6 +464,9 @@ public class GamePanel extends JPanel implements Runnable {
         this.ShippingBin = new ShippingBin();
         this.shippingBinUI = new ShippingBinUI(this, ShippingBin, player.getPlayerAction().getInventory());        // Initialize store system
         this.storeUI = new StoreUI(this, player, player.getPlayerAction().getInventory());
+        
+        // Initialize cooking system
+        this.cookingUI = new CookingUI(this);
         
         // Initialize tile manager
         this.tileManager = new TileManager(this);
@@ -979,7 +988,21 @@ public class GamePanel extends JPanel implements Runnable {
             // Then draw store UI overlay
             if (this.getStoreUI() != null) {
                 this.getStoreUI().draw(g2);
-            }        }
+            }
+        } else if (gameState == COOKING_STATE) {
+            // First draw the game world in the background
+            g2.setColor(Color.black);
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+            currentMap.draw(g2);
+            int playerScreenX = player.getWorldX() - cameraX;
+            int playerScreenY = player.getWorldY() - cameraY;
+            player.draw(g2, playerScreenX, playerScreenY);
+            
+            // Then draw cooking UI overlay
+            if (cookingUI != null) {
+                cookingUI.draw(g2);
+            }
+        }
         
         npcUi.drawMessagePanel(g2);
         g2.dispose(); // Release system resources

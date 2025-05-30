@@ -104,12 +104,15 @@ public class KeyHandler implements KeyListener {
                         
                         gamePanel.getCurrentMap().removeObject(tileCol, tileRow);
                     }
-                }                // 'C' key action - prioritize sleep if near bed, store if in store map, shipping bin if near shipping bin, watering/planting/tilling/land recovery if in farm map, otherwise fishing
+                }                // 'C' key action - prioritize sleep if near bed, cooking if near stove, store if in store map, shipping bin if near shipping bin, watering/planting/tilling/land recovery if in farm map, otherwise fishing
                 if(code == KeyEvent.VK_C) {
                     // Check if player is near a bed for sleep action
                     if (gamePanel.getPlayer().getPlayerAction().isPlayerNearBed()) {
                         System.out.println("DEBUG: 'C' key pressed for sleep (near bed)");
                         gamePanel.getPlayer().getPlayerAction().performSleep();
+                    } else if (gamePanel.getPlayer().getPlayerAction().isPlayerNearStove()) {
+                        System.out.println("DEBUG: 'C' key pressed for cooking (near stove)");
+                        gamePanel.getPlayer().getPlayerAction().performCooking();
                     } else if (gamePanel.getCurrentMap().getMapName().equals("Store Map")) {
                         System.out.println("DEBUG: 'C' key pressed for store (in Store Map)");
                         gamePanel.setGameState(GamePanel.STORE_STATE);
@@ -216,6 +219,16 @@ public class KeyHandler implements KeyListener {
                 if(code == KeyEvent.VK_ESCAPE) {
                     gamePanel.setGameState(GamePanel.PLAY_STATE);
                     System.out.println("ESC key pressed - exiting store state");
+                }
+            }
+            else if (gamePanel.getGameState() == GamePanel.COOKING_STATE) {
+                // Handle cooking UI keyboard inputs
+                if(code == KeyEvent.VK_ESCAPE) {
+                    gamePanel.setGameState(GamePanel.PLAY_STATE);
+                    System.out.println("ESC key pressed - exiting cooking state");
+                } else {
+                    // Pass other key inputs to CookingUI
+                    gamePanel.getCookingUI().processInput(code);
                 }
             }
             // Handle NPC interaction keys when menu is open

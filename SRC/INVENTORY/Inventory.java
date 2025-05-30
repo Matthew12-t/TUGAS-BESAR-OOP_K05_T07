@@ -209,4 +209,19 @@ public class Inventory {
         }
         return false;
     }
+    
+    /**
+     * Get the total count of a specific item by name
+     * @param itemName Name of the item to count
+     * @return Total quantity of the item in inventory
+     */
+    public int getItemCount(String itemName) {
+        int totalCount = 0;
+        for (int i = 0; i < MAX_INVENTORY_SLOTS; i++) {
+            if (itemSlots[i] != null && itemSlots[i].getName().equals(itemName)) {
+                totalCount += quantitySlots[i];
+            }
+        }
+        return totalCount;
+    }
 }
