@@ -600,6 +600,9 @@ public class Player extends Entity {
       
     // Add holding tool system
     private SRC.ITEMS.Tool currentHoldingTool = null;
+    // Add holding seed system
+    private SRC.ITEMS.Seed currentHoldingSeed = null;
+    
     /**
      * Get currently holding tool
      * @return Current holding tool or null if none
@@ -607,12 +610,17 @@ public class Player extends Entity {
     public SRC.ITEMS.Tool getCurrentHoldingTool() {
         return currentHoldingTool;
     }
-    
-    /**
+      /**
      * Set currently holding tool
      * @param tool Tool to hold
      */
     public void setCurrentHoldingTool(SRC.ITEMS.Tool tool) {
+        // Clear any held seed to ensure only one item is held at a time
+        if (tool != null && this.currentHoldingSeed != null) {
+            this.currentHoldingSeed = null;
+            System.out.println("Dropped held seed to hold tool: " + tool.getName());
+        }
+        
         this.currentHoldingTool = tool;
         System.out.println("Player is now holding: " + (tool != null ? tool.getName() : "nothing"));
     }
@@ -633,6 +641,62 @@ public class Player extends Entity {
     public boolean isHoldingAnyTool() {
         return currentHoldingTool != null;
     }
+    
+    // Seed holding system methods
+    /**
+     * Get currently holding seed
+     * @return Current holding seed or null if none
+     */
+    public SRC.ITEMS.Seed getCurrentHoldingSeed() {
+        return currentHoldingSeed;
+    }
+      /**
+     * Set currently holding seed
+     * @param seed Seed to hold
+     */
+    public void setCurrentHoldingSeed(SRC.ITEMS.Seed seed) {
+        // Clear any held tool to ensure only one item is held at a time
+        if (seed != null && this.currentHoldingTool != null) {
+            this.currentHoldingTool = null;
+            System.out.println("Dropped held tool to hold seed: " + seed.getName());
+        }
+        
+        this.currentHoldingSeed = seed;
+        System.out.println("Player is now holding seed: " + (seed != null ? seed.getName() : "nothing"));
+    }
+    
+    /**
+     * Check if player is holding a specific seed
+     * @param seedName Name of the seed to check
+     * @return true if holding the specified seed
+     */
+    public boolean isHoldingSeed(String seedName) {
+        return currentHoldingSeed != null && currentHoldingSeed.getName().equals(seedName);
+    }
+    
+    /**
+     * Check if player is holding any seed
+     * @return true if holding any seed
+     */
+    public boolean isHoldingAnySeed() {
+        return currentHoldingSeed != null;
+    }
+    
+    /**
+     * Get the currently held item (for seed detection in planting logic)
+     * @return Item currently selected in inventory, or null if none selected
+     */
+    public Item getCurrentlyHeldItem() {
+        int selectedSlotIndex = gp.getMouseHandler().getSelectedSlotIndex();
+        if (selectedSlotIndex >= 0) {
+            Item[] items = getInventoryItems();
+            if (selectedSlotIndex < items.length && items[selectedSlotIndex] != null) {
+                return items[selectedSlotIndex];
+            }
+        }
+        return null;
+    }
+    
     public boolean isMarried() {
         return married;
     }

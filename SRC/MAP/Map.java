@@ -120,11 +120,10 @@ public abstract class Map {
             worldX - gp.getTileSize() < gp.getCameraX() + gp.getScreenWidth() &&
             worldY + gp.getTileSize() > gp.getCameraY() &&
             worldY - gp.getTileSize() < gp.getCameraY() + gp.getScreenHeight()) {
-            
-            // Special handling for planted tiles to use dynamic growth system
+              // Special handling for planted tiles to use dynamic growth system
             if (tileType == Tile.TILE_PLANTED) {
-                // Create TileManager instance for growth rendering
-                SRC.TILES.TileManager tileManager = new SRC.TILES.TileManager(gp);
+                // Use GamePanel's shared TileManager instance for growth rendering
+                SRC.TILES.TileManager tileManager = gp.getTileManager();
                 
                 // Use delegation method for dynamic growth rendering
                 Tile.drawPlantedTileGrowth(g2, screenX, screenY, gp.getTileSize(), tileManager, col, row);

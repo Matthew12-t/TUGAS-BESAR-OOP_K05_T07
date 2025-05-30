@@ -17,19 +17,22 @@ public class TileManager {
     private GamePanel gamePanel;
     
     // ===== PLANTED TILE MANAGEMENT =====
-    
-    // Simple planted tile data structure
+      // Simple planted tile data structure
     public static class PlantedTileInfo {
         public String seedName;        // Nama seed yang ditanam
         public int plantedDay;         // Hari game saat ditanam  
         public int plantedHour;        // Jam game saat ditanam
         public int daysToGrow;         // Total hari untuk harvest
+        public boolean isWatered;      // Apakah sudah disiram hari ini
+        public int lastWateredDay;     // Hari terakhir disiram
         
         public PlantedTileInfo(String seedName, int plantedDay, int plantedHour, int daysToGrow) {
             this.seedName = seedName;
             this.plantedDay = plantedDay;
             this.plantedHour = plantedHour;
             this.daysToGrow = daysToGrow;
+            this.isWatered = false;
+            this.lastWateredDay = plantedDay; // Mulai dari hari ditanam
         }
     }
     
@@ -112,18 +115,21 @@ public class TileManager {
         System.out.println("DEBUG: Successfully recovered land at (" + col + ", " + row + ")");
         return true;
     }
+      // ===== PLANTED TILE GROWTH LOGIC =====
     
-    // ===== PLANTED TILE GROWTH LOGIC =====
-      /**
-     * Hitung growth stage berdasarkan current time
-     * @param plantInfo info tanaman
-     * @return growth stage (0 = baru tanam, daysToGrow+1 = siap harvest)
+    /**
+     * Calculate growth stage based on current time and watering status
+     * @param plantInfo plant information
+     * @return growth stage (0 = newly planted, daysToGrow+1 = ready to harvest)
      */
     private int calculateGrowthStage(PlantedTileInfo plantInfo) {
         // Get current game time
         int currentDay = gamePanel.getCurrentDay();
         Time currentTime = gamePanel.getCurrentTime();
         int currentHour = (currentTime != null) ? currentTime.getHour() : 6; // Default 6 AM
+        
+        // Update watering status berdasarkan weather
+        updateWateringFromWeather(plantInfo, currentDay);
         
         // Hitung berapa hari sudah berlalu sejak ditanam
         int daysPassed = currentDay - plantInfo.plantedDay;
@@ -133,13 +139,61 @@ public class TileManager {
             return 0;
         }
         
-        // Jika sudah lewat jam tanam di hari yang sama, atau sudah hari berikutnya
-        if (daysPassed == 0 && currentHour >= plantInfo.plantedHour) {
-            return 1; // Stage pertama growth
+        // Hitung growth stage berdasarkan watering
+        int actualGrowthDays = 0;
+        
+        // Loop dari hari ditanam sampai hari ini
+        for (int day = plantInfo.plantedDay; day <= currentDay; day++) {
+            // Cek apakah di hari tersebut tanaman sudah disiram
+            boolean wasWateredOnDay = wasPlantWateredOnDay(plantInfo, day);
+            
+            if (wasWateredOnDay) {
+                actualGrowthDays++;
+            }
+            // Jika tidak disiram, growth tidak bertambah untuk hari itu
         }
         
-        // Untuk hari-hari berikutnya, growth stage bertambah
-        return Math.min(daysPassed + 1, plantInfo.daysToGrow + 1);
+        // Growth stage = actualGrowthDays, maksimal daysToGrow + 1 (untuk harvest)
+        return Math.min(actualGrowthDays, plantInfo.daysToGrow + 1);
+    }
+    
+    /**
+     * Cek apakah tanaman disiram pada hari tertentu
+     */
+    private boolean wasPlantWateredOnDay(PlantedTileInfo plantInfo, int day) {
+        // Tanaman dianggap disiram jika:
+        // 1. Hari pertama ditanam (gratis watering)
+        // 2. Hari terakhir disiram manual adalah hari tersebut
+        // 3. Weather rainy di hari tersebut (semua tanaman auto-watered)
+        
+        if (day == plantInfo.plantedDay) {
+            return true; // Hari pertama gratis watering
+        }
+        
+        if (plantInfo.lastWateredDay >= day) {
+            return true; // Sudah disiram manual
+        }
+        
+        // Cek weather history (untuk implementasi sederhana, anggap rainy random)
+        // Bisa diimprove dengan weather history yang sebenarnya
+        return false;
+    }
+    
+    /**
+     * Update watering status berdasarkan weather saat ini
+     */
+    private void updateWateringFromWeather(PlantedTileInfo plantInfo, int currentDay) {
+        // Jika hari ini rainy, semua tanaman auto-watered
+        if (gamePanel.getWeather().name().equals("RAINY") && 
+            plantInfo.lastWateredDay < currentDay) {
+            plantInfo.isWatered = true;
+            plantInfo.lastWateredDay = currentDay;
+        }
+        
+        // Reset isWatered jika sudah ganti hari
+        if (plantInfo.lastWateredDay < currentDay) {
+            plantInfo.isWatered = false;
+        }
     }
     
     /**
@@ -147,17 +201,34 @@ public class TileManager {
      */
     private boolean isPlantReadyToHarvestInternal(PlantedTileInfo plantInfo) {
         return calculateGrowthStage(plantInfo) > plantInfo.daysToGrow;
-    }
-    
-    /**
+    }    /**
      * Get image file name berdasarkan growth stage
      */
     private String getGrowthImageName(PlantedTileInfo plantInfo) {
         int stage = calculateGrowthStage(plantInfo);
         
+        // Pastikan minimum stage = 1 untuk ada image
+        stage = Math.max(1, stage);
+        
         // Nama file: namaseed1.png, namaseed2.png, dst
-        String cleanSeedName = plantInfo.seedName.replace(" Seeds", "").replace(" ", "").toLowerCase();
-        return cleanSeedName + stage + ".png";
+        // Contoh: "Cauliflower Seed" -> "cauliflower1.png"
+        // Special case untuk "Hot Pepper Seed" -> "hot_pepper1.png"
+        String cleanSeedName = plantInfo.seedName.replace(" Seed", "").toLowerCase();
+        
+        // Handle special cases untuk nama dengan spasi
+        if (cleanSeedName.equals("hot pepper")) {
+            cleanSeedName = "hot_pepper"; // Gunakan underscore
+        } else {
+            cleanSeedName = cleanSeedName.replace(" ", ""); // Remove spasi untuk yang lain
+        }
+        
+        String imageName = cleanSeedName + stage + ".png";
+        
+        // Debug output
+        System.out.println("DEBUG: Growth stage for " + plantInfo.seedName + " = " + stage);
+        System.out.println("DEBUG: Looking for image: " + imageName);
+        
+        return imageName;
     }
     
     // ===== TILE ACTIONS =====
@@ -168,28 +239,25 @@ public class TileManager {
     public boolean plantSeed(int col, int row, String seedName, int daysToGrow) {
         // Validasi: hanya bisa plant di Farm Map
         if (!gamePanel.getCurrentMap().getMapName().equals("Farm Map")) {
-            System.out.println("DEBUG: Can only plant seeds in Farm Map!");
             return false;
         }
         
         // Validasi: tile harus tilled dan belum ada tanaman
         int tileType = gamePanel.getCurrentMap().getTile(col, row);
         if (tileType != Tile.TILE_TILLED) {
-            System.out.println("DEBUG: Can only plant on tilled soil!");
             return false;
         }
         
         String tileKey = col + "," + row;
         if (plantedTiles.containsKey(tileKey)) {
-            System.out.println("DEBUG: Tile already has a plant!");
             return false;
         }
         
         // Validasi: tidak ada collision
         if (gamePanel.getCurrentMap().getMapController().hasCollision(gamePanel.getCurrentMap(), col, row)) {
-            System.out.println("DEBUG: Cannot plant - collision detected");
             return false;
         }
+
           // Get current game time
         int currentDay = gamePanel.getCurrentDay();
         Time currentTime = gamePanel.getCurrentTime();
@@ -204,8 +272,7 @@ public class TileManager {
         // Update tile type to PLANTED
         gamePanel.getCurrentMap().setTileInMap(col, row, Tile.TILE_PLANTED);
         
-        System.out.println("DEBUG: Planted " + seedName + " at (" + col + ", " + row + ") on day " + 
-                          currentDay + " at " + currentHour + ":00");
+        System.out.println("DEBUG: Planted " + seedName + " at (" + col + ", " + row + ") on day " + currentDay + " at " + currentHour + ":00");
         return true;
     }
     
@@ -282,9 +349,7 @@ public class TileManager {
             g2.setColor(Color.WHITE);
             g2.drawString("Stage " + growthStage, screenX + 5, screenY + 15);
         }
-    }
-    
-    /**
+    }    /**
      * Load growth sprite dengan caching
      */
     private BufferedImage loadGrowthSprite(String seedName, String imageName) {
@@ -296,17 +361,36 @@ public class TileManager {
         
         try {
             // Path structure: RES/SEED/[SEED_NAME]/[imageName]
-            String cleanSeedName = seedName.replace(" Seeds", "").replace(" ", "").toLowerCase();
+            // Contoh: "Cauliflower Seed" -> "RES/SEED/CAULIFLOWER/cauliflower1.png"
+            String cleanSeedName = seedName.replace(" Seed", "").replace(" ", "").toUpperCase();
+            
+            // Special mapping untuk nama folder yang berbeda
+            if (cleanSeedName.equals("HOTPEPPER")) {
+                cleanSeedName = "HOTPEPPER"; // Folder tetap HOTPEPPER
+            }
+            
             String imagePath = "RES/SEED/" + cleanSeedName + "/" + imageName;
             
-            BufferedImage image = ImageIO.read(new File(imagePath));
+            // Debug output
+            System.out.println("DEBUG: Trying to load image from path: " + imagePath);
+            
+            File imageFile = new File(imagePath);
+            if (!imageFile.exists()) {
+                System.out.println("DEBUG: Image file does not exist: " + imagePath);
+                return null;
+            }
+            
+            BufferedImage image = ImageIO.read(imageFile);
             
             // Cache image untuk performance
             growthImageCache.put(cacheKey, image);
             
+            System.out.println("DEBUG: Successfully loaded image: " + imagePath);
             return image;
         } catch (Exception e) {
             System.out.println("DEBUG: Could not load growth sprite: " + imageName + " for seed: " + seedName);
+            System.out.println("DEBUG: Full path attempted: RES/SEED/" + seedName.replace(" Seed", "").replace(" ", "").toUpperCase() + "/" + imageName);
+            System.out.println("DEBUG: Error: " + e.getMessage());
             return null;
         }
     }
@@ -347,6 +431,40 @@ public class TileManager {
         if (plantInfo == null) return false;
         
         return isPlantReadyToHarvestInternal(plantInfo);
+    }
+    
+    /**
+     * Check if plant is already watered today
+     */
+    public boolean isPlantWateredToday(int col, int row) {
+        String tileKey = col + "," + row;
+        PlantedTileInfo plantInfo = plantedTiles.get(tileKey);
+        
+        if (plantInfo == null) return false;
+        
+        int currentDay = gamePanel.getCurrentDay();
+        return plantInfo.isWatered && plantInfo.lastWateredDay == currentDay;
+    }
+      /**
+     * Water a plant manually
+     */
+    public boolean waterPlant(int col, int row) {
+        String tileKey = col + "," + row;
+        PlantedTileInfo plantInfo = plantedTiles.get(tileKey);
+        
+        if (plantInfo == null) {
+            System.out.println("DEBUG: No plant found at (" + col + ", " + row + ") to water");
+            return false;
+        }
+        
+        int currentDay = gamePanel.getCurrentDay();
+        
+        // Update watering status
+        plantInfo.isWatered = true;
+        plantInfo.lastWateredDay = currentDay;
+        
+        System.out.println("DEBUG: Plant watered at (" + col + ", " + row + ") on day " + currentDay);
+        return true;
     }
     
     /**
