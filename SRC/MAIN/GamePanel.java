@@ -1535,4 +1535,8 @@ public class GamePanel extends JPanel implements Runnable {
     public SRC.ENTITY.NPCEntity getNPCInteractionTarget() {
         return npcUi.getNPCInteractionTarget();
     }
+
+    public boolean isMessagePanelActive() {
+        return npcUi.isMessagePanelActive();
+    }
 }

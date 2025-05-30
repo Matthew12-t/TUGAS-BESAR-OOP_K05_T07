@@ -809,47 +809,42 @@ public class PlayerAction {
     public SleepUI getSleepUI() {
         return this.sleepUI;
     }
-    
-    /**
+      /**
      * Check if player is near a bed (within collision distance)
+     * Improved logic to account for bed size (2x4 tiles)
      */
     public boolean isPlayerNearBed() {
         SRC.MAP.Map currentMap = gamePanel.getCurrentMap();
 
         // Get player position in tiles
-        int tileSize = gamePanel.getTileSize();
-        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
+        int tileSize = gamePanel.getTileSize();        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
         int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
-
+        
         // Check all objects on the map for beds
         SuperObject[] objects = currentMap.getObjects();
-        for (SuperObject obj : objects) {
-            if (obj instanceof SRC.OBJECT.OBJ_Bed) {
+        for (SuperObject obj : objects) {            if (obj instanceof SRC.OBJECT.OBJ_Bed) {
                 SRC.OBJECT.OBJ_Bed bed = (SRC.OBJECT.OBJ_Bed) obj;
-
+                
                 int bedCol = obj.getPosition().getWorldX() / tileSize;
                 int bedRow = obj.getPosition().getWorldY() / tileSize;
-                int bedWidth = bed.getBedWidth();
-                int bedHeight = bed.getBedHeight();
-                boolean nearLeftSide = (playerCol == bedCol - 1) &&
-                        (playerRow >= bedRow - 1) && (playerRow <= bedRow + bedHeight);
-                boolean nearRightSide = (playerCol == bedCol + bedWidth) &&
-                        (playerRow >= bedRow - 1) && (playerRow <= bedRow + bedHeight);
-                boolean nearTopSide = (playerRow == bedRow - 1) &&
-                        (playerCol >= bedCol - 1) && (playerCol <= bedCol + bedWidth);
-                boolean nearBottomSide = (playerRow == bedRow + bedHeight) &&
-                        (playerCol >= bedCol - 1) && (playerCol <= bedCol + bedWidth);
-
+                int bedWidth = bed.getBedWidth(); 
+                int bedHeight = bed.getBedHeight(); 
+                boolean nearLeftSide = (playerCol == bedCol - 1) && 
+                                     (playerRow >= bedRow - 1) && (playerRow <= bedRow + bedHeight);
+                boolean nearRightSide = (playerCol == bedCol + bedWidth) && 
+                                      (playerRow >= bedRow - 1) && (playerRow <= bedRow + bedHeight);
+                boolean nearTopSide = (playerRow == bedRow - 1) && 
+                                    (playerCol >= bedCol - 1) && (playerCol <= bedCol + bedWidth);
+                boolean nearBottomSide = (playerRow == bedRow + bedHeight) && 
+                                       (playerCol >= bedCol - 1) && (playerCol <= bedCol + bedWidth);
+                
                 if (nearLeftSide || nearRightSide || nearTopSide || nearBottomSide) {
                     System.out.println("DEBUG: Player near bed at (" + bedCol + "," + bedRow + ") - " +
-                            "Size: " + bedWidth + "x" + bedHeight + " - Player at (" + playerCol + "," + playerRow
-                            + ")");
+                                     "Size: " + bedWidth + "x" + bedHeight + " - Player at (" + playerCol + "," + playerRow + ")");
                     return true;
                 }
             }
-        }
-
-        return false;
+        }        return false;
     }
     
     /**

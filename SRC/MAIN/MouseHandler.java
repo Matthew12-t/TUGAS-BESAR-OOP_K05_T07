@@ -80,8 +80,7 @@ public class MouseHandler extends MouseAdapter {
             return;
         }
           // Check if we're in store state
-        if (gamePanel.getGameState() == GamePanel.STORE_STATE) {
-            // Handle store clicks
+        if (gamePanel.getGameState() == GamePanel.STORE_STATE) {            // Handle store clicks
             gamePanel.getStoreUI().handleMouseClick(screenX, screenY);
             return;
         }
@@ -95,6 +94,18 @@ public class MouseHandler extends MouseAdapter {
         
         // Only handle map clicks in PLAY_STATE
         if (gamePanel.getGameState() == GamePanel.PLAY_STATE) {
+            // Check if NPC interaction menu is open - if so, ignore map clicks
+            if (gamePanel.isNPCInteractionMenuOpen()) {
+                System.out.println("NPC interaction menu is open - ignoring map click");
+                return;
+            }
+            
+            // Check if message panel is active - if so, ignore map clicks
+            if (gamePanel.isMessagePanelActive()) {
+                System.out.println("NPC message panel is active - ignoring map click");
+                return;
+            }
+            
             // Convert to world coordinates
             int worldX = screenX + gamePanel.getCameraX();
             int worldY = screenY + gamePanel.getCameraY();

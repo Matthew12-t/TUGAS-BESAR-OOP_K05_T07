@@ -343,4 +343,20 @@ public class NPCUi {
         }
         return null;
     }
+
+    public boolean isMessagePanelActive() {
+        if (messagePanelText != null) {
+            long now = System.currentTimeMillis();
+            return (now - messagePanelTimestamp <= MESSAGE_PANE_DURATION_MS);
+        }
+        return false;
+    }
+    
+    /**
+     * Clear the message panel (dismiss message)
+     */
+    public void clearMessagePanel() {
+        messagePanelText = null;
+        gamePanel.repaint();
+    }
 }
