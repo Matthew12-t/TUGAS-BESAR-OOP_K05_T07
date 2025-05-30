@@ -55,10 +55,6 @@ public class Inventory {
         if (fishingRodItem != null) {
             addItem(fishingRodItem, 1);
         }
-        Item proposalRingItem = GameData.addTool("Proposal Ring", 2);
-        if (proposalRingItem != null) {
-            addItem(proposalRingItem, 2);
-        }
     }
     
     /**

@@ -17,27 +17,22 @@ public class StoreUI {
     private Player player;
     private Inventory inventory;
     
-    // New simplified store system
     private Store<Item> store;
     private StoreManager<Item> storeManager;
     
-    // UI dimensions
     private final int slotSize = 50;
     private final int storeCols = 4;
     private final int storeRows = 4;
     private final int inventoryCols = 4;
     private final int inventoryRows = 4;
     
-    // Categories from StoreManager
     private int currentCategory = 0;
     private String[] categoryNames;
     
-    // Selection
     private int selectedStoreSlot = 0;
     private int selectedInventorySlot = 0;
     private boolean selectingStore = true; // true=store, false=inventory
     
-    // UI elements
     private BufferedImage backgroundImage;
     private Rectangle buyButton;
     private Rectangle exitButton;
@@ -51,22 +46,16 @@ public class StoreUI {
         this.gp = gp;
         this.player = player;
         this.inventory = inventory;
-        
-        // Initialize new simplified store system
         this.store = new Store<>("General Store");
         this.storeManager = store.getStoreManager();
         this.categoryNames = storeManager.getCategories();
-        
         loadBackgroundImage();
-        initializeButtons();
-        
-        System.out.println("StoreUI initialized with " + categoryNames.length + " categories");
+        initializeButtons(); 
     }
     
     private void loadBackgroundImage() {
         try {
             backgroundImage = ImageIO.read(new File("RES/INVENTORY/shippingbin_inventory.png"));
-            System.out.println("Successfully loaded store UI background image");
         } catch (Exception e) {
             System.out.println("Could not load store UI background image: " + e.getMessage());
         }
@@ -79,17 +68,14 @@ public class StoreUI {
         buyButton = new Rectangle(centerX - buttonWidth - 10, bottomY, buttonWidth, buttonHeight);
         exitButton = new Rectangle(centerX + 10, bottomY, buttonWidth, buttonHeight);
         
-        // Category navigation buttons
         prevCategoryButton = new Rectangle(centerX - 150, 50, 80, 30);
         nextCategoryButton = new Rectangle(centerX + 70, 50, 80, 30);
     }
     
     public void draw(Graphics2D g2) {
-        // Draw semi-transparent background
         g2.setColor(new Color(0, 0, 0, 150));
         g2.fillRect(0, 0, gp.getScreenWidth(), gp.getScreenHeight());
         
-        // Draw background image if available
         if (backgroundImage != null) {
             int scaledWidth = backgroundImage.getWidth() * imageScale;
             int scaledHeight = backgroundImage.getHeight() * imageScale;
@@ -97,37 +83,26 @@ public class StoreUI {
             int imageY = (gp.getScreenHeight() - scaledHeight) / 2 - 20;
             
             g2.drawImage(backgroundImage, imageX, imageY, scaledWidth, scaledHeight, null);
-            
-            // Draw store slots (left side)
             drawStoreSlots(g2, imageX, imageY, scaledWidth, scaledHeight);
-            
-            // Draw inventory slots (right side)
             drawInventorySlots(g2, imageX, imageY, scaledWidth, scaledHeight);
-        } else {
+        } 
+        
+        else {
             drawFallbackUI(g2);
         }
         
-        // Draw category navigation
         drawCategoryNavigation(g2);
-        
-        // Draw buttons
         drawButtons(g2);
-        
-        // Draw player gold
         drawPlayerGold(g2);
-        
-        // Draw selected item info
         drawSelectedItemInfo(g2);
     }
     
     private void drawStoreSlots(Graphics2D g2, int baseX, int baseY, int imageWidth, int imageHeight) {
-        // Calculate store area - left side
         int storeAreaX = baseX + (int)(imageWidth * 0.05);
         int storeAreaY = baseY + (int)(imageHeight * 0.15);
         int storeAreaWidth = (int)(imageWidth * 0.35);
         int storeAreaHeight = (int)(imageHeight * 0.70);
         
-        // Calculate slot positions
         int slotSpacing = 2;
         int totalSlotsWidth = (storeCols * slotSize) + ((storeCols - 1) * slotSpacing);
         int totalSlotsHeight = (storeRows * slotSize) + ((storeRows - 1) * slotSpacing);
@@ -143,17 +118,18 @@ public class StoreUI {
                 int x = startX + col * (slotSize + slotSpacing);
                 int y = startY + row * (slotSize + slotSpacing);
                 
-                // Draw slot background
                 if (selectingStore && selectedStoreSlot == slotIndex) {
-                    g2.setColor(new Color(255, 255, 0, 100)); // Yellow highlight
-                } else {
-                    g2.setColor(new Color(255, 255, 255, 50)); // White background
+                    g2.setColor(new Color(255, 255, 0, 100)); 
+                } 
+                
+                else {
+                    g2.setColor(new Color(255, 255, 255, 50));
                 }
+
                 g2.fillRect(x, y, slotSize, slotSize);
                 g2.setColor(Color.WHITE);
                 g2.drawRect(x, y, slotSize, slotSize);
                 
-                // Draw item if available
                 if (slotIndex < currentItems.size()) {
                     Item item = currentItems.get(slotIndex);
                     if (item.getImage() != null) {
@@ -161,7 +137,6 @@ public class StoreUI {
                                    x + 5, y + 5, slotSize - 10, slotSize - 10, null);
                     }
                     
-                    // Draw price
                     int price = store.getBuyPrice(item);
                     g2.setColor(Color.YELLOW);
                     g2.setFont(new Font("Arial", Font.BOLD, 10));
@@ -172,13 +147,11 @@ public class StoreUI {
     }
     
     private void drawInventorySlots(Graphics2D g2, int baseX, int baseY, int imageWidth, int imageHeight) {
-        // Calculate inventory area - right side
         int inventoryAreaX = baseX + (int)(imageWidth * 0.60);
         int inventoryAreaY = baseY + (int)(imageHeight * 0.15);
         int inventoryAreaWidth = (int)(imageWidth * 0.35);
         int inventoryAreaHeight = (int)(imageHeight * 0.70);
         
-        // Calculate slot positions
         int slotSpacing = 2;
         int totalSlotsWidth = (inventoryCols * slotSize) + ((inventoryCols - 1) * slotSpacing);
         int totalSlotsHeight = (inventoryRows * slotSize) + ((inventoryRows - 1) * slotSpacing);
@@ -194,17 +167,17 @@ public class StoreUI {
                 int x = startX + col * (slotSize + slotSpacing);
                 int y = startY + row * (slotSize + slotSpacing);
                 
-                // Draw slot background
                 if (!selectingStore && selectedInventorySlot == slotIndex) {
-                    g2.setColor(new Color(255, 255, 0, 100)); // Yellow highlight
-                } else {
-                    g2.setColor(new Color(255, 255, 255, 50)); // White background
+                    g2.setColor(new Color(255, 255, 0, 100)); 
+                } 
+                
+                else {
+                    g2.setColor(new Color(255, 255, 255, 50)); 
                 }
                 g2.fillRect(x, y, slotSize, slotSize);
                 g2.setColor(Color.WHITE);
                 g2.drawRect(x, y, slotSize, slotSize);
-                
-                // Draw item if available
+
                 if (slotIndex < inventoryItems.length && inventoryItems[slotIndex] != null) {
                     Item item = inventoryItems[slotIndex];
                     if (item.getImage() != null) {
@@ -217,43 +190,35 @@ public class StoreUI {
     }
     
     private void drawFallbackUI(Graphics2D g2) {
-        // Fallback UI if background image doesn't load
         int panelWidth = 600;
         int panelHeight = 400;
         int panelX = (gp.getScreenWidth() - panelWidth) / 2;
         int panelY = (gp.getScreenHeight() - panelHeight) / 2;
         
-        g2.setColor(new Color(139, 69, 19, 200)); // Brown background
+        g2.setColor(new Color(139, 69, 19, 200)); 
         g2.fillRect(panelX, panelY, panelWidth, panelHeight);
         g2.setColor(Color.WHITE);
         g2.drawRect(panelX, panelY, panelWidth, panelHeight);
         
-        // Draw title
         g2.setFont(new Font("Arial", Font.BOLD, 24));
         g2.setColor(Color.WHITE);
         g2.drawString("Store", panelX + panelWidth/2 - 30, panelY + 30);
     }
     
     private void drawCategoryNavigation(Graphics2D g2) {
-        // Draw category buttons
+
         g2.setColor(new Color(139, 69, 19));
-        g2.fillRect(prevCategoryButton.x, prevCategoryButton.y, 
-                   prevCategoryButton.width, prevCategoryButton.height);
-        g2.fillRect(nextCategoryButton.x, nextCategoryButton.y, 
-                   nextCategoryButton.width, nextCategoryButton.height);
+        g2.fillRect(prevCategoryButton.x, prevCategoryButton.y,prevCategoryButton.width, prevCategoryButton.height);
+        g2.fillRect(nextCategoryButton.x, nextCategoryButton.y,nextCategoryButton.width, nextCategoryButton.height);
         
         g2.setColor(Color.WHITE);
-        g2.drawRect(prevCategoryButton.x, prevCategoryButton.y, 
-                   prevCategoryButton.width, prevCategoryButton.height);
-        g2.drawRect(nextCategoryButton.x, nextCategoryButton.y, 
-                   nextCategoryButton.width, nextCategoryButton.height);
+        g2.drawRect(prevCategoryButton.x, prevCategoryButton.y,prevCategoryButton.width, prevCategoryButton.height);
+        g2.drawRect(nextCategoryButton.x, nextCategoryButton.y,nextCategoryButton.width, nextCategoryButton.height);
         
-        // Draw button text
         g2.setFont(new Font("Arial", Font.BOLD, 12));
         g2.drawString("< Prev", prevCategoryButton.x + 15, prevCategoryButton.y + 20);
         g2.drawString("Next >", nextCategoryButton.x + 15, nextCategoryButton.y + 20);
         
-        // Draw current category
         g2.setFont(new Font("Arial", Font.BOLD, 18));
         String categoryText = categoryNames[currentCategory];
         FontMetrics fm = g2.getFontMetrics();
@@ -292,8 +257,7 @@ public class StoreUI {
                 int price = store.getBuyPrice(item);
                 g2.setColor(Color.WHITE);
                 g2.setFont(new Font("Arial", Font.BOLD, 14));
-                g2.drawString("Selected: " + item.getName() + " - $" + price, 
-                            20, gp.getScreenHeight() - 120);
+                g2.drawString("Selected: " + item.getName() + " - $" + price, 20, gp.getScreenHeight() - 120);
             }
         }
     }
@@ -305,8 +269,7 @@ public class StoreUI {
         }
         return storeManager.getAllItems();
     }
-    
-    // Input handling methods
+
     public void moveSelection(String direction) {
         if (selectingStore) {
             moveStoreSelection(direction);

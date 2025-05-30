@@ -9,32 +9,25 @@ import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
-/**
- * TvUI handles the display of TV watching screen
- * Shows different content based on current season and weather
- */
 public class TvUI {
     private GamePanel gamePanel;
     private boolean isWatching = false;
     private BufferedImage currentTvImage;
     private long watchStartTime;
-    private static final int WATCH_DURATION_MS = 5000; // 5 seconds      // UI styling
+    private static final int WATCH_DURATION_MS = 5000; 
     private static final Color TEXT_COLOR = Color.WHITE;
-    private static final Color ACCENT_COLOR = new Color(255, 215, 0); // Gold color
+    private static final Color ACCENT_COLOR = new Color(255, 215, 0); 
     private static final Font MESSAGE_FONT = new Font("Arial", Font.PLAIN, 18);
     
     public TvUI(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
     }
-      /**
-     * Start watching TV with content based on current season and weather
-     */
+
     public void startWatchingTV() {
         Season currentSeason = gamePanel.getSeason();
         Weather currentWeather = gamePanel.getWeather();
         
-        // Load appropriate TV image
-        loadTvImage(currentSeason, currentWeather);        // Start watching
+        loadTvImage(currentSeason, currentWeather);        
         isWatching = true;
         watchStartTime = System.currentTimeMillis();
         
