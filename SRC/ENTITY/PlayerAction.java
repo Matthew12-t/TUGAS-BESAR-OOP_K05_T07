@@ -874,19 +874,15 @@ public class PlayerAction {
             int dailyIncome = SleepUI.calculateDailyIncome(currentDay, currentSeason);
             player.addGold(dailyIncome);
             
-            System.out.println("DEBUG: Daily income: " + dailyIncome + " gold added (no shipping bin items)");
-        }
+            System.out.println("DEBUG: Daily income: " + dailyIncome + " gold added (no shipping bin items)");        }
         
-        // Advance to next day if trigger is automatic (not manual)
-        if (trigger == SleepUI.SleepTrigger.LOW_ENERGY || 
-            trigger == SleepUI.SleepTrigger.LATE_TIME) {
-            gamePanel.advanceToNextDay();
-            // Reset time to 10:00 again after day advancement
-            currentTime.setHour(10);
-            currentTime.setMinute(0);
-        }
+        // Always advance to next day when sleeping (manual or automatic)
+        gamePanel.advanceToNextDay();
+        // Reset time to 10:00 after day advancement
+        currentTime.setHour(10);
+        currentTime.setMinute(0);
         
-        System.out.println("DEBUG: Sleep effects applied - Energy restored, time set to 10:00 AM");
+        System.out.println("DEBUG: Sleep effects applied - Energy restored, time set to 10:00 AM, advanced to next day");
     }
       /**
      * Transport player to house bed location (spawn beside the bed, not on it)
