@@ -22,6 +22,7 @@ public class Player extends Entity {
     private final int MAX_ENERGY = 100; // Maximum energy value
     private int gold; // Player's gold amount
     private final int TOTAL_FRAMES = 8;
+    private boolean married;
 
     // --- Variabel Entitas (Deklarasikan jika tidak di Entity) ---
     private Rectangle solidArea; // Collision area for the player
@@ -49,7 +50,9 @@ public class Player extends Entity {
     // ----------------------------------    //contructor
     public Player(GamePanel gp, KeyHandler keyH, MouseHandler mouseHandler) {
         super(gp, 100, 100); // Panggil konstruktor Entity dengan posisi awal
-        this.gp = gp;        this.keyH = keyH;
+        this.gp = gp;        
+        this.keyH = keyH;
+        this.married = false;
         this.mouseHandler = mouseHandler;
         this.energy = 100; 
         this.gold = 500; // Initialize gold with 500
@@ -632,5 +635,12 @@ public class Player extends Entity {
           // Draw "Energy" label above the bar
         g2.setFont(new Font("Arial", Font.BOLD, 10));
         g2.drawString("Energy", barX, barY - 2);
+    }
+    public boolean isMarried() {
+        return married;
+    }
+
+    public void setMarried(boolean married) {
+        this.married = married;
     }
 }

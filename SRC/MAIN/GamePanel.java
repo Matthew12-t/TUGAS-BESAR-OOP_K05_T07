@@ -1471,6 +1471,60 @@ public class GamePanel extends JPanel implements Runnable {
         time.setHour(currentHour);
         time.setMinute(currentMinute);
     }
+    /**
+     * Tambah waktu dalam menit
+     */
+    public void addMinutes(int minutes) {
+        int totalMinutes = time.getHour() * 60 + time.getMinute() + minutes;
+        int hour = (totalMinutes / 60) % 24;
+        int minute = totalMinutes % 60;
+        if (totalMinutes >= 24 * 60) {
+            day++;
+            dayOfWeek = (dayOfWeek + 1) % 7;
+            // Update weather dan season jika perlu
+            currentWeather = (Math.random() < 0.3) ? Weather.RAINY : Weather.SUNNY;
+            if ((day - 1) % 10 == 0 && day != 1) {
+                currentSeasonIndex = (currentSeasonIndex + 1) % seasons.length;
+                Season[] seasonValues = Season.values();
+                if (currentSeasonIndex < seasonValues.length) {
+                    currentSeason = seasonValues[currentSeasonIndex];
+                } else {
+                    currentSeasonIndex = 0;
+                    currentSeason = Season.SPRING;
+                }
+            }
+            if (day > 30) {
+                day = 1;
+                month++;
+                if (month > 12) {
+                    month = 1;
+                }
+                currentSeason = Season.SPRING;
+                currentSeasonIndex = 0;
+                currentWeather = Weather.SUNNY;
+            }
+        }
+        time.setHour(hour);
+        time.setMinute(minute);
+    }
+
+    /**
+     * Tambah waktu dalam jam
+     */
+    public void addHours(int hours) {
+        addMinutes(hours * 60);
+    }
+
+    /**
+     * Timeskip ke jam dan menit tertentu, dan teleport ke rumah jika married
+     */
+    public void timeskipTo(int hour, int minute, boolean teleportHomeIfMarried) {
+        time.setHour(hour);
+        time.setMinute(minute);
+        if (teleportHomeIfMarried && player.isMarried()) {
+            teleportToMap("House Map");
+        }
+    }
       /**
      * Get current time object
      * @return Current Time object
@@ -1586,6 +1640,7 @@ public class GamePanel extends JPanel implements Runnable {
                 // Remove only one item from inventory here
                 player.removeOneItemFromInventory(selectedSlot);
                 player.setEnergy(player.getEnergy() - 5);
+                addMinutes(10); // Tambah waktu 10 menit saat gifting
                 giftingTargetNPC = null;
                 setGameState(PLAY_STATE);
             } 
@@ -1606,6 +1661,7 @@ public class GamePanel extends JPanel implements Runnable {
             String npcReply = baos.toString().trim();
             if (npcReply.isEmpty()) npcReply = nearbyNPC.getNPCName() + ": ...";
             showMessagePanel(npcReply);
+            addMinutes(10); // Tambah waktu 10 menit saat talking
         }
     }
 

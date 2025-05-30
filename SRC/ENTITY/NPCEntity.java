@@ -140,22 +140,58 @@ public class NPCEntity extends Entity implements NPC {
                     message = "Kamu harus punya Proposal Ring untuk melamar!";
                     System.out.println(message);
                     showMessageToUI(message);
+                    gp.addHours(1);
                     break;
                 }
-                if (heartPoints >= MAX_HEART_POINTS) {
-                    if (!relationshipStatus.equals("fiance") && !relationshipStatus.equals("spouse")) {
+                if (relationshipStatus.equals("single")) {
+                    if (heartPoints >= MAX_HEART_POINTS) {
                         relationshipStatus = "fiance";
                         player.setEnergy(player.getEnergy() - 10);
                         message = name + " menerima lamaranmu! Status: FIANCE. Energi -10.";
                     } else {
-                        message = name + " sudah menjadi " + relationshipStatus + ".";
+                        player.setEnergy(player.getEnergy() - 20);
+                        message = name + " menolak lamaranmu. Energi -20.";
                     }
+                } else if (relationshipStatus.equals("fiance")) {
+                    // Sudah tunangan, lanjutkan ke married jika player tekan P lagi
+                    message = name + " sudah menjadi tunanganmu. Tekan P lagi untuk menikah!";
                 } else {
-                    player.setEnergy(player.getEnergy() - 20);
-                    message = name + " menolak lamaranmu. Energi -20.";
+                    message = name + " sudah menjadi " + relationshipStatus + ".";
                 }
                 System.out.println(message);
                 showMessageToUI(message);
+                gp.addHours(1); // Advance time by 1 hour after proposing
+                break;
+            }
+            case "married": {
+                String message;
+                boolean hasRing = false;
+                Item[] items = player.getInventoryItems();
+                for (Item item : items) {
+                    if (item != null && item.getName().equalsIgnoreCase("Proposal Ring")) {
+                        hasRing = true;
+                        break;
+                    }
+                }
+                if (!hasRing) {
+                    message = "Kamu harus punya Proposal Ring untuk menikah!";
+                    System.out.println(message);
+                    showMessageToUI(message);
+                    break;
+                }
+                if (relationshipStatus.equals("fiance")) {
+                    relationshipStatus = "spouse";
+                    player.setEnergy(player.getEnergy() - 80);
+                    message = name + " sekarang menjadi pasanganmu! Status: SPOUSE. Energi -80.";
+                } else if (relationshipStatus.equals("spouse")) {
+                    message = name + " sudah menjadi pasanganmu.";
+                } else {
+                    message = "Kamu harus melamar dulu sebelum menikah!";
+                }
+                System.out.println(message);
+                showMessageToUI(message);
+                player.setMarried(true);
+                gp.timeskipTo(22, 00, hasRing);
                 break;
             }
             default:
