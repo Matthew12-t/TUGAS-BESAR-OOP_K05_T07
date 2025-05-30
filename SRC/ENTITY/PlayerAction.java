@@ -8,7 +8,6 @@ import SRC.SEASON.Season;
 import SRC.WEATHER.Weather;
 import SRC.TIME.Time;
 import SRC.TIME.GameTime;
-import SRC.DATA.SleepData;
 import SRC.UI.SleepUI;
 import SRC.OBJECT.SuperObject;
 import SRC.STORE.Store;
@@ -715,7 +714,7 @@ public class PlayerAction {
         }
         
         // Perform manual sleep
-        executeSleep(SleepData.SleepTrigger.MANUAL);
+        executeSleep(SleepUI.SleepTrigger.MANUAL);
         return true;
     }
     
@@ -727,21 +726,21 @@ public class PlayerAction {
         // Check low energy sleep
         if (player.getEnergy() <= LOW_ENERGY_THRESHOLD) {
             System.out.println("DEBUG: Auto sleep triggered - Low energy");
-            executeSleep(SleepData.SleepTrigger.LOW_ENERGY);
+            executeSleep(SleepUI.SleepTrigger.LOW_ENERGY);
             return;
         }
           // Check late night sleep
         Time currentTime = gamePanel.getCurrentTime();
         if (currentTime.getHour() == LATE_NIGHT_HOUR && currentTime.getMinute() == 0) {
             System.out.println("DEBUG: Auto sleep triggered - Late night");
-            executeSleep(SleepData.SleepTrigger.LATE_TIME);
+            executeSleep(SleepUI.SleepTrigger.LATE_TIME);
             return;
         }
     }
       /**
      * Execute sleep sequence (immediate spawn and effects)
      */
-    private void executeSleep(SleepData.SleepTrigger trigger) {
+    private void executeSleep(SleepUI.SleepTrigger trigger) {
         System.out.println("DEBUG: Executing sleep with trigger: " + trigger);
         
         // Stop player movement
@@ -754,7 +753,7 @@ public class PlayerAction {
         performSleepEffects(trigger);
         
         // Create sleep result SETELAH effects applied
-        SleepData.SleepResult sleepResult = createSleepResult(trigger);
+        SleepUI.SleepResult sleepResult = createSleepResult(trigger);
         
         // Show sleep screen
         sleepUI.showSleepResult(sleepResult);
@@ -764,12 +763,12 @@ public class PlayerAction {
     }    /**
      * Create sleep result based on current game state
      */
-    private SleepData.SleepResult createSleepResult(SleepData.SleepTrigger trigger) {
+    private SleepUI.SleepResult createSleepResult(SleepUI.SleepTrigger trigger) {
         int currentDay = gamePanel.getCurrentDay();
         Season currentSeason = gamePanel.getSeason();
         Weather currentWeather = gamePanel.getWeather();
         
-        return SleepData.createSleepResult(trigger, currentDay, currentSeason, currentWeather);
+        return SleepUI.createSleepResult(trigger, currentDay, currentSeason, currentWeather);
     }/**
      * Get access to the sleep UI
      */
@@ -804,7 +803,7 @@ public class PlayerAction {
     }    /**
      * Perform sleep effects (restore energy, set time to 10:00 AM, process shipping bin)
      */
-    private void performSleepEffects(SleepData.SleepTrigger trigger) {
+    private void performSleepEffects(SleepUI.SleepTrigger trigger) {
         // Restore full energy
         player.setEnergy(MAX_ENERGY);
         
@@ -814,7 +813,7 @@ public class PlayerAction {
         currentTime.setMinute(0); // Set ke menit 0
         
         // Process shipping bin income
-        int shippingBinValue = gamePanel.getShippingBinData().calculateTotalValue();
+        int shippingBinValue = gamePanel.getShippingBin().calculateTotalValue();
         if (shippingBinValue > 0) {
             // Get current day and season for income calculation
             int currentDay = gamePanel.getCurrentDay();
@@ -822,14 +821,14 @@ public class PlayerAction {
             Weather currentWeather = gamePanel.getWeather();
             
             // Create sleep result with shipping bin income
-            SleepData.SleepResult sleepResult = SleepData.createSleepResultWithShipping(
+            SleepUI.SleepResult sleepResult = SleepUI.createSleepResultWithShipping(
                 trigger, currentDay, currentSeason, currentWeather, shippingBinValue);
             
             // Add total income to player's gold
             player.addGold(sleepResult.getIncome());
             
             // Clear shipping bin after processing
-            gamePanel.getShippingBinData().clearAllItems();
+            gamePanel.getShippingBin().clearAllItems();
             
             System.out.println("DEBUG: Shipping bin processed - Value: " + shippingBinValue + 
                              ", Total income: " + sleepResult.getIncome() + " gold added");
@@ -838,15 +837,15 @@ public class PlayerAction {
             int currentDay = gamePanel.getCurrentDay();
             Season currentSeason = gamePanel.getSeason();
             
-            int dailyIncome = SleepData.calculateDailyIncome(currentDay, currentSeason);
+            int dailyIncome = SleepUI.calculateDailyIncome(currentDay, currentSeason);
             player.addGold(dailyIncome);
             
             System.out.println("DEBUG: Daily income: " + dailyIncome + " gold added (no shipping bin items)");
         }
         
         // Advance to next day if trigger is automatic (not manual)
-        if (trigger == SleepData.SleepTrigger.LOW_ENERGY || 
-            trigger == SleepData.SleepTrigger.LATE_TIME) {
+        if (trigger == SleepUI.SleepTrigger.LOW_ENERGY || 
+            trigger == SleepUI.SleepTrigger.LATE_TIME) {
             gamePanel.advanceToNextDay();
             // Reset time to 10:00 again after day advancement
             currentTime.setHour(10);

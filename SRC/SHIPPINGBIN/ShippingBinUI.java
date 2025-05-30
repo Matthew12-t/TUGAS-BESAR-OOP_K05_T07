@@ -1,7 +1,6 @@
-package SRC.UI;
+package SRC.SHIPPINGBIN;
 
 import SRC.MAIN.GamePanel;
-import SRC.DATA.ShippingBinData;
 import SRC.INVENTORY.Inventory;
 import SRC.ITEMS.Item;
 import SRC.ITEMS.Tool;
@@ -13,7 +12,7 @@ import java.util.List;
 
 public class ShippingBinUI {
     private GamePanel gp;
-    private ShippingBinData shippingBinData;
+    private ShippingBin ShippingBin;
     private Inventory inventory;
     private final int slotSize = 50;
     private final int inventoryCols = 4;
@@ -31,9 +30,9 @@ public class ShippingBinUI {
     
     // Image scaling
     private final int imageScale = 3;
-      public ShippingBinUI(GamePanel gp, ShippingBinData shippingBinData, Inventory inventory) {
+      public ShippingBinUI(GamePanel gp, ShippingBin ShippingBin, Inventory inventory) {
         this.gp = gp;
-        this.shippingBinData = shippingBinData;
+        this.ShippingBin = ShippingBin;
         this.inventory = inventory;
         loadBackgroundImage();
         initializeButtons();
@@ -171,8 +170,8 @@ public class ShippingBinUI {
         int startX = shippingAreaX + (shippingAreaWidth - totalSlotsWidth) / 2;
         int startY = shippingAreaY + (shippingAreaHeight - totalSlotsHeight) / 2;
         
-        List<Item> shippingItems = shippingBinData.getItems();
-        List<Integer> quantities = shippingBinData.getQuantities();
+        List<Item> shippingItems = ShippingBin.getItems();
+        List<Integer> quantities = ShippingBin.getQuantities();
         
         for (int row = 0; row < shippingBinRows; row++) {
             for (int col = 0; col < shippingBinCols; col++) {
@@ -265,7 +264,7 @@ public class ShippingBinUI {
         g2.drawString(exitText, exitTextX, exitTextY);
     }
       private void drawTotalValue(Graphics2D g2) {
-        int totalValue = shippingBinData.calculateTotalValue();
+        int totalValue = ShippingBin.calculateTotalValue();
         g2.setColor(Color.YELLOW);
         g2.setFont(new Font("Arial", Font.BOLD, 16));
         
@@ -354,7 +353,7 @@ public class ShippingBinUI {
         }
         
         // Move item to shipping bin (only 1 item at a time for simplicity)
-        shippingBinData.addItem(selectedItem, 1);
+        ShippingBin.addItem(selectedItem, 1);
         
         // Remove from inventory
         if (quantity > 1) {

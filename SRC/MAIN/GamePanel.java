@@ -31,8 +31,8 @@ import SRC.OBJECT.SuperObject;
 import SRC.TIME.Time;
 import SRC.SEASON.Season;
 import SRC.WEATHER.Weather;
-import SRC.DATA.ShippingBinData;
-import SRC.UI.ShippingBinUI;
+import SRC.SHIPPINGBIN.ShippingBin;
+import SRC.SHIPPINGBIN.ShippingBinUI;
 import SRC.UI.StoreUI;
 
 public class GamePanel extends JPanel implements Runnable {
@@ -117,7 +117,7 @@ public class GamePanel extends JPanel implements Runnable {
     private Season currentSeason = Season.SPRING;    // Inventory constants
     private static final int INVENTORY_ROWS = 4;
     private static final int INVENTORY_COLS = 4;    // Shipping Bin system
-    private ShippingBinData shippingBinData;
+    private ShippingBin ShippingBin;
     private ShippingBinUI shippingBinUI;
       // Store system
     private StoreUI storeUI;
@@ -152,8 +152,8 @@ public class GamePanel extends JPanel implements Runnable {
     }
       public int getFPS() {
         return FPS;    }
-      public ShippingBinData getShippingBinData() {
-        return shippingBinData;
+      public ShippingBin getShippingBin() {
+        return ShippingBin;
     }
       public ShippingBinUI getShippingBinUI() {
         return shippingBinUI;
@@ -434,8 +434,8 @@ public class GamePanel extends JPanel implements Runnable {
         // Load clock image
         loadClockImage();        // Load inventory image
         loadInventoryImage();        // Initialize shipping bin system
-        this.shippingBinData = new ShippingBinData();
-        this.shippingBinUI = new ShippingBinUI(this, shippingBinData, player.getPlayerAction().getInventory());
+        this.ShippingBin = new ShippingBin();
+        this.shippingBinUI = new ShippingBinUI(this, ShippingBin, player.getPlayerAction().getInventory());
           // Initialize store system
         this.storeUI = new StoreUI(this, player, player.getPlayerAction().getInventory());
         

@@ -1,4 +1,4 @@
-package SRC.DATA;
+package SRC.SHIPPINGBIN;
 
 import SRC.ITEMS.Item;
 import java.util.ArrayList;
@@ -6,7 +6,11 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ShippingBinData {
+/**
+ * ShippingBin class manages the shipping bin functionality
+ * Similar to Store structure but for selling items
+ */
+public class ShippingBin {
     private List<ShippingItem> shippingBinItems;
     private Map<String, Integer> itemSellPrices;
     
@@ -21,7 +25,7 @@ public class ShippingBinData {
         }
     }
     
-    public ShippingBinData() {
+    public ShippingBin() {
         this.shippingBinItems = new ArrayList<>();
         this.itemSellPrices = new HashMap<>();
         initializeSellPrices();
