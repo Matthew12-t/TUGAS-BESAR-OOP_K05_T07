@@ -940,16 +940,10 @@ public class PlayerAction {
             gamePanel.getShippingBin().clearAllItems();
             
             System.out.println("DEBUG: Shipping bin processed - Value: " + shippingBinValue + 
-                             ", Total income: " + sleepResult.getIncome() + " gold added");
-        } else {
-            // No shipping bin income, just add regular daily income
-            int currentDay = gamePanel.getCurrentDay();
-            Season currentSeason = gamePanel.getSeason();
-            
-            int dailyIncome = SleepUI.calculateDailyIncome(currentDay, currentSeason);
-            player.addGold(dailyIncome);
-            
-            System.out.println("DEBUG: Daily income: " + dailyIncome + " gold added (no shipping bin items)");        }
+                             ", Total income: " + sleepResult.getIncome() + " gold added");        } else {
+            // No shipping bin income - player gets no gold
+            System.out.println("DEBUG: No shipping bin items - no income received");
+        }
         
         // Always advance to next day when sleeping (manual or automatic)
         gamePanel.advanceToNextDay();

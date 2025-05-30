@@ -283,10 +283,9 @@ public class SleepUI {
         g2.drawString("Day: " + currentSleepResult.getDay(), textX, textY);
         g2.drawString("Season: " + currentSleepResult.getSeason().toString(), textX, textY + lineSpacing);
         g2.drawString("Weather: " + currentSleepResult.getWeather().toString(), textX, textY + lineSpacing * 2);
-        
-        // Draw income with special formatting
+          // Draw income with special formatting
         g2.setColor(ACCENT_COLOR);
-        g2.drawString("Daily Income: " + currentSleepResult.getIncome() + " coins", textX, textY + lineSpacing * 3);
+        g2.drawString("Shipping Income: " + currentSleepResult.getIncome() + " coins", textX, textY + lineSpacing * 3);
     }
       /**
      * Draw Enter key hint
@@ -392,23 +391,21 @@ public class SleepUI {
         
         return baseIncome + (dayMultiplier * 25) + seasonBonus + (int)(Math.random() * 50);
     }
-    
-    /**
+      /**
      * Calculate total income including shipping bin earnings
      */
     public static int calculateTotalIncome(int day, Season season, int shippingBinValue) {
-        int dailyIncome = calculateDailyIncome(day, season);
-        return dailyIncome + shippingBinValue;
+        // Removed daily income - player only gets gold from shipping bin
+        return shippingBinValue;
     }
-    
-    /**
+      /**
      * Create a complete sleep result
      */
     public static SleepResult createSleepResult(SleepTrigger trigger, int day, 
                                               Season season, Weather weather) {
         String message = getSleepMessage(trigger);
         String background = getSleepBackground(trigger);
-        int income = calculateDailyIncome(day, season);
+        int income = 0; // No daily income - only shipping bin income
         
         return new SleepResult(message, background, income, day, season, weather, trigger);
     }
