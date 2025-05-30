@@ -104,7 +104,7 @@ public class KeyHandler implements KeyListener {
                         
                         gamePanel.getCurrentMap().removeObject(tileCol, tileRow);
                     }
-                }                // 'C' key action - prioritize sleep if near bed, store if in store map, shipping bin if near shipping bin, tilling/land recovery if in farm map, otherwise fishing
+                }                // 'C' key action - prioritize sleep if near bed, store if in store map, shipping bin if near shipping bin, watering/planting/tilling/land recovery if in farm map, otherwise fishing
                 if(code == KeyEvent.VK_C) {
                     // Check if player is near a bed for sleep action
                     if (gamePanel.getPlayer().getPlayerAction().isPlayerNearBed()) {
@@ -116,6 +116,14 @@ public class KeyHandler implements KeyListener {
                     } else if (gamePanel.getPlayer().getPlayerAction().isPlayerNearShippingBin()) {
                         System.out.println("DEBUG: 'C' key pressed for shipping bin");
                         gamePanel.setGameState(GamePanel.SHIPPING_STATE);
+                      } else if (gamePanel.getCurrentMap().getMapName().equals("Farm Map") && 
+                               gamePanel.getPlayer().isHolding("Watering Can")) {
+                        System.out.println("DEBUG: 'C' key pressed for watering (holding watering can in farm map)");
+                        gamePanel.getPlayer().getPlayerAction().performWatering();
+                    } else if (gamePanel.getCurrentMap().getMapName().equals("Farm Map") && 
+                               gamePanel.getPlayer().isHoldingAnySeed()) {
+                        System.out.println("DEBUG: 'C' key pressed for planting (holding seeds in farm map)");
+                        gamePanel.getPlayer().getPlayerAction().performPlanting();
                     } else if (gamePanel.getCurrentMap().getMapName().equals("Farm Map") && 
                                gamePanel.getPlayer().isHolding("Hoe")) {
                         System.out.println("DEBUG: 'C' key pressed for tilling (holding hoe in farm map)");
@@ -172,14 +180,20 @@ public class KeyHandler implements KeyListener {
                                      (gamePanel.getGameState() == GamePanel.PLAY_STATE ? "PLAY" : "INVENTORY"));
                 }
             }
-            
-            // Drop held tool with 'Q' key - works in both PLAY_STATE and INVENTORY_STATE
+              // Drop held tool or seed with 'Q' key - works in both PLAY_STATE and INVENTORY_STATE
             if(code == KeyEvent.VK_Q) {
                 if (gamePanel.getGameState() == GamePanel.PLAY_STATE || 
                     gamePanel.getGameState() == GamePanel.INVENTORY_STATE) {
-                    // Drop the currently held tool
-                    gamePanel.getPlayer().getPlayerAction().dropHeldTool();
-                    System.out.println("DEBUG: 'Q' key pressed to drop held tool");
+                    // Drop the currently held tool or seed
+                    if (gamePanel.getPlayer().isHoldingAnyTool()) {
+                        gamePanel.getPlayer().getPlayerAction().dropHeldTool();
+                        System.out.println("DEBUG: 'Q' key pressed to drop held tool");
+                    } else if (gamePanel.getPlayer().isHoldingAnySeed()) {
+                        gamePanel.getPlayer().getPlayerAction().dropHeldSeed();
+                        System.out.println("DEBUG: 'Q' key pressed to drop held seed");
+                    } else {
+                        System.out.println("DEBUG: 'Q' key pressed but nothing to drop");
+                    }
                 }
             }
             

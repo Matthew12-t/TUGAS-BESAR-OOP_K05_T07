@@ -27,7 +27,7 @@ public class Inventory {
      */    
     private void initStarterItems() {
         // Add Parsnip Seeds x15 using GameData
-        Item seedItem = GameData.addSeed("Parsnip Seeds", 15);
+        Item seedItem = GameData.addSeed("Parsnip Seed", 15);
         if (seedItem != null) {
             addItem(seedItem, 15);
         }

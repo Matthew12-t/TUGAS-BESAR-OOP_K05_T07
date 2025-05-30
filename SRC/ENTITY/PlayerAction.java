@@ -147,6 +147,24 @@ public class PlayerAction {
     }
 
     /**
+     * Handle seed holding (not immediate usage)
+     */
+    public void holdSeed(String seedName) {
+        // Get the seed from inventory and set it as currently holding
+        Item[] items = player.getInventoryItems();
+        for (int i = 0; i < items.length; i++) {
+            if (items[i] != null && items[i] instanceof SRC.ITEMS.Seed && 
+                items[i].getName().equals(seedName)) {
+                SRC.ITEMS.Seed seed = (SRC.ITEMS.Seed) items[i];
+                player.setCurrentHoldingSeed(seed);
+                System.out.println("Now holding seed: " + seedName);
+                return;
+            }
+        }
+        System.out.println("Seed not found in inventory: " + seedName);
+    }
+    
+    /**
      * Use the currently held tool and consume energy
      */
     public boolean useHeldTool() {
@@ -205,6 +223,17 @@ public class PlayerAction {
     }
 
     /**
+     * Drop the currently held seed
+     */
+    public void dropHeldSeed() {
+        if (player.isHoldingAnySeed()) {
+            SRC.ITEMS.Seed droppedSeed = player.getCurrentHoldingSeed();
+            player.setCurrentHoldingSeed(null);
+            System.out.println("Dropped seed: " + droppedSeed.getName());
+        } else {
+            System.out.println("No seed is currently held");
+        }
+    }    /**
      * Handle item usage - updated for holding system
      */
     public void useItem(String itemName, String itemCategory) {
@@ -217,9 +246,8 @@ public class PlayerAction {
                 holdTool(itemName);
                 break;
             case "seed":
-                useSeeds(itemName);
-                // Consume energy for planting
-                consumeEnergy(3); // Planting consumes 3 energy
+                // Seeds are now held instead of immediately used
+                holdSeed(itemName);
                 break;
             case "food":
                 // Food restores energy, handled in MouseHandler
@@ -266,12 +294,11 @@ public class PlayerAction {
         }
         
         // Get player's current position in tile coordinates
-        int tileSize = gamePanel.getTileSize();
-        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
+        int tileSize = gamePanel.getTileSize();        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
         int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
         
         // Initialize TileManager if needed
-        SRC.TILES.TileManager tileManager = new SRC.TILES.TileManager(gamePanel);
+        SRC.TILES.TileManager tileManager = gamePanel.getTileManager();
         
         // Attempt to till the tile at player's position
         if (tileManager.tillTile(playerCol, playerRow)) {
@@ -313,12 +340,11 @@ public class PlayerAction {
         }
         
         // Get player's current position in tile coordinates
-        int tileSize = gamePanel.getTileSize();
-        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
+        int tileSize = gamePanel.getTileSize();        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
         int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
         
         // Initialize TileManager if needed
-        SRC.TILES.TileManager tileManager = new SRC.TILES.TileManager(gamePanel);
+        SRC.TILES.TileManager tileManager = gamePanel.getTileManager();
         
         // Attempt to recover the land at player's position
         if (tileManager.recoverLand(playerCol, playerRow)) {
@@ -1000,14 +1026,13 @@ public class PlayerAction {
         int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
         
         // Get seed growth days from SeedData
-        int daysToGrow = getSeedGrowthDays(heldSeedName);
-        if (daysToGrow == -1) {
+        int daysToGrow = getSeedGrowthDays(heldSeedName);        if (daysToGrow == -1) {
             System.out.println("DEBUG: Invalid seed data for " + heldSeedName);
             return false;
         }
         
         // Initialize TileManager if needed
-        SRC.TILES.TileManager tileManager = new SRC.TILES.TileManager(gamePanel);
+        SRC.TILES.TileManager tileManager = gamePanel.getTileManager();
         
         // Attempt to plant the seed at player's position
         if (tileManager.plantSeed(playerCol, playerRow, heldSeedName, daysToGrow)) {
@@ -1024,13 +1049,17 @@ public class PlayerAction {
             System.out.println("DEBUG: Failed to plant " + heldSeedName + " at (" + playerCol + ", " + playerRow + ")");
             return false;
         }
-    }
-      /**
+    }    /**
      * Get the name of the seed currently being held by the player
      * @return seed name if holding a seed, null otherwise
      */
     public String getHeldSeedName() {
-        // Check if player has a selected item that is a seed
+        // First check the new holding system
+        if (player.isHoldingAnySeed()) {
+            return player.getCurrentHoldingSeed().getName();
+        }
+        
+        // Fallback to old inventory-based system for backward compatibility
         int selectedSlotIndex = gamePanel.getMouseHandler().getSelectedSlotIndex();
         if (selectedSlotIndex >= 0) {
             Item[] items = player.getInventoryItems();
@@ -1041,11 +1070,7 @@ public class PlayerAction {
                 }
             }
         }
-          // Also check if player is holding a tool that might be a seed (alternative approach)
-        if (player.isHoldingAnyTool()) {
-            // For seeds, we might need to check inventory instead of held tools
-        }
-        
+          
         return null; // Not holding any seed
     }
     
@@ -1066,8 +1091,7 @@ public class PlayerAction {
         }
         return -1; // Default or error case
     }
-    
-    /**
+      /**
      * Remove one seed from inventory after planting
      * @param seedName name of the seed to remove
      */
@@ -1081,6 +1105,10 @@ public class PlayerAction {
                     quantities[i]--; // Reduce quantity
                 } else {
                     player.removeItemFromInventory(i); // Remove item completely
+                    // Clear held seed if this seed was being held
+                    if (player.isHoldingSeed(seedName)) {
+                        player.setCurrentHoldingSeed(null);
+                    }
                     // Reset selection if this was the selected item
                     if (gamePanel.getMouseHandler().getSelectedSlotIndex() == i) {
                         gamePanel.getMouseHandler().setSelectedSlotIndex(-1);
@@ -1107,12 +1135,11 @@ public class PlayerAction {
         }
         
         // Get player's current position in tile coordinates
-        int tileSize = gamePanel.getTileSize();
-        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
+        int tileSize = gamePanel.getTileSize();        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
         int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
         
         // Initialize TileManager if needed
-        SRC.TILES.TileManager tileManager = new SRC.TILES.TileManager(gamePanel);
+        SRC.TILES.TileManager tileManager = gamePanel.getTileManager();
         
         // Check if there's a plant at this position that's ready to harvest
         if (!tileManager.hasPlantAt(playerCol, playerRow)) {
@@ -1151,6 +1178,68 @@ public class PlayerAction {
             return true;
         } else {
             System.out.println("DEBUG: Failed to harvest crop at (" + playerCol + ", " + playerRow + ")");
+            return false;
+        }
+    }
+    
+    /**
+     * Perform watering action when player presses 'C' key and holds a Watering Can
+     * @return true if watering action was performed successfully
+     */
+    public boolean performWatering() {
+        System.out.println("DEBUG: performWatering called");
+        
+        // Check if we're in Farm Map
+        if (!gamePanel.getCurrentMap().getMapName().equals("Farm Map")) {
+            System.out.println("DEBUG: Watering only available in Farm Map");
+            return false;
+        }
+        
+        // Check if player is holding a Watering Can
+        if (!player.isHolding("Watering Can")) {
+            System.out.println("DEBUG: Player must be holding a Watering Can to water plants");
+            return false;
+        }
+        
+        // Check energy requirements (2 energy for watering)
+        if (!hasEnoughEnergy(2)) {
+            System.out.println("DEBUG: Not enough energy to water plants");
+            return false;
+        }
+        
+        // Get player's current position in tile coordinates
+        int tileSize = gamePanel.getTileSize();
+        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
+        int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
+        
+        // Initialize TileManager if needed
+        SRC.TILES.TileManager tileManager = new SRC.TILES.TileManager(gamePanel);
+        
+        // Check if there's a plant at this position
+        if (!tileManager.hasPlantAt(playerCol, playerRow)) {
+            System.out.println("DEBUG: No plant at this location to water");
+            return false;
+        }
+        
+        // Check if plant is already watered today
+        if (tileManager.isPlantWateredToday(playerCol, playerRow)) {
+            System.out.println("DEBUG: Plant is already watered today");
+            return false;
+        }
+        
+        // Perform watering
+        boolean success = tileManager.waterPlant(playerCol, playerRow);
+        if (success) {
+            // Consume energy for watering
+            consumeEnergy(2);
+            
+            // Add time for watering (1 minute)
+            addGameTime(1);
+            
+            System.out.println("DEBUG: Successfully watered plant at (" + playerCol + ", " + playerRow + ")");
+            return true;
+        } else {
+            System.out.println("DEBUG: Failed to water plant at (" + playerCol + ", " + playerRow + ")");
             return false;
         }
     }

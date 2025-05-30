@@ -3,7 +3,6 @@ package SRC.MAIN;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -37,6 +36,10 @@ import SRC.SHIPPINGBIN.ShippingBin;
 import SRC.SHIPPINGBIN.ShippingBinUI;
 import SRC.UI.StoreUI;
 import SRC.UI.ClockUI;
+import SRC.UI.DayUI;
+import SRC.UI.EnergyUI;
+import SRC.UI.HoldingItemUI;
+import SRC.TILES.TileManager;
 
 public class GamePanel extends JPanel implements Runnable {
     private final int originalTileSize = 16; // 16x16 tile from source image
@@ -79,11 +82,13 @@ public class GamePanel extends JPanel implements Runnable {
     private boolean isInitializedDascoHouse = false;
     private boolean isInitializedEmilyHouse = false;
     private boolean isInitializedMayorTadiHouse = false;
-    private boolean isInitializedPerryHouse = false;
-    // SYSTEM
+    private boolean isInitializedPerryHouse = false;    // SYSTEM
     private KeyHandler keyHandler = new KeyHandler(this);
     private MouseHandler mouseHandler = new MouseHandler(this);
     private Thread gameThread;
+
+    // TILES
+    private TileManager tileManager;
 
     // ENTITY
     private Player player = new Player(this, keyHandler, mouseHandler);    // MAP
@@ -105,10 +110,17 @@ public class GamePanel extends JPanel implements Runnable {
     private Map perryHouseMap;     // Perry's house instance
       // CAMERA
     private int cameraX = 0; 
-    private int cameraY = 0;
+    private int cameraY = 0;    // Clock UI system
+    private ClockUI clockUI;
+    private DayUI dayUI;
     
-    // Clock UI system
-    private ClockUI clockUI;// Inventory constants
+    // Energy UI system
+    private EnergyUI energyUI;
+    
+    // Holding Item UI system
+    private HoldingItemUI holdingItemUI;
+    
+    // Inventory constants
     private static final int INVENTORY_ROWS = 4;
     private static final int INVENTORY_COLS = 4;    // Shipping Bin system
     private ShippingBin ShippingBin;
@@ -203,9 +215,12 @@ public class GamePanel extends JPanel implements Runnable {
     public MouseHandler getMouseHandler() {
         return mouseHandler;
     }
-    
-    public Player getPlayer() {
+      public Player getPlayer() {
         return player;
+    }
+    
+    public TileManager getTileManager() {
+        return tileManager;
     }
     
     public int getCameraX() {
@@ -422,17 +437,24 @@ public class GamePanel extends JPanel implements Runnable {
         this.addMouseListener(mouseHandler);
         this.setFocusable(true);        // Initialize map menu images
         mapMenuImages = new BufferedImage[TOTAL_WORLD_MAPS];
-        loadMapMenuImages();
+        loadMapMenuImages();        // Initialize clock UI
+        this.clockUI = new ClockUI(screenWidth, screenHeight);        // Initialize day UI
+        this.dayUI = new DayUI(screenWidth, screenHeight, clockUI);
         
-        // Initialize clock UI
-        this.clockUI = new ClockUI(screenWidth, screenHeight);
+        // Initialize energy UI
+        this.energyUI = new EnergyUI(screenWidth, screenHeight);
+        
+        // Initialize holding item UI
+        this.holdingItemUI = new HoldingItemUI(screenWidth, screenHeight);
         
         // Load inventory image
         loadInventoryImage();// Initialize shipping bin system
         this.ShippingBin = new ShippingBin();
-        this.shippingBinUI = new ShippingBinUI(this, ShippingBin, player.getPlayerAction().getInventory());
-          // Initialize store system
+        this.shippingBinUI = new ShippingBinUI(this, ShippingBin, player.getPlayerAction().getInventory());        // Initialize store system
         this.storeUI = new StoreUI(this, player, player.getPlayerAction().getInventory());
+        
+        // Initialize tile manager
+        this.tileManager = new TileManager(this);
         
         // Initialize maps
         this.forestrivermap = new ForestRiverMap(this);
@@ -878,12 +900,14 @@ public class GamePanel extends JPanel implements Runnable {
             int playerScreenX = player.getWorldX() - cameraX;
             int playerScreenY = player.getWorldY() - cameraY;            // Draw the player at their screen position
             player.draw(g2, playerScreenX, playerScreenY);
+              // --- Draw Time Info ---
+            clockUI.drawTimeInfo(g2, player);            // --- Draw Day Info ---
+            dayUI.drawDayInfo(g2);
+              // --- Draw Energy Bar ---
+            energyUI.drawEnergyBar(g2, player);
             
-            // --- Draw Time Info ---
-            clockUI.drawTimeInfo(g2, player);
-            
-            // --- Draw Energy and Tool Info ---
-            drawEnergyAndToolInfo(g2);
+            // --- Draw Held Items Info ---
+            holdingItemUI.drawHeldItems(g2, player);
         } else if (gameState == INVENTORY_STATE) {
             // First draw the game world in the background
             g2.setColor(Color.black);
@@ -1201,83 +1225,6 @@ public class GamePanel extends JPanel implements Runnable {
         System.out.println("Selected map index: " + (currentMapMenuIndex + 1));
         // Force repaint to show new selection immediately
         repaint();    }
-      /**
-     * Draw energy bar and held tool information
-     */
-    private void drawEnergyAndToolInfo(Graphics2D g2) {
-        // Draw energy bar
-        int barWidth = 200;
-        int barHeight = 20;
-        int barX = 10; // Top-left corner
-        int barY = 10;
-        
-        // Draw background (empty bar)
-        g2.setColor(new Color(50, 50, 50, 150)); // Dark gray semi-transparent
-        g2.fillRect(barX, barY, barWidth, barHeight);
-        
-        // Draw border
-        g2.setColor(Color.WHITE);
-        g2.drawRect(barX, barY, barWidth, barHeight);
-        
-        // Calculate energy fill width
-        double energyPercentage = player.getEnergyPercentage();
-        int fillWidth = (int) (barWidth * energyPercentage);
-        
-        // Draw energy fill with color based on energy level
-        if (energyPercentage > 0.6) {
-            g2.setColor(new Color(76, 175, 80)); // Green
-        } else if (energyPercentage > 0.3) {
-            g2.setColor(new Color(255, 193, 7)); // Yellow
-        } else {
-            g2.setColor(new Color(244, 67, 54)); // Red
-        }
-        
-        g2.fillRect(barX + 1, barY + 1, fillWidth - 2, barHeight - 2);
-        
-        // Draw energy text
-        g2.setColor(Color.WHITE);
-        g2.setFont(new Font("Arial", Font.BOLD, 12));
-        String energyText = player.getCurrentEnergy() + "/" + player.getMaxEnergy();
-        FontMetrics fm = g2.getFontMetrics();
-        int textX = barX + (barWidth - fm.stringWidth(energyText)) / 2;
-        int textY = barY + (barHeight + fm.getAscent()) / 2 - 2;
-        g2.drawString(energyText, textX, textY);
-        
-        // Draw "Energy" label above the bar
-        g2.setFont(new Font("Arial", Font.BOLD, 10));
-        g2.drawString("Energy", barX, barY - 2);
-        
-        // Draw held tool information below the energy bar
-        SRC.ITEMS.Tool heldTool = player.getCurrentHoldingTool();
-        if (heldTool != null) {
-            int toolInfoY = barY + barHeight + 10; // 10px gap below energy bar
-            
-            // Draw tool info background
-            int toolInfoWidth = 200;
-            int toolInfoHeight = 30;
-            g2.setColor(new Color(139, 69, 19, 180)); // Brown semi-transparent
-            g2.fillRoundRect(barX, toolInfoY, toolInfoWidth, toolInfoHeight, 10, 10);
-            
-            // Draw tool info border
-            g2.setColor(Color.WHITE);
-            g2.drawRoundRect(barX, toolInfoY, toolInfoWidth, toolInfoHeight, 10, 10);
-            
-            // Draw tool icon if available
-            if (heldTool.getImage() != null) {
-                int iconSize = 24;
-                int iconX = barX + 5;
-                int iconY = toolInfoY + (toolInfoHeight - iconSize) / 2;
-                g2.drawImage(heldTool.getImage(), iconX, iconY, iconSize, iconSize, null);
-            }
-            
-            // Draw tool name
-            g2.setColor(Color.WHITE);
-            g2.setFont(new Font("Arial", Font.BOLD, 12));
-            String toolText = "Holding: " + heldTool.getName();
-            int toolTextX = barX + (heldTool.getImage() != null ? 35 : 10);
-            int toolTextY = toolInfoY + (toolInfoHeight + fm.getAscent()) / 2 - 2;
-            g2.drawString(toolText, toolTextX, toolTextY);
-        }    }
 
     // Delegate clock-related methods to ClockUI
     public Season getSeason() {

@@ -420,7 +420,9 @@ public class Tile {
 
     public static void drawTilledTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
         g2.drawImage(tilledLandTile, screenX, screenY, tileSize, tileSize, null);
-    }    public static void drawPlantedTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+    }    
+    
+    public static void drawPlantedTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
         g2.drawImage(plantedLandTile, screenX, screenY, tileSize, tileSize, null);
     }
     
