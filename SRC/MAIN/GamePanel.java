@@ -59,6 +59,7 @@ public class GamePanel extends JPanel implements Runnable {
     public static final int SHIPPING_STATE = 4;
     public static final int STORE_STATE = 5;
     public static final int COOKING_STATE = 6;
+    public static final int TV_STATE = 7;
     private int gameState = PLAY_STATE;
       // Inventory UI properties
     private BufferedImage inventoryImage;
@@ -178,6 +179,10 @@ public class GamePanel extends JPanel implements Runnable {
     
     public CookingUI getCookingUI() {
         return cookingUI;
+    }
+    
+    public SRC.UI.TvUI getTvUI() {
+        return player.getPlayerAction().getTvUI();
     }
     
     public void setGameState(int gameState) {
@@ -795,14 +800,14 @@ public class GamePanel extends JPanel implements Runnable {
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
             ((PerryHouseMap)perryHouseMap).ensureNPCsVisible();
         }
-    }    
-      public void update() {
-        // Handle different game states
+    }      public void update() {        // Handle different game states
         if (gameState == PLAY_STATE || gameState == INVENTORY_STATE) {
             // Update player in both PLAY_STATE and INVENTORY_STATE (background still visible)
             if (gameState == PLAY_STATE) {
                 player.update(); // Only update position in PLAY_STATE
             }
+              // Always update PlayerAction (includes TV UI, Sleep UI, Fishing UI updates)
+            player.getPlayerAction().update();
             // Hitung posisi tengah player
             int playerCenterX = player.getWorldX() + player.getPlayerVisualWidth() / 2;
             int playerCenterY = player.getWorldY() + player.getPlayerVisualHeight() / 2;
@@ -879,9 +884,15 @@ public class GamePanel extends JPanel implements Runnable {
             if (cameraX < 0) cameraX = 0;
             if (cameraY < 0) cameraY = 0;
             if (cameraX > getMaxWorldWidth() - screenWidth) cameraX = getMaxWorldWidth() - screenWidth;
-            if (cameraY > getMaxWorldHeight() - screenHeight) cameraY = getMaxWorldHeight() - screenHeight;
+            if (cameraY > getMaxWorldHeight() - screenHeight) cameraY = getMaxWorldHeight() - screenHeight;        }
         }
+        
+        // Handle TV_STATE updates 
+        if (gameState == TV_STATE) {
+            // Update PlayerAction for TV auto-close functionality
+            player.getPlayerAction().update();
         }
+        
         // MAP_MENU_STATE doesn't need update logic as it's controlled by key inputs
     }
     
@@ -1002,11 +1013,25 @@ public class GamePanel extends JPanel implements Runnable {
             if (cookingUI != null) {
                 cookingUI.draw(g2);
             }
+
+        } else if (gameState == TV_STATE) {
+            // First draw the game world in the background
+            g2.setColor(Color.black);
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+            currentMap.draw(g2);
+            int playerScreenX = player.getWorldX() - cameraX;
+            int playerScreenY = player.getWorldY() - cameraY;
+            player.draw(g2, playerScreenX, playerScreenY);
+            
+            // Then draw TV UI overlay
+            if (player.getPlayerAction().getTvUI() != null) {
+                player.getPlayerAction().getTvUI().draw(g2);
+            }
         }
         
         npcUi.drawMessagePanel(g2);
-        g2.dispose(); // Release system resources
-    }
+        g2.dispose();} // Release system resources
+    
       /**
      * Enter map menu mode when player teleports from Farm Map
      */
@@ -1014,8 +1039,8 @@ public class GamePanel extends JPanel implements Runnable {
         System.out.println("Entering map menu state");
         this.gameState = MAP_MENU_STATE;
         this.currentMapMenuIndex = 0;
-        
-        // Debug info
+        addMinutes(15);
+        player.consumeEnergy(10);
         System.out.println("Game state is now: " + (gameState == PLAY_STATE ? "PLAY_STATE" : "MAP_MENU_STATE"));
         
         // Force an immediate repaint to show the menu
