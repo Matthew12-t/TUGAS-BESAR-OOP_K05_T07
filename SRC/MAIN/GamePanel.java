@@ -1012,6 +1012,18 @@ public class GamePanel extends JPanel implements Runnable {
             // Then draw cooking UI overlay
             if (cookingUI != null) {
                 cookingUI.draw(g2);
+            }else if (gameState == TV_STATE) {
+            // First draw the game world in the background
+            g2.setColor(Color.black);
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+            currentMap.draw(g2);
+            playerScreenX = player.getWorldX() - cameraX;
+            playerScreenY = player.getWorldY() - cameraY;
+            player.draw(g2, playerScreenX, playerScreenY);
+            
+            // Then draw TV UI overlay
+            if (player.getPlayerAction().getTvUI() != null) {
+                player.getPlayerAction().getTvUI().draw(g2);
             }
         }
         
