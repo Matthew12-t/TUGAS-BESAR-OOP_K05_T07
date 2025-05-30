@@ -157,4 +157,29 @@ public class MountainLake extends Map {
             }
         }
     }
+    
+    /**
+     * Override drawTile to handle teleport tiles with mountain-specific base
+     * @param g2 Graphics2D object for drawing
+     * @param col Column position
+     * @param row Row position
+     * @param tileType Type of tile to draw
+     */
+    @Override
+    public void drawTile(Graphics2D g2, int col, int row, int tileType) {
+        // Calculate screen position
+        int worldX = col * gp.getTileSize();
+        int worldY = row * gp.getTileSize();
+        int screenX = worldX - gp.getCameraX();
+        int screenY = worldY - gp.getCameraY();
+        
+        // Special handling for teleport tiles in mountain maps
+        if (tileType == Tile.TILE_TELEPORT) {
+            Tile.makeTeleportTile(g2, screenX, screenY, gp.getTileSize(), "mountain"); // Use mountain map base
+        } else {
+            // Use standard drawing for other tile types
+            Tile.drawTileByType(g2, screenX, screenY, gp.getTileSize(), tileType);
+        }
+    }
+
 }

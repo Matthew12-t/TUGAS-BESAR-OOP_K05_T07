@@ -27,8 +27,7 @@ public class Tile {
     private BufferedImage image;
     private int type;
       // Area solid untuk collision detection
-    private Rectangle solidArea;
-    
+    private Rectangle solidArea;// Referensi ke GamePanel untuk akses ukuran tile
     // Konstanta untuk tipe-tipe tile
     public static final int TILE_GRASS = 0;
     public static final int TILE_WATER = 1;
@@ -86,7 +85,7 @@ public class Tile {
     private static Image tilledLandTile;
     private static Image plantedLandTile;
     private static Image landTile;
-
+    private static Image sandTile;
 
     
     public Tile(GamePanel gp, int col, int row) {
@@ -340,7 +339,10 @@ public class Tile {
             if (landTile == null) {
                 landTile = ImageIO.read(new File("RES/TILE/Land.png"));
             }
-            
+            sandTile = ImageIO.read(Tile.class.getResourceAsStream("/RES/TILE/sand.png"));
+            if (sandTile == null) {
+                sandTile = ImageIO.read(new File("RES/TILE/sand.png"));
+            }
             System.out.println("Tile resources loaded successfully!");
         } catch (IOException e) {
             System.err.println("Error loading tile images: " + e.getMessage());
@@ -350,7 +352,9 @@ public class Tile {
             e.printStackTrace();
         }
     }
-
+    public static void drawSandTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        g2.drawImage(sandTile, screenX, screenY, tileSize, tileSize, null);
+    }
     public static void drawGrassTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
         g2.drawImage(grassTile, screenX, screenY, tileSize, tileSize, null);
     }
@@ -459,19 +463,34 @@ public class Tile {
         // Add a subtle border to make it stand out
         g2.setColor(new java.awt.Color(180, 150, 110)); // Slightly darker brown
         g2.drawRect(screenX, screenY, tileSize - 1, tileSize - 1);
-    }
-    
-    /**
+    }      /**
      * Menggambar teleport tile pada posisi layar tertentu
      * @param g2 Graphics context untuk menggambar
      * @param screenX Posisi X pada layar
      * @param screenY Posisi Y pada layar
      * @param tileSize Ukuran tile yang akan digambar
+     * @param mapType Type of map context: "house" for house maps, "grass" for outdoor maps, "water" for ocean maps, etc.
      */
-    public static void makeTeleportTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
-        // Draw grass as base layer
-        drawGrassTile(g2, screenX, screenY, tileSize);
-        
+    public static void makeTeleportTile(Graphics2D g2, int screenX, int screenY, int tileSize, String mapType) {
+        // Draw appropriate base layer depending on map context
+        switch (mapType.toLowerCase()) {
+            case "house":
+            case "floor":
+                drawFloorTile(g2, screenX, screenY, tileSize);
+                break;           
+            case "water":
+                drawSandTile(g2, screenX, screenY, tileSize);
+                break;
+            case "mountain":
+                drawPathTile2(g2, screenX, screenY, tileSize);
+                break;
+            case "forest":
+                drawForestGrassTile2(g2, screenX, screenY, tileSize);
+                break;
+            default:
+                drawPathTile(g2, screenX, screenY, tileSize);
+                break;
+        }
         // Draw magenta circle to indicate teleport point
         g2.setColor(java.awt.Color.MAGENTA);
         int circleSize = (int)(tileSize * 0.6);
@@ -503,6 +522,15 @@ public class Tile {
         int[] xPointsRight = {screenX + tileSize*3/4, screenX + tileSize*3/4 - arrowSize, screenX + tileSize*3/4 - arrowSize};
         int[] yPointsRight = {screenY + tileSize/2, screenY + tileSize/2 - arrowSize/2, screenY + tileSize/2 + arrowSize/2};
         g2.fillPolygon(xPointsRight, yPointsRight, 3);
+    }    /**
+     * Backward-compatible version of makeTeleportTile (uses grass base by default)
+     * @param g2 Graphics context untuk menggambar
+     * @param screenX Posisi X pada layar
+     * @param screenY Posisi Y pada layar
+     * @param tileSize Ukuran tile yang akan digambar
+     */
+    public static void makeTeleportTile(Graphics2D g2, int screenX, int screenY, int tileSize) {
+        makeTeleportTile(g2, screenX, screenY, tileSize, "grass");
     }
     
     /**
@@ -557,9 +585,8 @@ public class Tile {
                 break;
             case TILE_PLANTED:
                 drawPlantedTile(g2, screenX, screenY, tileSize);
-                break;
-            case TILE_TELEPORT:
-                makeTeleportTile(g2, screenX, screenY, tileSize);
+                break;            case TILE_TELEPORT:
+                makeTeleportTile(g2, screenX, screenY, tileSize, "grass"); // Default to outdoor (grass) for backward compatibility
                 break;
             case TILE_FLOOR:
                 drawFloorTile(g2, screenX, screenY, tileSize);

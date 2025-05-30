@@ -1,6 +1,7 @@
 package SRC.ENTITY;
 
 import SRC.MAIN.GamePanel;
+import SRC.MAP.NPC_HOUSE.HouseMap;
 import SRC.INVENTORY.Inventory;
 import SRC.ITEMS.Item;
 import SRC.ENTITY.ACTION.FishingUI;
@@ -818,7 +819,10 @@ public class PlayerAction {
      */
     public boolean isPlayerNearBed() {
         SRC.MAP.Map currentMap = gamePanel.getCurrentMap();
-
+        if (currentMap != null && !(currentMap instanceof HouseMap)) {
+            System.out.println("DEBUG: Player is not in a house map, cannot sleep");
+            return false; // Only check beds in house maps
+        }
         // Get player position in tiles
         int tileSize = gamePanel.getTileSize();        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
         int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;

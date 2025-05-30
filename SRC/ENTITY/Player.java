@@ -24,7 +24,7 @@ public class Player extends Entity {
 
     // --- Variabel Entitas (Deklarasikan jika tidak di Entity) ---
     private Rectangle solidArea; // Collision area for the player
-    private boolean showHitbox = true; // Debug toggle for hitbox visibility
+    private boolean showHitbox = false; // Debug toggle for hitbox visibility
     // -----------------------------------------------------------
 
     // Arrays untuk menyimpan 8 frame animasi untuk setiap arah

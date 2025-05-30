@@ -144,6 +144,38 @@ public abstract class NPCHouseMap extends Map {
     }
 
     /**
+     * Override drawTile to handle teleport tiles with appropriate base for house maps
+     * @param g2 Graphics2D object for drawing
+     * @param col Column in the map grid
+     * @param row Row in the map grid
+     * @param tileType Type of tile to draw
+     */
+    @Override
+    protected void drawTile(Graphics2D g2, int col, int row, int tileType) {
+        // Calculate tile's world position
+        int worldX = col * gp.getTileSize();
+        int worldY = row * gp.getTileSize();
+        
+        // Calculate tile's screen position (relative to camera view)
+        int screenX = worldX - gp.getCameraX();
+        int screenY = worldY - gp.getCameraY();
+        
+        // Only draw if the tile is visible on screen
+        if (worldX + gp.getTileSize() > gp.getCameraX() &&
+            worldX - gp.getTileSize() < gp.getCameraX() + gp.getScreenWidth() &&
+            worldY + gp.getTileSize() > gp.getCameraY() &&
+            worldY - gp.getTileSize() < gp.getCameraY() + gp.getScreenHeight()) {
+              // Special handling for teleport tiles in NPC house maps
+            if (tileType == Tile.TILE_TELEPORT) {
+                Tile.makeTeleportTile(g2, screenX, screenY, gp.getTileSize(), "house"); // Use house map base (floor)
+            } else {
+                // Use standard drawing for other tile types
+                Tile.drawTileByType(g2, screenX, screenY, gp.getTileSize(), tileType);
+            }
+        }
+    }
+
+    /**
      * Helper method to deploy large objects only once using tracking
      * @param objectType Type of object (for tracking key)
      * @param col Column position
