@@ -188,7 +188,7 @@ public class StoreMap extends Map {    // Size of the store map
                 System.out.println("Repositioning NPC " + npc.getNPCName() + " to be visible in camera view");
                 int centerWorldX = cameraX + (screenWidth / 2) - (gp.getTileSize() / 2);
                 int centerWorldY = cameraY + (screenHeight / 2) - (gp.getTileSize() / 2);
-                npc.setWorldX(centerWorldX - (gp.getTileSize()*2));
+                npc.setWorldX(centerWorldX - (gp.getTileSize()*2) + 25);
                 npc.setWorldY(centerWorldY);
             
         }
