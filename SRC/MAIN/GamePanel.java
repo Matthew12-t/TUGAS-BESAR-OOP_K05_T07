@@ -1012,13 +1012,15 @@ public class GamePanel extends JPanel implements Runnable {
             // Then draw cooking UI overlay
             if (cookingUI != null) {
                 cookingUI.draw(g2);
-            }else if (gameState == TV_STATE) {
+            }
+
+        } else if (gameState == TV_STATE) {
             // First draw the game world in the background
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
             currentMap.draw(g2);
-            playerScreenX = player.getWorldX() - cameraX;
-            playerScreenY = player.getWorldY() - cameraY;
+            int playerScreenX = player.getWorldX() - cameraX;
+            int playerScreenY = player.getWorldY() - cameraY;
             player.draw(g2, playerScreenX, playerScreenY);
             
             // Then draw TV UI overlay
@@ -1028,8 +1030,8 @@ public class GamePanel extends JPanel implements Runnable {
         }
         
         npcUi.drawMessagePanel(g2);
-        g2.dispose(); // Release system resources
-    }
+        g2.dispose();} // Release system resources
+    
       /**
      * Enter map menu mode when player teleports from Farm Map
      */
