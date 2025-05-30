@@ -129,7 +129,19 @@ public class PerryEntity extends NPCEntity {
     @Override
     public void interact(Player player) {
         super.interact(player);
-        System.out.println("Perry says: I love berries, but please keep fish away from me!");
+        if (getHeartPoints() <= 25) {
+            System.out.println("Perry: Ada yang bisa kubantu?");
+        } else if (getHeartPoints() <= 50) {
+            System.out.println("Perry: Kamu mau kutuliskan puisi?");
+        } else if (getHeartPoints() <= 75) {
+            System.out.println("Perry: Kamu sangat baik!!");
+        }else if (getHeartPoints() <= 100) {
+            System.out.println("Perry: Love comforteth like sunshine after rain..");
+        } else if (getHeartPoints() <= 125) {
+            System.out.println("Perry: I kiss thee with a most constant heart.");
+        } else{
+            System.out.println("Perry: I do love nothing in the world so well as you—is not that strange?");
+        }
         updateRelationshipStatus();
     }
 

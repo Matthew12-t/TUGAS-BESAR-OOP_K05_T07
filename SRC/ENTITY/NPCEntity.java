@@ -137,7 +137,7 @@ public class NPCEntity extends Entity implements NPC {
                     }
                 }
                 if (!hasRing) {
-                    message = "Kamu harus punya Proposal Ring untuk melamar!";
+                    message = "Yeuu ga punya cincin kok berani ngelamar anak orang";
                     System.out.println(message);
                     showMessageToUI(message);
                     gp.addHours(1);
@@ -147,14 +147,13 @@ public class NPCEntity extends Entity implements NPC {
                     if (heartPoints >= MAX_HEART_POINTS) {
                         relationshipStatus = "fiance";
                         player.setEnergy(player.getEnergy() - 10);
-                        message = name + " menerima lamaranmu! Status: FIANCE. Energi -10.";
+                        message = name + " menerima lamaranmu! Selamat yaaa :).";
                     } else {
                         player.setEnergy(player.getEnergy() - 20);
-                        message = name + " menolak lamaranmu. Energi -20.";
+                        message = name + " menolak lamaranmu. jangan sedih ya broo :(. ";
                     }
                 } else if (relationshipStatus.equals("fiance")) {
-                    // Sudah tunangan, lanjutkan ke married jika player tekan P lagi
-                    message = name + " sudah menjadi tunanganmu. Tekan P lagi untuk menikah!";
+                    message = name + " sudah menjadi tunanganmu. Mau nikah kah?";
                 } else {
                     message = name + " sudah menjadi " + relationshipStatus + ".";
                 }
@@ -174,7 +173,7 @@ public class NPCEntity extends Entity implements NPC {
                     }
                 }
                 if (!hasRing) {
-                    message = "Kamu harus punya Proposal Ring untuk menikah!";
+                    message = "Cihhh, gapunya cincin kok ngajak nikah!";
                     System.out.println(message);
                     showMessageToUI(message);
                     break;
@@ -182,11 +181,11 @@ public class NPCEntity extends Entity implements NPC {
                 if (relationshipStatus.equals("fiance")) {
                     relationshipStatus = "spouse";
                     player.setEnergy(player.getEnergy() - 80);
-                    message = name + " sekarang menjadi pasanganmu! Status: SPOUSE. Energi -80.";
+                    message = name + " sekarang menjadi pasanganmu! Selamat yaaa semoga bahagia selalu.";
                 } else if (relationshipStatus.equals("spouse")) {
-                    message = name + " sudah menjadi pasanganmu.";
+                    message =  "Aku pasanganmu, bukan suami/istri orang lain!!!!";
                 } else {
-                    message = "Kamu harus melamar dulu sebelum menikah!";
+                    message = "Minimal dilamar dulu kalii";
                 }
                 System.out.println(message);
                 showMessageToUI(message);

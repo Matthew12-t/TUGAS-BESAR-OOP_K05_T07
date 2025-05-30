@@ -84,9 +84,9 @@ public class Player extends Entity {
     // --- Getter dan Setter untuk atribut baru ---
     public int getEnergy() {
         return energy;
-    }     public void setEnergy(int energy) {
-        if (energy < 0) {
-            this.energy = 0; // Prevent negative energy
+    }    public void setEnergy(int energy) {
+        if (energy < -30) {
+            this.energy = -30; // Allow negative energy but limit to -30
         } else if (energy > MAX_ENERGY) {
             this.energy = MAX_ENERGY; // Prevent exceeding max energy
         } else {
@@ -152,14 +152,17 @@ public class Player extends Entity {
     public int getMaxEnergy() {
         return MAX_ENERGY;
     }
-    
-    public boolean consumeEnergy(int amount) {
+      public boolean consumeEnergy(int amount) {
         if (energy >= amount) {
             energy -= amount;
-            if (energy < 0) energy = 0;
+            if (energy < -30) energy = -30; // Allow negative energy but limit to -30
             return true;
         } else {
-            return false;
+            // Allow forced energy consumption even if not enough energy
+            // This ensures actions can still consume energy and go into negative
+            energy -= amount;
+            if (energy < -30) energy = -30; // Limit to -30
+            return true; // Changed to always return true to allow negative energy
         }
     }
     
@@ -172,9 +175,10 @@ public class Player extends Entity {
       public boolean hasEnoughEnergy(int requiredEnergy) {
         return energy >= requiredEnergy;
     }
-    
-    public double getEnergyPercentage() {
-        return (double) energy / MAX_ENERGY;
+      public double getEnergyPercentage() {
+        // Return percentage based on energy, but cap at 0 for UI display
+        double percentage = (double) energy / MAX_ENERGY;
+        return Math.max(0.0, percentage); // Don't show negative percentage in UI
     }
     
     // Getter for solidArea      

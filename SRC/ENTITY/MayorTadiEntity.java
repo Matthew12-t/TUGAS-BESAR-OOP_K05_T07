@@ -140,7 +140,19 @@ public class MayorTadiEntity extends NPCEntity {
     @Override
     public void interact(Player player) {
         super.interact(player);
-        System.out.println("Mayor Tadi says: Kenal WOWO ga lu");
+        if (getHeartPoints() <= 25) {
+            System.out.println("Mayor Tadi: Siapa lu, gw kenalnya cuma si wowok.");
+        } else if (getHeartPoints() <= 50) {
+            System.out.println("Mayor Tadi: Kamu adalah seorang warga yang baik.");
+        } else if (getHeartPoints() <= 75) {
+            System.out.println("Mayor Tadi: Aku punya teman yang bernama Wowok, dia sangat baik.");
+        }else if (getHeartPoints() <= 100) {
+            System.out.println("Mayor Tadi: we wok detok not onle tok de tok.");
+        } else if (getHeartPoints() <= 125) {
+            System.out.println("Mayor Tadi: Hubungan kita ini apaa sih?? .");
+        } else{
+            System.out.println("Mayor Tadi: Pliss nikahin aku dong  :)");
+        }
         updateRelationshipStatus();
     }
     

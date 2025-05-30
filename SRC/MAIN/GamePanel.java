@@ -115,12 +115,14 @@ public class GamePanel extends JPanel implements Runnable {
     private int cameraY = 0;    // Clock UI system
     private ClockUI clockUI;
     private DayUI dayUI;
-    
-    // Energy UI system
+      // Energy UI system
     private EnergyUI energyUI;
     
     // Holding Item UI system
     private HoldingItemUI holdingItemUI;
+    
+    // Brightness system for day/night cycle
+    private float currentBrightness = 1.0f; // Normal brightness (1.0 = 100%, 0.5 = 50%)
     
     // Inventory constants
     private static final int INVENTORY_ROWS = 4;
@@ -798,9 +800,11 @@ public class GamePanel extends JPanel implements Runnable {
             player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 2));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 4));
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
-            ((PerryHouseMap)perryHouseMap).ensureNPCsVisible();
-        }
-    }      public void update() {        // Handle different game states
+            ((PerryHouseMap)perryHouseMap).ensureNPCsVisible();        }
+    }
+    
+    public void update() {
+        // Handle different game states
         if (gameState == PLAY_STATE || gameState == INVENTORY_STATE) {
             // Update player in both PLAY_STATE and INVENTORY_STATE (background still visible)
             if (gameState == PLAY_STATE) {
@@ -846,8 +850,7 @@ public class GamePanel extends JPanel implements Runnable {
             } else if (currentMap.getMapName().equals("Store Map")) {
                 
                     teleportToMap("Farm Map");
-                
-            } else if (currentMap.getMapName().equals("Abigail's House") ||
+                  } else if (currentMap.getMapName().equals("Abigail's House") ||
                        currentMap.getMapName().equals("Caroline's House") ||
                        currentMap.getMapName().equals("Dasco's House") ||
                        currentMap.getMapName().equals("Emily's House") ||
@@ -856,7 +859,10 @@ public class GamePanel extends JPanel implements Runnable {
                 // For NPC houses, teleport back to house map
                 teleportToMap("Farm Map");
             }
-        }        // Update camera position based on map type
+        }
+        }
+        
+        // Update camera position based on map type
         if (currentMap.getMapName().equals("Forest River Map")) {
             // For the ForestRiverMap, maintain the centered position
             centerCameraOnMap(ForestRiverMap.FOREST_COLS, ForestRiverMap.FOREST_ROWS);
@@ -884,8 +890,11 @@ public class GamePanel extends JPanel implements Runnable {
             if (cameraX < 0) cameraX = 0;
             if (cameraY < 0) cameraY = 0;
             if (cameraX > getMaxWorldWidth() - screenWidth) cameraX = getMaxWorldWidth() - screenWidth;
-            if (cameraY > getMaxWorldHeight() - screenHeight) cameraY = getMaxWorldHeight() - screenHeight;        }
+            if (cameraY > getMaxWorldHeight() - screenHeight) cameraY = getMaxWorldHeight() - screenHeight;
         }
+        
+        // Update brightness for day/night cycle
+        updateBrightness();
         
         // Handle TV_STATE updates 
         if (gameState == TV_STATE) {
@@ -914,9 +923,7 @@ public class GamePanel extends JPanel implements Runnable {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        Graphics2D g2 = (Graphics2D) g;
-
-        if (gameState == PLAY_STATE) {
+        Graphics2D g2 = (Graphics2D) g;        if (gameState == PLAY_STATE) {
             // Set the background to black (will be visible around small maps)
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
@@ -927,6 +934,9 @@ public class GamePanel extends JPanel implements Runnable {
             int playerScreenX = player.getWorldX() - cameraX;
             int playerScreenY = player.getWorldY() - cameraY;            // Draw the player at their screen position
             player.draw(g2, playerScreenX, playerScreenY);
+            
+            // Apply night lighting effect after drawing game content but before UI elements
+            applyNightEffect(g2);
               // --- Draw Time Info ---
             clockUI.drawTimeInfo(g2, player);            // --- Draw Day Info ---
             dayUI.drawDayInfo(g2);
@@ -934,8 +944,7 @@ public class GamePanel extends JPanel implements Runnable {
             energyUI.drawEnergyBar(g2, player);
             
             // --- Draw Held Items Info ---
-            holdingItemUI.drawHeldItems(g2, player);
-        } else if (gameState == INVENTORY_STATE) {
+            holdingItemUI.drawHeldItems(g2, player);        } else if (gameState == INVENTORY_STATE) {
             // First draw the game world in the background
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
@@ -943,6 +952,9 @@ public class GamePanel extends JPanel implements Runnable {
             int playerScreenX = player.getWorldX() - cameraX;
             int playerScreenY = player.getWorldY() - cameraY;
             player.draw(g2, playerScreenX, playerScreenY);
+            
+            // Apply night lighting effect after drawing game content but before UI elements
+            applyNightEffect(g2);
             
             // Then draw inventory overlay
             drawInventoryScreen(g2);        } else if (gameState == SLEEP_STATE) {
@@ -953,6 +965,9 @@ public class GamePanel extends JPanel implements Runnable {
             int playerScreenX = player.getWorldX() - cameraX;
             int playerScreenY = player.getWorldY() - cameraY;
             player.draw(g2, playerScreenX, playerScreenY);
+            
+            // Apply night lighting effect after drawing game content but before UI elements
+            applyNightEffect(g2);
             
             // Then draw sleep UI on top
             player.getPlayerAction().getSleepUI().draw(g2);
@@ -984,6 +999,9 @@ public class GamePanel extends JPanel implements Runnable {
             currentMap.draw(g2);
             int playerScreenX = player.getWorldX() - cameraX;
             int playerScreenY = player.getWorldY() - cameraY;            player.draw(g2, playerScreenX, playerScreenY);
+            
+            // Apply night lighting effect after drawing game content but before UI elements
+            applyNightEffect(g2);
               // Then draw shipping bin UI overlay
             if (shippingBinUI != null) {
                 shippingBinUI.draw(g2);
@@ -996,11 +1014,13 @@ public class GamePanel extends JPanel implements Runnable {
             int playerScreenY = player.getWorldY() - cameraY;
             player.draw(g2, playerScreenX, playerScreenY);
             
+            // Apply night lighting effect after drawing game content but before UI elements
+            applyNightEffect(g2);
+            
             // Then draw store UI overlay
             if (this.getStoreUI() != null) {
                 this.getStoreUI().draw(g2);
-            }
-        } else if (gameState == COOKING_STATE) {
+            }        } else if (gameState == COOKING_STATE) {
             // First draw the game world in the background
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
@@ -1009,12 +1029,13 @@ public class GamePanel extends JPanel implements Runnable {
             int playerScreenY = player.getWorldY() - cameraY;
             player.draw(g2, playerScreenX, playerScreenY);
             
+            // Apply night lighting effect after drawing game content but before UI elements
+            applyNightEffect(g2);
+            
             // Then draw cooking UI overlay
             if (cookingUI != null) {
                 cookingUI.draw(g2);
-            }
-
-        } else if (gameState == TV_STATE) {
+            }        } else if (gameState == TV_STATE) {
             // First draw the game world in the background
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
@@ -1022,6 +1043,9 @@ public class GamePanel extends JPanel implements Runnable {
             int playerScreenX = player.getWorldX() - cameraX;
             int playerScreenY = player.getWorldY() - cameraY;
             player.draw(g2, playerScreenX, playerScreenY);
+            
+            // Apply night lighting effect after drawing game content but before UI elements
+            applyNightEffect(g2);
             
             // Then draw TV UI overlay
             if (player.getPlayerAction().getTvUI() != null) {
@@ -1030,7 +1054,8 @@ public class GamePanel extends JPanel implements Runnable {
         }
         
         npcUi.drawMessagePanel(g2);
-        g2.dispose();} // Release system resources
+        g2.dispose();
+    } // Release system resources
     
       /**
      * Enter map menu mode when player teleports from Farm Map
@@ -1563,5 +1588,50 @@ public class GamePanel extends JPanel implements Runnable {
 
     public boolean isMessagePanelActive() {
         return npcUi.isMessagePanelActive();
+    }    /**
+     * Check if current time is night time (18:00 - 05:59)
+     * @return true if it's night time
+     */
+    private boolean isNightTime() {
+        Time currentTime = clockUI.getCurrentTime();
+        int hour = currentTime.getHour();
+        // Night time: 18:00 (6 PM) to 05:59 (5:59 AM)
+        return hour >= 18 || hour < 6;
+    }
+    
+    /**
+     * Check if current map should have night effects
+     * @return true if map should be affected by night brightness
+     */
+    private boolean isMapAffectedByNight() {
+        String mapName = currentMap.getMapName();
+        return mapName.equals("Farm Map") || 
+               mapName.equals("Ocean Map") || 
+               mapName.equals("Mountain Lake") || 
+               mapName.equals("Forest River Map");
+    }
+    
+    /**
+     * Update brightness based on time and map
+     */
+    private void updateBrightness() {
+        if (isMapAffectedByNight() && isNightTime()) {
+            currentBrightness = 0.5f; // 50% brightness for night
+        } else {
+            currentBrightness = 1.0f; // Normal brightness for day or indoor maps
+        }
+    }
+      /**
+     * Apply night effect overlay to the graphics
+     * @param g2 Graphics2D object
+     */
+    private void applyNightEffect(Graphics2D g2) {
+        if (currentBrightness < 1.0f) {
+            // Create dark overlay for night effect
+            int alpha = (int)((1.0f - currentBrightness) * 255);
+            Color nightOverlay = new Color(0, 0, 0, alpha);
+            g2.setColor(nightOverlay);
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+        }
     }
 }

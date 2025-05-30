@@ -141,8 +141,19 @@ public class DascoEntity extends NPCEntity {
     @Override
     public void interact(Player player) {
         super.interact(player);
-        System.out.println("Dasco love wowo");
-        // Determine relationship status based on heart points
+        if (getHeartPoints() <= 25) {
+            System.out.println("Dasco: Siapa lu, gw penjudi gacorr broo.");
+        } else if (getHeartPoints() <= 50) {
+            System.out.println("Dasco: Situs MAXWIN di riauasix.com .");
+        } else if (getHeartPoints() <= 75) {
+            System.out.println("Dasco: Kode MAXWIN hari ini 2240.");
+        }else if (getHeartPoints() <= 100) {
+            System.out.println("Dasco: ya tanya bapak jangan tanya saya.");
+        } else if (getHeartPoints() <= 125) {
+            System.out.println("Dasco: Hubungan kita ini apaa sih?? .");
+        } else{
+            System.out.println("Dasco: Pliss nikahin aku dong  :)");
+        }
         updateRelationshipStatus();
     }
     

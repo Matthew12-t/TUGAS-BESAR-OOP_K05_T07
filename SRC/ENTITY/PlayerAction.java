@@ -26,10 +26,14 @@ public class PlayerAction {
     
     // Energy system - now delegated to Player
     private static final int MAX_ENERGY = 100;
-    
-    // Sleep system constants
-    private static final int LOW_ENERGY_THRESHOLD = 20;
+      // Sleep system constants
+    private static final int LOW_ENERGY_THRESHOLD = -20;
     private static final int LATE_NIGHT_HOUR = 2; // 02:00
+    
+    // Last bed location tracking
+    private String lastBedMapName = "House Map"; // Default to House Map
+    private int lastBedX = 5; // Default bed X position in House Map
+    private int lastBedY = 3; // Default bed Y position in House Map
       // Store and buying system
     private Store<Item> store;
       public PlayerAction(GamePanel gamePanel, Player player) {
@@ -812,30 +816,37 @@ public class PlayerAction {
      */
     public SleepUI getSleepUI() {
         return this.sleepUI;
-    }
-      /**
+    }    /**
      * Check if player is near a bed (within collision distance)
      * Improved logic to account for bed size (2x4 tiles)
+     * Now supports beds in all house maps (HouseMap and NPCHouseMap)
      */
     public boolean isPlayerNearBed() {
         SRC.MAP.Map currentMap = gamePanel.getCurrentMap();
-        if (currentMap != null && !(currentMap instanceof HouseMap)) {
+        
+        // Check if player is in any house map (HouseMap or NPCHouseMap)
+        if (currentMap != null && 
+            !(currentMap instanceof HouseMap)) {
             System.out.println("DEBUG: Player is not in a house map, cannot sleep");
             return false; // Only check beds in house maps
         }
+        
         // Get player position in tiles
-        int tileSize = gamePanel.getTileSize();        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
+        int tileSize = gamePanel.getTileSize();        
+        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
         int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
         
         // Check all objects on the map for beds
         SuperObject[] objects = currentMap.getObjects();
-        for (SuperObject obj : objects) {            if (obj instanceof SRC.OBJECT.OBJ_Bed) {
+        for (SuperObject obj : objects) {            
+            if (obj instanceof SRC.OBJECT.OBJ_Bed) {
                 SRC.OBJECT.OBJ_Bed bed = (SRC.OBJECT.OBJ_Bed) obj;
                 
                 int bedCol = obj.getPosition().getWorldX() / tileSize;
                 int bedRow = obj.getPosition().getWorldY() / tileSize;
                 int bedWidth = bed.getBedWidth(); 
                 int bedHeight = bed.getBedHeight(); 
+                
                 boolean nearLeftSide = (playerCol == bedCol - 1) && 
                                      (playerRow >= bedRow - 1) && (playerRow <= bedRow + bedHeight);
                 boolean nearRightSide = (playerCol == bedCol + bedWidth) && 
@@ -844,17 +855,25 @@ public class PlayerAction {
                                     (playerCol >= bedCol - 1) && (playerCol <= bedCol + bedWidth);
                 boolean nearBottomSide = (playerRow == bedRow + bedHeight) && 
                                        (playerCol >= bedCol - 1) && (playerCol <= bedCol + bedWidth);
-                
-                if (nearLeftSide || nearRightSide || nearTopSide || nearBottomSide) {
+                  if (nearLeftSide || nearRightSide || nearTopSide || nearBottomSide) {
                     System.out.println("DEBUG: Player near bed at (" + bedCol + "," + bedRow + ") - " +
                                      "Size: " + bedWidth + "x" + bedHeight + " - Player at (" + playerCol + "," + playerRow + ")");
+                    
+                    // Track this bed as the last bed location
+                    lastBedMapName = currentMap.getMapName();
+                    lastBedX = bedCol;
+                    lastBedY = bedRow;
+                    System.out.println("DEBUG: Updated last bed location to map: " + lastBedMapName + 
+                                     " at (" + lastBedX + "," + lastBedY + ")");
+                    
                     return true;
                 }
             }
         }
-        
-        return false;
-    }    /**
+          return false;
+    }
+    
+    /**
      * Check if player is near a TV (within interaction distance)
      * TV is 1x1 tile, so check adjacent tiles around it
      */
@@ -944,28 +963,37 @@ public class PlayerAction {
         currentTime.setMinute(0);
         
         System.out.println("DEBUG: Sleep effects applied - Energy restored, time set to 10:00 AM, advanced to next day");
-    }
-      /**
-     * Transport player to house bed location (spawn beside the bed, not on it)
+    }    /**
+     * Transport player to last bed location (spawn beside the bed, not on it)
      */
     private void transportPlayerToHouseBed() {
-        // Switch to house map if not already there
-        if (!gamePanel.getCurrentMap().getMapName().equals("House Map")) {
-            gamePanel.switchToHouseMap();
+        // Switch to the map where the last bed was located
+        if (!gamePanel.getCurrentMap().getMapName().equals(lastBedMapName)) {
+            // Switch to the appropriate map
+            if (lastBedMapName.equals("House Map")) {
+                gamePanel.switchToHouseMap();
+            } else {
+                // For NPC house maps, we need to switch to the appropriate map
+                // This assumes there are methods to switch to specific NPC house maps
+                // If not available, we'll fall back to the house map
+                
+                    System.out.println("DEBUG: Could not switch to " + lastBedMapName + ", falling back to House Map");
+                    gamePanel.switchToHouseMap();
+                    lastBedMapName = "House Map";
+                    lastBedX = 5;
+                    lastBedY = 3;
+                
+            }
         }
         
-        // Position player beside the bed in house map
-        // Bed coordinates in house map
-        int tileSize = gamePanel.getTileSize();
-        int bedX = 5; // Bed position in house map
-        int bedY = 3; // Bed position in house map
         
         // Position player to the RIGHT of bed (not on top)
-        player.setWorldX(tileSize * (bedX + 2));
-        player.setWorldY(tileSize * bedY);
+        player.setWorldX(player.getWorldX()); // Move 1 tile to the right
+        player.setWorldY(player.getWorldY() ); // Center vertically beside the bed
         
-        System.out.println("DEBUG: Player transported to house bed at position beside bed");
-    }   
+        System.out.println("DEBUG: Player transported to last bed at " + lastBedMapName + 
+                         " position (" + lastBedX + "," + lastBedY + ") - Player positioned beside bed");
+    }
     
     /**
      * Check if player is near a shipping bin
