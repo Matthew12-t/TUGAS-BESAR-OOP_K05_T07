@@ -55,6 +55,10 @@ public class GamePanel extends JPanel implements Runnable {
     private final int screenHeight = tileSize * maxScreenRow; // 576 pixels
     private final int FPS = 60;
         // Game states
+    public static final int MAIN_MENU_STATE = -1;
+    public static final int NEW_GAME_STATE = -2;
+    public static final int LOAD_GAME_STATE = -3;
+    public static final int OPTIONS_STATE = -4;
     public static final int PLAY_STATE = 0;
     public static final int MAP_MENU_STATE = 1;
     public static final int INVENTORY_STATE = 2;
@@ -62,10 +66,16 @@ public class GamePanel extends JPanel implements Runnable {
     public static final int SHIPPING_STATE = 4;
     public static final int STORE_STATE = 5;
     public static final int COOKING_STATE = 6;
-    public static final int TV_STATE = 7;
-    public static final int CHEAT_STATE = 8;
+    public static final int TV_STATE = 7;    public static final int CHEAT_STATE = 8;
     public static final int ENDGAME_STATE = 9;
-    private int gameState = PLAY_STATE;
+    public static final int PLAYER_STATISTICS_STATE = 10;
+    private int gameState = MAIN_MENU_STATE; // Start with main menu instead of play state
+
+    // Menu system components
+    private SRC.MAIN.MENU.MainMenu mainMenu;
+    private SRC.UI.NewGameUI newGameUI;
+    private SRC.UI.LoadGameUI loadGameUI;
+    private SRC.UI.OptionsUI optionsUI;
 
     // Inventory UI properties
     private BufferedImage inventoryImage;
@@ -145,11 +155,13 @@ public class GamePanel extends JPanel implements Runnable {
 
     // Cheat system
     private SRC.UI.CheatUI cheatUI;
-    private SRC.CHEAT.Cheat cheat;
-
-    // ENDGAME SYSTEM
+    private SRC.CHEAT.Cheat cheat;    // ENDGAME SYSTEM
     private SRC.ENDGAME.EndGame endGame;
-    private SRC.UI.EndGameUI endGameUI;
+    private SRC.UI.EndGameUI endGameUI;    // PLAYER STATISTICS SYSTEM
+    private SRC.UI.PlayerStatisticsUI playerStatisticsUI;
+    
+    // Flag to track if milestone achievement has been shown
+    private boolean milestonesShown = false;
 
     // Getters and setters
     public int getTileSize() {
@@ -586,10 +598,18 @@ public class GamePanel extends JPanel implements Runnable {
         this.perryHouseMap.setActive(false);
         
         this.houseMap.setActive(true);
-        this.npcUi = new NPCUi(this);
-          // Inisialisasi EndGame dan EndGameUI
+        this.npcUi = new NPCUi(this);        // Inisialisasi EndGame dan EndGameUI
         this.endGame = new SRC.ENDGAME.EndGame(player, this);
         this.endGameUI = new SRC.UI.EndGameUI(this);
+        
+        // Initialize PlayerStatisticsUI
+        this.playerStatisticsUI = new SRC.UI.PlayerStatisticsUI(this);
+        
+        // Initialize menu system components
+        this.mainMenu = new SRC.MAIN.MENU.MainMenu(this);
+        this.newGameUI = new SRC.UI.NewGameUI(this);
+        this.loadGameUI = new SRC.UI.LoadGameUI(this);
+        this.optionsUI = new SRC.UI.OptionsUI(this);
     }
     
     /**
@@ -860,10 +880,19 @@ public class GamePanel extends JPanel implements Runnable {
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
             ((PerryHouseMap)perryHouseMap).ensureNPCsVisible();        }
     }
-    
-    public void update() {
+      public void update() {
+        // Handle menu states
+        if (gameState == MAIN_MENU_STATE) {
+            if (mainMenu != null) {
+                mainMenu.update();
+            }
+            return; // Don't process game logic in menu states
+        } else if (gameState == NEW_GAME_STATE || gameState == LOAD_GAME_STATE || gameState == OPTIONS_STATE) {
+            // These UI states don't need updates
+            return;
+        }
         // Handle different game states
-        if (gameState == PLAY_STATE || gameState == INVENTORY_STATE) {
+        else if (gameState == PLAY_STATE || gameState == INVENTORY_STATE) {
             // Update player in both PLAY_STATE and INVENTORY_STATE (background still visible)
             if (gameState == PLAY_STATE) {
                 player.update(); // Only update position in PLAY_STATE
@@ -957,7 +986,7 @@ public class GamePanel extends JPanel implements Runnable {
             boolean goldMilestone = player.getGold() >= 17209;
             boolean marriageMilestone = player.isMarried();
             
-            if (goldMilestone && marriageMilestone) {
+            if (goldMilestone && marriageMilestone && !milestonesShown) {
                 System.out.println("*** BOTH MILESTONES ACHIEVED! ***");
                 System.out.println("Player gold: " + player.getGold() + " (Required: 17,209)");
                 System.out.println("Marriage status: " + (player.isMarried() ? "MARRIED" : "SINGLE") + " (Required: MARRIED)");
@@ -971,6 +1000,7 @@ public class GamePanel extends JPanel implements Runnable {
                 
                 System.out.println("Switching to EndGame state...");
                 gameState = ENDGAME_STATE;
+                milestonesShown = true; // Set flag to prevent re-showing
             }
         }
         
@@ -1002,8 +1032,26 @@ public class GamePanel extends JPanel implements Runnable {
 
         Graphics2D g2 = (Graphics2D) g;
 
+        // Handle menu states
+        if (gameState == MAIN_MENU_STATE) {
+            if (mainMenu != null) {
+                mainMenu.draw(g2);
+            }
+        } else if (gameState == NEW_GAME_STATE) {
+            if (newGameUI != null) {
+                newGameUI.draw(g2);
+            }
+        } else if (gameState == LOAD_GAME_STATE) {
+            if (loadGameUI != null) {
+                loadGameUI.draw(g2);
+            }
+        } else if (gameState == OPTIONS_STATE) {
+            if (optionsUI != null) {
+                optionsUI.draw(g2);
+            }
+        } 
         // Draw background and game world for play state and cheat state
-        if (gameState == PLAY_STATE || gameState == CHEAT_STATE) {
+        else if (gameState == PLAY_STATE || gameState == CHEAT_STATE) {
             // Set the background to black (will be visible around small maps)
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
@@ -1131,8 +1179,7 @@ public class GamePanel extends JPanel implements Runnable {
             // Then draw TV UI overlay
             if (player.getPlayerAction().getTvUI() != null) {
                 player.getPlayerAction().getTvUI().draw(g2);
-            }
-        } else if (gameState == ENDGAME_STATE) {
+            }        } else if (gameState == ENDGAME_STATE) {
             // First draw the game world in the background
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
@@ -1145,6 +1192,20 @@ public class GamePanel extends JPanel implements Runnable {
             // Draw EndGameUI overlay
             if (endGameUI != null) {
                 endGameUI.draw(g2);
+            }
+        } else if (gameState == PLAYER_STATISTICS_STATE) {
+            // First draw the game world in the background
+            g2.setColor(Color.black);
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+            currentMap.draw(g2);
+            int playerScreenX = player.getWorldX() - cameraX;
+            int playerScreenY = player.getWorldY() - cameraY;
+            player.draw(g2, playerScreenX, playerScreenY);
+            // Apply night lighting effect after drawing game content but before UI elements
+            applyNightEffect(g2);
+            // Draw PlayerStatisticsUI overlay
+            if (playerStatisticsUI != null) {
+                playerStatisticsUI.draw(g2);
             }
         }
         
@@ -1766,9 +1827,25 @@ public class GamePanel extends JPanel implements Runnable {
 
     public SRC.ENDGAME.EndGame getEndGame() {
         return endGame;
+    }    public SRC.UI.EndGameUI getEndGameUI() {
+        return endGameUI;
     }
 
-    public SRC.UI.EndGameUI getEndGameUI() {
-        return endGameUI;
+    public SRC.UI.PlayerStatisticsUI getPlayerStatisticsUI() {
+        return playerStatisticsUI;
+    }public SRC.MAIN.MENU.MainMenu getMainMenu() {
+        return mainMenu;
+    }
+    
+    public SRC.UI.NewGameUI getNewGameUI() {
+        return newGameUI;
+    }
+    
+    public SRC.UI.LoadGameUI getLoadGameUI() {
+        return loadGameUI;
+    }
+    
+    public SRC.UI.OptionsUI getOptionsUI() {
+        return optionsUI;
     }
 }

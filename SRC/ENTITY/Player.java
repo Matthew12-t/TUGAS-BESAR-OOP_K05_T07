@@ -22,7 +22,7 @@ public class Player extends Entity {
     private int energy;
     private final int MAX_ENERGY = 100; // Maximum energy value
     private int gold; // Player's gold amount
-    private final int TOTAL_FRAMES = 8;
+    private final int TOTAL_FRAMES = 2;
     private boolean married;
 
     // Statistics tracking for EndGame system
@@ -32,6 +32,12 @@ public class Player extends Entity {
     private int totalCropsHarvested;
     private int totalFishCaught;
     private List<Fish> caughtFish;
+
+    // Character customization fields
+    private String playerName = "Farmer";
+    private String farmName = "My Farm";
+    private String gender = "BOY"; // "BOY" or "GIRL"
+    private String favoriteItem = "Parsnip";
 
     // --- Variabel Entitas (Deklarasikan jika tidak di Entity) ---
     private Rectangle solidArea; // Collision area for the player
@@ -151,6 +157,64 @@ public class Player extends Entity {
     
     public void removeOneItemFromInventory(int slotIndex) {
         playerAction.removeOneInventoryItem(slotIndex);
+    }
+    
+    // Character customization getters and setters
+    public String getPlayerName() {
+        return playerName;
+    }
+    
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName != null ? playerName : "Farmer";
+    }
+    
+    public String getFarmName() {
+        return farmName;
+    }
+    
+    public void setFarmName(String farmName) {
+        this.farmName = farmName != null ? farmName : "My Farm";
+    }
+    
+    public String getGender() {
+        return gender;
+    }
+    
+    public void setGender(String gender) {
+        this.gender = gender != null && (gender.equals("BOY") || gender.equals("GIRL")) ? gender : "BOY";
+    }
+    
+    public String getFavoriteItem() {
+        return favoriteItem;
+    }
+    
+    public void setFavoriteItem(String favoriteItem) {
+        this.favoriteItem = favoriteItem != null ? favoriteItem : "Parsnip";
+    }
+    
+    // Statistics getters
+    public int getDaysPlayed() {
+        return daysPlayed;
+    }
+    
+    public int getTotalIncome() {
+        return totalIncome;
+    }
+    
+    public int getTotalExpenditure() {
+        return totalExpenditure;
+    }
+    
+    public int getTotalCropsHarvested() {
+        return totalCropsHarvested;
+    }
+    
+    public int getTotalFishCaught() {
+        return totalFishCaught;
+    }
+    
+    public boolean isMarried() {
+        return married;
     }
     
     public Item[] getInventoryItems() {
@@ -728,45 +792,16 @@ public class Player extends Entity {
             if (selectedSlotIndex < items.length && items[selectedSlotIndex] != null) {
                 return items[selectedSlotIndex];
             }
-        }
-        return null;
-    }
-    
-    public boolean isMarried() {
-        return married;
+        }        return null;
     }
 
-    public void setMarried(boolean married) {
-        this.married = married;
-    }
-
-    // Statistics tracking methods for EndGame system
-    public int getTotalIncome() {
-        return totalIncome;
-    }
-
-    public int getTotalExpenditure() {
-        return totalExpenditure;
-    }
-
-    public int getDaysPlayed() {
-        return daysPlayed;
-    }
-
+    // Additional methods needed by EndGame system
     public void incrementDaysPlayed() {
         this.daysPlayed++;
     }
 
-    public int getTotalCropsHarvested() {
-        return totalCropsHarvested;
-    }
-
     public void incrementCropsHarvested(int amount) {
         this.totalCropsHarvested += amount;
-    }
-
-    public int getTotalFishCaught() {
-        return totalFishCaught;
     }
 
     public void incrementFishCaught(Fish fish) {
@@ -778,5 +813,9 @@ public class Player extends Entity {
 
     public List<Fish> getCaughtFish() {
         return new ArrayList<>(caughtFish); // Return copy to prevent external modification
+    }
+
+    public void setMarried(boolean married) {
+        this.married = married;
     }
 }
