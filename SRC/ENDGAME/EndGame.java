@@ -15,16 +15,13 @@ import SRC.MAP.StoreMap;
 import java.util.List;
 import java.util.ArrayList;
 
-/**
- * Class for handling end game statistics and milestone validation
- * Spakbor Hills has infinite gameplay but shows statistics when milestones are reached
- */
+
 public class EndGame {
     private Player player;
     private GamePanel gamePanel;
-    private static final int GOLD_MILESTONE = 17209; // 17,209g milestone
+    private static final int GOLD_MILESTONE = 17209; 
     
-    // Calculated statistics
+
     private int totalIncome;
     private int totalExpenditure;
     private int totalDaysPlayed;
@@ -34,11 +31,11 @@ public class EndGame {
     private int regularFishCaught;
     private int legendaryFishCaught;
     
-    // Per season averages
+
     private double avgSeasonIncome;
     private double avgSeasonExpenditure;
     
-    // NPC relationship statistics
+
     private List<NPCRelationshipData> npcRelationships;
       public EndGame(Player player, GamePanel gamePanel) {
         this.player = player;
@@ -47,9 +44,7 @@ public class EndGame {
         collectNPCData();
     }
     
-    /**
-     * Inner class to store NPC relationship data
-     */
+
     public static class NPCRelationshipData {
         private String npcName;
         private int heartPoints;
@@ -68,86 +63,73 @@ public class EndGame {
         public String getRelationshipStatus() { return relationshipStatus; }
         public String getLocation() { return location; }
     }
-      /**
-     * Check if end game milestone has been reached
-     * @return true if BOTH gold milestone (17,209g) AND marriage milestone are reached
-     */
+      
     public boolean isMilestoneReached() {
         return isGoldMilestoneReached() && isMarriageMilestoneReached();
     }
     
-    /**
-     * Check if gold milestone (17,209g) has been reached
-     * @return true if player has >= 17,209 gold
-     */
+
     private boolean isGoldMilestoneReached() {
         return player.getGold() >= GOLD_MILESTONE;
     }
     
-    /**
-     * Check if marriage milestone has been reached
-     * @return true if player is married
-     */
+
     private boolean isMarriageMilestoneReached() {
         return player.isMarried();
     }
     
-    /**
-     * Calculate all statistics with validation
-     */
+
     private void calculateStatistics() {
-        // Validate player data before calculating
+
         if (player == null) {
             throw new IllegalStateException("Player cannot be null for EndGame statistics");
         }
         
-        // Calculate financial statistics
+
         totalIncome = player.getTotalIncome();
         totalExpenditure = player.getTotalExpenditure();
         
-        // Validate financial data
+
         if (totalIncome < 0 || totalExpenditure < 0) {
             System.err.println("Warning: Invalid financial data detected");
             totalIncome = Math.max(0, totalIncome);
             totalExpenditure = Math.max(0, totalExpenditure);
         }
         
-        // Calculate time-based statistics
+
         totalDaysPlayed = player.getDaysPlayed();
         if (totalDaysPlayed <= 0) {
-            totalDaysPlayed = 1; // Minimum 1 day to avoid division by zero
+            totalDaysPlayed = 1; 
         }
         
-        // Calculate season averages (28 days per season)
+
         int totalSeasons = Math.max(1, (totalDaysPlayed / 28) + 1);
         avgSeasonIncome = (double) totalIncome / totalSeasons;
         avgSeasonExpenditure = (double) totalExpenditure / totalSeasons;
         
-        // Calculate farming statistics
+
         cropsHarvested = player.getTotalCropsHarvested();
         if (cropsHarvested < 0) {
             cropsHarvested = 0;
         }
         
-        // Calculate fishing statistics
+
         calculateFishStatistics();
     }
     
-    /**
-     * Calculate fishing statistics with validation
-     */
+
     private void calculateFishStatistics() {
         fishCaught = player.getTotalFishCaught();
         commonFishCaught = 0;
         regularFishCaught = 0;
         legendaryFishCaught = 0;
         
-        // Validate fish count
+
         if (fishCaught < 0) {
             fishCaught = 0;
         }
         
-        // Count fish by rarity
+
         List<Fish> caughtFish = player.getCaughtFish();
         if (caughtFish != null) {
             for (Fish fish : caughtFish) {
@@ -164,7 +146,7 @@ public class EndGame {
                             legendaryFishCaught++;
                             break;
                         default:
-                            // Unknown type counts as common
+
                             commonFishCaught++;
                             break;
                     }
@@ -179,9 +161,7 @@ public class EndGame {
             fishCaught = calculatedTotal;        }
     }
     
-    /**
-     * Collect NPC relationship data from all maps
-     */
+
     private void collectNPCData() {
         npcRelationships = new ArrayList<>();
         
@@ -197,12 +177,10 @@ public class EndGame {
         collectNPCsFromStoreMap((StoreMap) gamePanel.getStoreMap());
     }
     
-    /**
-     * Collect NPCs from a specific house map
-     */
+
     private void collectNPCsFromMap(Object houseMap, String location) {
         try {
-            // Use reflection to get NPCs list since all house maps have getNPCs() method
+
             java.lang.reflect.Method getNPCsMethod = houseMap.getClass().getMethod("getNPCs");
             @SuppressWarnings("unchecked")
             List<NPCEntity> npcs = (List<NPCEntity>) getNPCsMethod.invoke(houseMap);
@@ -225,9 +203,7 @@ public class EndGame {
         }
     }
     
-    /**
-     * Collect NPCs from store map
-     */
+
     private void collectNPCsFromStoreMap(StoreMap storeMap) {
         try {
             List<NPCEntity> npcs = storeMap.getNPCs();
@@ -249,9 +225,7 @@ public class EndGame {
         }
     }
     
-    /**
-     * Convert heart points to relationship status
-     */
+
     private String getRelationshipStatus(int heartPoints) {
         if (heartPoints >= 150) {
             return "Spouse";
@@ -270,7 +244,7 @@ public class EndGame {
         }
     }
     
-    // Getters for statistics (all validated)
+
     public int getTotalIncome() { 
         return totalIncome; 
     }
@@ -280,11 +254,11 @@ public class EndGame {
     }
     
     public double getAvgSeasonIncome() { 
-        return Math.round(avgSeasonIncome * 100.0) / 100.0; // Round to 2 decimal places
+        return Math.round(avgSeasonIncome * 100.0) / 100.0; 
     }
     
     public double getAvgSeasonExpenditure() { 
-        return Math.round(avgSeasonExpenditure * 100.0) / 100.0; // Round to 2 decimal places
+        return Math.round(avgSeasonExpenditure * 100.0) / 100.0; 
     }
     
     public int getTotalDaysPlayed() { 
@@ -318,10 +292,7 @@ public class EndGame {
     public Player getPlayer() { 
         return player;
     }
-      /**
-     * Get which milestone was reached (for UI display)
-     * @return description of the milestone reached
-     */
+
     public String getMilestoneReached() {
         if (isMarriageMilestoneReached() && isGoldMilestoneReached()) {
             return "Both Marriage and Gold Milestones Achieved!";

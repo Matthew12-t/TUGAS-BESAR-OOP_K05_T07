@@ -7,9 +7,7 @@ import javax.imageio.ImageIO;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Data class for managing all tool items with static initialization
- */
+
 public class ToolData {
     private static Map<String, Tool> tools = new HashMap<>();
     

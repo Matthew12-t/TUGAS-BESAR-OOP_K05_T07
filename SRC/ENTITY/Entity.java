@@ -6,27 +6,24 @@ import SRC.MAIN.GamePanel;
 public abstract class Entity {
     private Tile position;
     private int speed;
-    protected GamePanel gp;  // Store GamePanel reference for subclasses
+    protected GamePanel gp; 
     
-    // Direction
+
     private String direction;
     
-    // Animation variables
+
     private int spriteCounter = 0;
     private int spriteNum = 0;
     
-    // Constructor
+
     public Entity(GamePanel gp, int worldX, int worldY) {
-        this.gp = gp;  // Store GamePanel reference
+        this.gp = gp;  
         this.position = new Tile(gp, worldX, worldY);
         this.speed = 0;
         this.direction = "down";
     }
     
-    // Abstract method that must be implemented by subclasses
-    //public abstract void update(); //semua pergerakan yang dilakukan oleh entity ada di sini
 
-      // Getters and Setters
     public int getWorldX() {
         return position.getWorldX();
     }

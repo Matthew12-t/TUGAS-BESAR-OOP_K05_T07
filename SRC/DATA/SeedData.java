@@ -4,20 +4,15 @@ import SRC.ITEMS.Seed;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Data class for managing all seed items with static initialization
- */
+
 public class SeedData {
     private static Map<String, Seed> seeds = new HashMap<>();
     
-    // Static initializer to load all seeds
+
     static {
         initializeSeeds();
     }
-    
-    /**
-     * Initialize all seed items
-     */
+
     private static void initializeSeeds() {
        
         seeds.put("Parsnip Seed", new Seed("Parsnip Seed", 10, 20, "Spring", 1)); 

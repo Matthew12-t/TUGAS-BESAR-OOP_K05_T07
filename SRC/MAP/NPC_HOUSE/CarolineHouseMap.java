@@ -6,42 +6,30 @@ import SRC.MAIN.GamePanel;
 import SRC.ENTITY.CarolineEntity;
 import SRC.ENTITY.NPCEntity;
 
-/**
- * Caroline's House Map - A 12x12 NPC house
- */
+
 public class CarolineHouseMap extends NPCHouseMap {
     
     private ArrayList<NPCEntity> npcs;
     
-    /**
-     * Constructor for CarolineHouseMap
-     * @param gp GamePanel reference
-     */
+
     public CarolineHouseMap(GamePanel gp) {
         super(gp, "Caroline's House");
         
         npcs = new ArrayList<>();
     }
     
-    /**
-     * Initialize the map with tiles from carolinehousemap.txt
-     */
+
     @Override
     protected void initializeMap() {
         initializeFromFile("carolinehousemap.txt");
     }
-      /**
-     * Set up initial objects in Caroline's house
-     */
+
     @Override
     public void setupInitialObjects() {
         setupObjectsFromFile("carolinehousemap.txt");
     }
     
-    /**
-     * Override setupObjectsFromFile to handle NPC placement (character 'n')
-     * @param mapFileName The txt file to read objects from
-     */
+
     @Override
     protected void setupObjectsFromFile(String mapFileName) {
         super.setupObjectsFromFile(mapFileName);

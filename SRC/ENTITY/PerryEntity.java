@@ -11,19 +11,11 @@ import SRC.DATA.GameData;
 import SRC.ITEMS.Item;
 import java.awt.Graphics2D;
 
-/**
- * PerryEntity - Represents the Perry NPC in the game
- */
+
 public class PerryEntity extends NPCEntity {
     private BufferedImage sprite;
     
-    /**
-     * Constructor 
-     * 
-     * @param gp GamePanel reference
-     * @param worldX X position in the world
-     * @param worldY Y position in the world
-     */
+
     public PerryEntity(GamePanel gp, int worldX, int worldY) {
         super(gp, worldX, worldY, "Perry", "Perry's House", 
               "Perry adalah seorang penulis yang baru saja menerbitkan buku pertamanya");
@@ -101,7 +93,7 @@ public class PerryEntity extends NPCEntity {
     private void createPlaceholderSprite() {
         System.out.println("Creating placeholder sprite for Perry");
         
-        // Create a simple colored square with text as a placeholder
+
         sprite = new BufferedImage(48, 48, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = sprite.createGraphics();
         g.setColor(java.awt.Color.CYAN);
@@ -150,10 +142,7 @@ public class PerryEntity extends NPCEntity {
             setRelationshipStatus("single");
         }
     }
-      /**
-     * Custom method to handle gift giving
-     * @param item the item being given
-     */
+
     @Override
     public String receiveGift(Item item) {
         String baseMsg = super.receiveGift(item);
@@ -169,11 +158,7 @@ public class PerryEntity extends NPCEntity {
         }
     }
     
-    /**
-     * Get Perry's sprite for rendering
-     * 
-     * @return The sprite image
-     */
+
     public BufferedImage getSprite() {
         if (sprite == null) {
             createPlaceholderSprite();
@@ -181,22 +166,14 @@ public class PerryEntity extends NPCEntity {
         return sprite;
     }
     
-    /**
-     * Draw the Perry NPC
-     * 
-     * @param g2 Graphics2D object used for drawing
-     */
+ 
     @Override
     public void draw(Graphics2D g2) {
-        // Get the current sprite based on direction and animation frame
         BufferedImage image = getSprite();
-        
-        // Calculate screen position based on world position and camera
         int screenX = getWorldX() - gp.getCameraX();
         int screenY = getWorldY() - gp.getCameraY();
         int tileSize = gp.getTileSize();
         
-        // Only draw if NPC is visible on screen
         if (getWorldX() + tileSize > gp.getCameraX() &&
             getWorldX() - tileSize < gp.getCameraX() + gp.getScreenWidth() &&
             getWorldY() + tileSize > gp.getCameraY() &&

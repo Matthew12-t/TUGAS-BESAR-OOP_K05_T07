@@ -11,19 +11,11 @@ import SRC.DATA.GameData;
 import SRC.ITEMS.Item;
 import java.awt.Graphics2D;
 
-/**
- * CarolineEntity - Represents the Caroline NPC in the game
- */
+
 public class CarolineEntity extends NPCEntity {
     private BufferedImage sprite;
     
-    /**
-     * Constructor for CarolineEntity
-     * 
-     * @param gp GamePanel reference
-     * @param worldX X position in the world
-     * @param worldY Y position in the world
-     */
+ 
     public CarolineEntity(GamePanel gp, int worldX, int worldY) {
         super(gp, worldX, worldY, "Caroline", "Caroline's House", 
               "Caroline adalah seorang tukang kayu lokal di Spakbor Hills.");
@@ -31,9 +23,8 @@ public class CarolineEntity extends NPCEntity {
         setItemPreferences();
         loadSprite();
         setSpeed(0);
-    }    /**
-     * Set up Caroline's item preferences
-     */
+    }    
+
     private void setItemPreferences() {
         Set<String> lovedItemNames = Set.of("Wood", "Coal");
         for (String itemName : lovedItemNames) {
@@ -60,9 +51,7 @@ public class CarolineEntity extends NPCEntity {
         }
     }
     
-    /**
-     * Load Caroline's sprite from the file system
-     */
+  
     private void loadSprite() {
         String[] pathsToTry = {
             "RES/ENTITY/NPC/caroline.png",
@@ -102,9 +91,7 @@ public class CarolineEntity extends NPCEntity {
         }
     }
     
-    /**
-     * Create a placeholder sprite when the image file can't be loaded
-     */
+
     private void createPlaceholderSprite() {
         System.out.println("Creating placeholder sprite for Caroline");
         sprite = new BufferedImage(48, 48, BufferedImage.TYPE_INT_ARGB);
@@ -116,10 +103,7 @@ public class CarolineEntity extends NPCEntity {
         g.dispose();
     }
     
-    /**
-     * Update method for Caroline's behavior
-     * This will be called by the game loop
-     */
+ 
     public void update() {
         incrementSpriteCounter();
         
@@ -133,9 +117,7 @@ public class CarolineEntity extends NPCEntity {
         }
     }
     
-    /**
-     * Custom interaction method for Caroline
-     */
+
     @Override
     public void interact(Player player) {
         super.interact(player);
@@ -156,18 +138,13 @@ public class CarolineEntity extends NPCEntity {
         updateRelationshipStatus();
     }
     
-    /**
-     * Update relationship status based on heart points
-     */
+
     private void updateRelationshipStatus() {
         if (getHeartPoints() < 100) {
             setRelationshipStatus("single");
         }
     }
-      /**
-     * Custom method to handle gift giving
-     * @param item the item being given
-     */
+
     @Override
     public String receiveGift(Item item) {
         String baseMsg = super.receiveGift(item);
@@ -183,11 +160,7 @@ public class CarolineEntity extends NPCEntity {
         }
     }
     
-    /**
-     * Get Caroline's sprite for rendering
-     * 
-     * @return The sprite image
-     */
+
     public BufferedImage getSprite() {
         if (sprite == null) {
             createPlaceholderSprite();
@@ -195,11 +168,7 @@ public class CarolineEntity extends NPCEntity {
         return sprite;
     }
     
-    /**
-     * Draw the Caroline NPC
-     * 
-     * @param g2 Graphics2D object used for drawing
-     */
+   
     @Override
     public void draw(Graphics2D g2) {
         BufferedImage image = getSprite();

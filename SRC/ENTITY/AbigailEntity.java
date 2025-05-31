@@ -11,19 +11,11 @@ import SRC.DATA.GameData;
 import SRC.ITEMS.Item;
 import java.awt.Graphics2D;
 
-/**
- * AbigailEntity - Represents the Abigail NPC in the game
- */
+
 public class AbigailEntity extends NPCEntity {
     private BufferedImage sprite;
     
-    /**
-     * Constructor for AbigailEntity
-     * 
-     * @param gp GamePanel reference
-     * @param worldX X position in the world
-     * @param worldY Y position in the world
-     */
+
     public AbigailEntity(GamePanel gp, int worldX, int worldY) {
         super(gp, worldX, worldY, "Abigail", "Abigail's House", 
               "Abigail adalah seorang perempuan yang outgoing dan senang melakukan eksplorasi alam.");
@@ -31,9 +23,8 @@ public class AbigailEntity extends NPCEntity {
         setItemPreferences();
         loadSprite();
         setSpeed(0);
-    }    /**
-     * Set up Abigail's item preferences
-     */
+    }    
+
     private void setItemPreferences() {
         
         Set<String> lovedItemNames = Set.of("Blueberry", "Melon", "Pumpkin", "Grape", "Cranberry");
@@ -60,10 +51,7 @@ public class AbigailEntity extends NPCEntity {
             }
         }
     }
-    
-    /**
-     * Load Abigail's sprite from the file system
-     */
+
     private void loadSprite() {
         String[] pathsToTry = {
             "RES/ENTITY/NPC/abigail.png",
@@ -103,9 +91,7 @@ public class AbigailEntity extends NPCEntity {
         }
     }
     
-    /**
-     * Create a placeholder sprite when the image file can't be loaded
-     */
+
     private void createPlaceholderSprite() {
         System.out.println("Creating placeholder sprite for Abigail");
         sprite = new BufferedImage(48, 48, BufferedImage.TYPE_INT_ARGB);
@@ -117,10 +103,6 @@ public class AbigailEntity extends NPCEntity {
         g.dispose();
     }
     
-    /**
-     * Update method for Abigail's behavior
-     * This will be called by the game loop
-     */
     public void update() {
         incrementSpriteCounter();
         
@@ -134,9 +116,7 @@ public class AbigailEntity extends NPCEntity {
         }
     }
     
-    /**
-     * Custom interaction method for Abigail
-     */
+
     @Override
     public void interact(Player player) {
         super.interact(player);
@@ -156,18 +136,13 @@ public class AbigailEntity extends NPCEntity {
         updateRelationshipStatus();
     }
     
-    /**
-     * Update relationship status based on heart points
-     */
+
     private void updateRelationshipStatus() {
         if (getHeartPoints() < 100) {
             setRelationshipStatus("single");
         }
     }
-      /**
-     * Custom method to handle gift giving
-     * @param item the item being given
-     */
+
     @Override
     public String receiveGift(Item item) {
         String baseMsg = super.receiveGift(item);
@@ -183,11 +158,7 @@ public class AbigailEntity extends NPCEntity {
         }
     }
     
-    /**
-     * Get Abigail's sprite for rendering
-     * 
-     * @return The sprite image
-     */
+
     public BufferedImage getSprite() {
         if (sprite == null) {
             createPlaceholderSprite();
@@ -195,11 +166,7 @@ public class AbigailEntity extends NPCEntity {
         return sprite;
     }
     
-    /**
-     * Draw the Abigail NPC
-     * 
-     * @param g2 Graphics2D object used for drawing
-     */
+
     @Override
     public void draw(Graphics2D g2) {
         BufferedImage image = getSprite();

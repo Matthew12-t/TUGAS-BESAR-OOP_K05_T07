@@ -3,24 +3,20 @@ package SRC.ENTITY.ACTION;
 import SRC.MAIN.GamePanel;
 import java.awt.*;
 
-/**
- * FishingUI class handles visual feedback for fishing actions
- */
+
 public class FishingUI {
     private GamePanel gp;
     private boolean showFishingMessage = false;
     private String fishingMessage = "";
     private int messageTimer = 0;
-    private final int MESSAGE_DURATION = 180; // 3 seconds at 60 FPS
+    private final int MESSAGE_DURATION = 180; 
     private Color messageColor = Color.WHITE;
     
     public FishingUI(GamePanel gp) {
         this.gp = gp;
     }
     
-    /**
-     * Display fishing result message
-     */
+ 
     public void showFishingResult(String fishName, boolean success) {
         if (success) {
             fishingMessage = "You caught a " + fishName + "!";
@@ -33,19 +29,15 @@ public class FishingUI {
         messageTimer = MESSAGE_DURATION;
     }
     
-    /**
-     * Show fishing attempt message
-     */
+ 
     public void showFishingAttempt() {
         fishingMessage = "Casting your line...";
         messageColor = Color.CYAN;
         showFishingMessage = true;
-        messageTimer = 90; // 1.5 seconds
+        messageTimer = 90; 
     }
     
-    /**
-     * Show insufficient energy message
-     */
+
     public void showInsufficientEnergy() {
         fishingMessage = "Not enough energy to fish!";
         messageColor = Color.RED;
@@ -53,9 +45,7 @@ public class FishingUI {
         messageTimer = MESSAGE_DURATION;
     }
     
-    /**
-     * Show invalid location message
-     */
+ 
     public void showInvalidLocation() {
         fishingMessage = "You need to be near water to fish!";
         messageColor = Color.YELLOW;
@@ -63,9 +53,7 @@ public class FishingUI {
         messageTimer = MESSAGE_DURATION;
     }
     
-    /**
-     * Show missing fishing rod message
-     */
+
     public void showMissingFishingRod() {
         fishingMessage = "You need a fishing rod to fish!";
         messageColor = Color.RED;
@@ -73,9 +61,7 @@ public class FishingUI {
         messageTimer = MESSAGE_DURATION;
     }
     
-    /**
-     * Update the fishing UI
-     */
+
     public void update() {
         if (showFishingMessage) {
             messageTimer--;
@@ -85,9 +71,7 @@ public class FishingUI {
         }
     }
     
-    /**
-     * Draw the fishing UI
-     */
+
     public void draw(Graphics2D g2) {
         if (showFishingMessage) {
             // Save original settings
@@ -124,25 +108,16 @@ public class FishingUI {
         }
     }
     
-    /**
-     * Check if fishing message is currently being displayed
-     */
+  
     public boolean isShowingMessage() {
         return showFishingMessage;
-    }    /**
-     * Play GUI-based mini-game using JOptionPane
-     * @param fishType Type of fish (Common, Regular, Legendary)
-     * @param targetNumber The number player needs to guess
-     * @param maxRange Maximum range for guessing
-     * @param maxAttempts Maximum attempts allowed
-     * @return true if player wins the mini-game
-     */
+    }    
     public boolean playGUIMiniGame(String fishType, int targetNumber, int maxRange, int maxAttempts) {
         System.out.println("DEBUG: playGUIMiniGame called with fishType=" + fishType + ", targetNumber=" + targetNumber + ", maxRange=" + maxRange + ", maxAttempts=" + maxAttempts);
         
         final int ENERGY_PER_ATTEMPT = 5; // Energy cost per fishing attempt
         
-        // Simple approach - directly use JOptionPane without threading complications
+
         try {
             javax.swing.JOptionPane.showMessageDialog(null, 
                 "A " + fishType + " fish is on the line!\n" +
@@ -157,7 +132,7 @@ public class FishingUI {
             return false;
         }
         
-        for (int attempt = 1; attempt <= maxAttempts; attempt++) {            // Check if player has enough energy for this attempt using new logic
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {          
             if (!gp.getPlayer().getPlayerAction().hasEnoughEnergy(ENERGY_PER_ATTEMPT)) {
                 javax.swing.JOptionPane.showMessageDialog(null, 
                     "Not enough energy for another attempt!\n" +

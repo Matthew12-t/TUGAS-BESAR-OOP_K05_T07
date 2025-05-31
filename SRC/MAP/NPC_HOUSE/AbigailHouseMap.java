@@ -6,44 +6,32 @@ import SRC.MAIN.GamePanel;
 import SRC.ENTITY.AbigailEntity;
 import SRC.ENTITY.NPCEntity;
 
-/**
- * Abigail's House Map - A 12x12 NPC house
- */
+
 public class AbigailHouseMap extends NPCHouseMap {
     
-    // List to store NPCs in this house
+
     private ArrayList<NPCEntity> npcs;
     
-    /**
-     * Constructor for AbigailHouseMap
-     * @param gp GamePanel reference
-     */
+
     public AbigailHouseMap(GamePanel gp) {
         super(gp, "Abigail's House");
         
-        // Initialize NPC list
+
         npcs = new ArrayList<>();
     }
     
-    /**
-     * Initialize the map with tiles from abigailhousemap.txt
-     */
+
     @Override
     protected void initializeMap() {
         initializeFromFile("abigailhousemap.txt");
     }
-      /**
-     * Set up initial objects in Abigail's house
-     */
+
     @Override
     public void setupInitialObjects() {
         setupObjectsFromFile("abigailhousemap.txt");
     }
     
-    /**
-     * Override setupObjectsFromFile to handle NPC placement (character 'n')
-     * @param mapFileName The txt file to read objects from
-     */
+
     @Override
     protected void setupObjectsFromFile(String mapFileName) {
         super.setupObjectsFromFile(mapFileName);
@@ -73,10 +61,7 @@ public class AbigailHouseMap extends NPCHouseMap {
         }
     }
     
-    /**
-     * Override draw method to render NPCs in addition to tiles and objects
-     * @param g2 Graphics2D object for drawing
-     */
+
     @Override
     public void draw(Graphics2D g2) {
         super.draw(g2);
@@ -85,29 +70,21 @@ public class AbigailHouseMap extends NPCHouseMap {
         }
     }
     
-    /**
-     * Update NPCs behavior
-     */
+
     public void updateNPCs() {
         for (NPCEntity npc : npcs) {
             npc.update();
         }
     }
     
-    /**
-     * Get the list of NPCs in this house
-     * @return ArrayList of NPCs
-     */
+
     public ArrayList<NPCEntity> getNPCs() {
         return npcs;
     }
     
-    /**
-     * Ensure NPCs are placed in visible camera area
-     * Call this after initializing NPCs and centering camera
-     */
+
     public void ensureNPCsVisible() {
-        // Get the camera bounds
+
         int cameraX = gp.getCameraX();
         int cameraY = gp.getCameraY();
         int screenWidth = gp.getScreenWidth();

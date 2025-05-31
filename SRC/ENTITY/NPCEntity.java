@@ -9,14 +9,14 @@ import java.awt.Rectangle;
 import SRC.MAIN.GamePanel;
 import SRC.ITEMS.Item;
 
-public class NPCEntity extends Entity implements NPC {    // Basic NPC properties
+public class NPCEntity extends Entity implements NPC {    
     private String name;
     private String location;
     private String description;
     private int heartPoints;
     private static final int MAX_HEART_POINTS = 150;
     private String relationshipStatus; 
-    private int engagementDay; // Track the day when became fiance
+    private int engagementDay; 
     private List<Item> lovedItems;
     private List<Item> likedItems;
     private List<Item> hatedItems;
@@ -30,12 +30,11 @@ public class NPCEntity extends Entity implements NPC {    // Basic NPC propertie
         this.description = description;
           this.heartPoints = 0; 
         this.relationshipStatus = "single";
-        this.engagementDay = -1; // -1 means not engaged yet
+        this.engagementDay = -1; 
         this.lovedItems = new ArrayList<>();
         this.likedItems = new ArrayList<>();
         this.hatedItems = new ArrayList<>();
         
-        // Initialize collision area - NPC takes up the full tile size
         int tileSize = gp.getTileSize();
         this.solidArea = new Rectangle(0, 0, tileSize, tileSize);
     }
@@ -45,30 +44,23 @@ public class NPCEntity extends Entity implements NPC {    // Basic NPC propertie
             setSpriteNum((getSpriteNum() + 1) % 2);  
             setSpriteCounter(0);
         }
-    }    /**
-     * Draw the NPC on screen
-     * @param g2 Graphics2D object for drawing
-     */    public void draw(Graphics2D g2) {
-        // Calculate screen position based on world position and camera
+    }    
+     public void draw(Graphics2D g2) {
         int screenX = getWorldX() - gp.getCameraX();
         int screenY = getWorldY() - gp.getCameraY();
-        
-        // Debug - log visibility calculation values
         boolean isVisible = getWorldX() + gp.getTileSize() > gp.getCameraX() &&
                            getWorldX() - gp.getTileSize() < gp.getCameraX() + gp.getScreenWidth() &&
                            getWorldY() + gp.getTileSize() > gp.getCameraY() &&
                            getWorldY() - gp.getTileSize() < gp.getCameraY() + gp.getScreenHeight();
         
-        // Print NPC visibility info when entering DascoHouseMap 
+
         if (name.equals("Dasco") && gp.getCurrentMap().getMapName().equals("Dasco's House")) {
             System.out.println("Dasco NPC draw check - worldX: " + getWorldX() + ", worldY: " + getWorldY() + 
                             ", cameraX: " + gp.getCameraX() + ", cameraY: " + gp.getCameraY() + 
                             ", visible: " + isVisible);
         }
         
-        // Only draw if NPC is visible on screen
         if (isVisible) {
-            // Default NPC rendering - draw a colored rectangle with name
             g2.setColor(Color.BLUE);
             g2.fillRect(screenX, screenY, gp.getTileSize(), gp.getTileSize());
             
@@ -145,7 +137,7 @@ public class NPCEntity extends Entity implements NPC {    // Basic NPC propertie
                 }                if (relationshipStatus.equals("single")) {
                     if (heartPoints >= MAX_HEART_POINTS) {
                         relationshipStatus = "fiance";
-                        engagementDay = gp.getCurrentDay(); // Record the day of engagement
+                        engagementDay = gp.getCurrentDay(); 
                         player.setEnergy(player.getEnergy() - 10);
                         message = name + " menerima lamaranmu! Selamat yaaa :).";
                     } else {
@@ -159,12 +151,11 @@ public class NPCEntity extends Entity implements NPC {    // Basic NPC propertie
                 }
                 System.out.println(message);
                 showMessageToUI(message);
-                gp.addHours(1); // Advance time by 1 hour after proposing
+                gp.addHours(1); 
                 break;
             }            case "married": {
                 String message;
                 
-                // Check if player is already married to someone else first
                 if (player.isMarried() && !name.equals(player.getSpouseName())) {
                     message = "CIEE udah ga setia sama pasangan sendiri, gaboleh poligami yaaa";
                     System.out.println(message);
@@ -221,11 +212,8 @@ public class NPCEntity extends Entity implements NPC {    // Basic NPC propertie
         }
     }
 
-    /**
-     * Helper untuk menampilkan pesan ke UI (bisa dihubungkan ke GamePanel/MessagePanel)
-     */
+
     private void showMessageToUI(String message) {
-        // Use NPCUi for message panel if available
         if (gp != null && gp.getNPCUi() != null) {
             gp.getNPCUi().showMessagePanel(message);
         } else if (gp != null) {
@@ -284,9 +272,7 @@ public class NPCEntity extends Entity implements NPC {    // Basic NPC propertie
         hatedItems.remove(item);
     }
     
-      /**
-     * Player memberikan hadiah ke NPC, return pesan reaksi untuk UI
-     */
+
     public String receiveGift(Item item) {        
         String reactionMsg;
         if (lovedItems.contains(item)) {
@@ -306,35 +292,21 @@ public class NPCEntity extends Entity implements NPC {    // Basic NPC propertie
         return reactionMsg;
     }
     
-    /**
-     * Get the collision bounds of this NPC
-     * @return Rectangle representing the collision area in world coordinates
-     */
     public Rectangle getCollisionBounds() {
         return new Rectangle(getWorldX() + solidArea.x, getWorldY() + solidArea.y, 
                            solidArea.width, solidArea.height);
     }
     
-    /**
-     * Check if this NPC is solid (blocks player movement)
-     * @return true if NPC should block player movement
-     */
+
     public boolean isSolid() {
         return isSolid;
     }
     
-    /**
-     * Set whether this NPC should be solid
-     * @param solid true to make NPC block player movement
-     */
+
     public void setSolid(boolean solid) {
         this.isSolid = solid;
     }
     
-    /**
-     * Get the solid area rectangle of this NPC
-     * @return Rectangle representing the relative solid area
-     */
     public Rectangle getSolidArea() {
         return solidArea;
     }

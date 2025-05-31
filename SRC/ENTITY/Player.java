@@ -21,61 +21,48 @@ public class Player extends Entity {
     private MouseHandler mouseHandler;    
     private PlayerAction playerAction;
     private int energy;
-    private final int MAX_ENERGY = 100; // Maximum energy value
-    private int gold; // Player's gold amount
+    private final int MAX_ENERGY = 100; 
+    private int gold; 
     private final int TOTAL_FRAMES = 2;
     private boolean married;
-    private String spouseName; // Store the name of the spouse
-
-    // Statistics tracking for EndGame system
+    private String spouseName; 
     private int totalIncome;
     private int totalExpenditure;
     private int daysPlayed;
     private int totalCropsHarvested;
     private int totalFishCaught;
     private List<Fish> caughtFish;
-
-    // Character customization fields
     private String playerName = "Farmer";
     private String farmName = "My Farm";
-    private String gender = "BOY"; // "BOY" or "GIRL"
+    private String gender = "BOY"; 
     private String favoriteItem = "Parsnip";
-
-    // --- Variabel Entitas (Deklarasikan jika tidak di Entity) ---
-    private Rectangle solidArea; // Collision area for the player
-    private boolean showHitbox = false; // Debug toggle for hitbox visibility
-    // -----------------------------------------------------------
-
-    // Arrays untuk menyimpan 8 frame animasi untuk setiap arah
+    private Rectangle solidArea;
+    private boolean showHitbox = false; 
     private BufferedImage[] up;
     private BufferedImage[] down;
     private BufferedImage[] left;
     private BufferedImage[] right;
-
-    // --- Tambahkan skala visual player ---
     private final int visualScale = 1;
     private int playerVisualWidth;
     private int playerVisualHeight;
-    // -------------------------------------
-
-    // --- Collision hitbox properties ---
-    private final float collisionScale = 0.6f; // Hitbox size relative to tile size (60%)
+    private final float collisionScale = 0.6f; 
     private int collisionWidth;
     private int collisionHeight;
     private int collisionOffsetX;
     private int collisionOffsetY;
-    // ----------------------------------    //contructor
+
+
     public Player(GamePanel gp, KeyHandler keyH, MouseHandler mouseHandler) {
-        super(gp, 100, 100); // Panggil konstruktor Entity dengan posisi awal
+        super(gp, 100, 100); 
         this.gp = gp;          this.keyH = keyH;
         this.married = false;
-        this.spouseName = null; // Initialize spouse name as null
+        this.spouseName = null; 
         this.mouseHandler = mouseHandler;
         this.energy = 100; 
-        this.gold = 500; // Initialize gold with 500
+        this.gold = 500; 
         this.playerAction = new PlayerAction(gp, this);
         
-        // Initialize statistics tracking
+
         this.totalIncome = 0;
         this.totalExpenditure = 0;
         this.daysPlayed = 0;
@@ -83,22 +70,17 @@ public class Player extends Entity {
         this.totalFishCaught = 0;
         this.caughtFish = new ArrayList<>();
         
-        // Hitung ukuran visual player berdasarkan skala
-        this.playerVisualWidth = gp.getTileSize() * visualScale; // 48 * 4 = 192 pixels
-        this.playerVisualHeight = gp.getTileSize() * visualScale; // 48 * 4 = 192 pixels
 
-        // Hitung ukuran collision hitbox (lebih kecil dari visual)
-        this.collisionWidth = (int)(gp.getTileSize() * collisionScale); // 48 * 0.6 = ~28 pixels
-        this.collisionHeight = (int)(gp.getTileSize() * collisionScale); // 48 * 0.6 = ~28 pixels
+        this.playerVisualWidth = gp.getTileSize() * visualScale; 
+        this.playerVisualHeight = gp.getTileSize() * visualScale; 
+        this.collisionWidth = (int)(gp.getTileSize() * collisionScale); 
+        this.collisionHeight = (int)(gp.getTileSize() * collisionScale); 
         
-        // Offset agar hitbox berada di tengah sprite (baik horizontal maupun vertikal)
-        this.collisionOffsetX = (playerVisualWidth - collisionWidth) / 2; // Tengah secara horizontal
-        this.collisionOffsetY = (playerVisualHeight - collisionHeight) / 2; // Tengah secara vertikal
+        this.collisionOffsetX = (playerVisualWidth - collisionWidth) / 2; 
+        this.collisionOffsetY = (playerVisualHeight - collisionHeight) / 2; 
         
-        // Set solid area dengan ukuran dan posisi hitbox baru
         solidArea = new Rectangle(collisionOffsetX, collisionOffsetY, collisionWidth, collisionHeight);
 
-        // Inisialisasi array gambar
         up = new BufferedImage[TOTAL_FRAMES];
         down = new BufferedImage[TOTAL_FRAMES];
         left = new BufferedImage[TOTAL_FRAMES];
@@ -108,14 +90,13 @@ public class Player extends Entity {
         getPlayerImage();
     }
     
-    // --- Getter dan Setter untuk atribut baru ---
     public int getEnergy() {
         return energy;
     }    public void setEnergy(int energy) {
         if (energy < -30) {
-            this.energy = -30; // Allow negative energy but limit to -30
+            this.energy = -30; 
         } else if (energy > MAX_ENERGY) {
-            this.energy = MAX_ENERGY; // Prevent exceeding max energy
+            this.energy = MAX_ENERGY; 
         } else {
             this.energy = energy;
         }
@@ -127,7 +108,7 @@ public class Player extends Entity {
 
     public void setGold(int gold) {
         if (gold < 0) {
-            this.gold = 0; // Prevent negative gold
+            this.gold = 0; 
         } else {
             this.gold = gold;
         }
@@ -136,17 +117,17 @@ public class Player extends Entity {
     public void addGold(int amount) {
         if (amount > 0) {
             this.gold += amount;
-            this.totalIncome += amount; // Track income for statistics
+            this.totalIncome += amount; 
         }
     }
 
     public boolean spendGold(int amount) {
         if (amount > 0 && this.gold >= amount) {
             this.gold -= amount;
-            this.totalExpenditure += amount; // Track expenditure for statistics
-            return true; // Successfully spent gold
+            this.totalExpenditure += amount; 
+            return true; 
         }
-        return false; // Not enough gold
+        return false; 
     }
 
     public void addItemToInventory(Item item) {
@@ -161,7 +142,6 @@ public class Player extends Entity {
         playerAction.removeOneInventoryItem(slotIndex);
     }
     
-    // Character customization getters and setters
     public String getPlayerName() {
         return playerName;
     }
@@ -194,7 +174,6 @@ public class Player extends Entity {
         this.favoriteItem = favoriteItem != null ? favoriteItem : "Parsnip";
     }
     
-    // Statistics getters
     public int getDaysPlayed() {
         return daysPlayed;
     }
@@ -229,9 +208,7 @@ public class Player extends Entity {
     public PlayerAction getPlayerAction() {
         return playerAction;
     }
-      /**
-     * Energy system methods (implemented directly in Player)
-     */
+
     public int getCurrentEnergy() {
         return energy;
     }
@@ -242,14 +219,13 @@ public class Player extends Entity {
       public boolean consumeEnergy(int amount) {
         if (energy >= amount) {
             energy -= amount;
-            if (energy < -30) energy = -30; // Allow negative energy but limit to -30
+            if (energy < -30) energy = -30; 
             return true;
         } else {
-            // Allow forced energy consumption even if not enough energy
-            // This ensures actions can still consume energy and go into negative
+
             energy -= amount;
-            if (energy < -30) energy = -30; // Limit to -30
-            return true; // Changed to always return true to allow negative energy
+            if (energy < -30) energy = -30; 
+            return true;
         }
     }
     
@@ -258,59 +234,48 @@ public class Player extends Entity {
         if (energy > MAX_ENERGY) {
             energy = MAX_ENERGY;
         }
-    }      public boolean hasEnoughEnergy(int requiredEnergy) {
-        // New logic: action can be performed if currentEnergy - requiredEnergy > lowerBound
-        // Lower bound is -20, so action requires currentEnergy - requiredEnergy > -20
+    }      
+    
+    public boolean hasEnoughEnergy(int requiredEnergy) {
+
         final int LOWER_ENERGY_BOUND = -20;
         return (energy - requiredEnergy) > LOWER_ENERGY_BOUND;
     }
     
-    /**
-     * Get the lower energy bound
-     * @return lower energy bound value
-     */
     public int getLowerEnergyBound() {
         return -20;
     }
       public double getEnergyPercentage() {
-        // Return percentage based on energy, but cap at 0 for UI display
+
         double percentage = (double) energy / MAX_ENERGY;
-        return Math.max(0.0, percentage); // Don't show negative percentage in UI
+        return Math.max(0.0, percentage); 
     }
     
-    // Getter for solidArea      
     public Rectangle getSolidArea() {
         return solidArea;
     }
       
-    /**
-     * Toggle hitbox visibility for debugging
-     */
     public void toggleHitbox() {
         showHitbox = !showHitbox;
     }
-        /**
-     * Check if player collides with any map objects, tiles, or NPCs
-     * @return true if collision detected
-     */
+
     public boolean checkCollision() {
-        // Calculate the player's position in tile coordinates with center hitbox
+
         int tileSize = gp.getTileSize();
         
-        // Calculate the world position of the hitbox
+
         int hitboxWorldX = getWorldX() + collisionOffsetX;
         int hitboxWorldY = getWorldY() + collisionOffsetY;
         
-        // Convert hitbox corners to tile coordinates
+
         int hitboxLeftCol = hitboxWorldX / tileSize;
         int hitboxTopRow = hitboxWorldY / tileSize;
         int hitboxRightCol = (hitboxWorldX + collisionWidth - 1) / tileSize;
         int hitboxBottomRow = (hitboxWorldY + collisionHeight - 1) / tileSize;
         
-        // Get the current map
+
         SRC.MAP.Map currentMap = gp.getCurrentMap();
-        
-        // Check all tiles that the hitbox overlaps
+
         for (int row = hitboxTopRow; row <= hitboxBottomRow; row++) {
             for (int col = hitboxLeftCol; col <= hitboxRightCol; col++) {
                 if (currentMap.hasCollision(col, row)) {
@@ -326,13 +291,9 @@ public class Player extends Entity {
         return false;
     }
     
-    /**
-     * Check if player collides with any NPCs on the current map
-     * @return true if collision with an NPC is detected
-     */
     private boolean checkNPCCollision() {
         SRC.MAP.Map currentMap = gp.getCurrentMap();
-        // Check for NPC collision in NPCHouseMap subclasses
+
         if (currentMap instanceof SRC.MAP.NPC_HOUSE.NPCHouseMap) {
             SRC.MAP.NPC_HOUSE.NPCHouseMap npcHouseMap = (SRC.MAP.NPC_HOUSE.NPCHouseMap) currentMap;
             java.util.ArrayList<NPCEntity> npcs = null;
@@ -357,7 +318,7 @@ public class Player extends Entity {
                 }
             }
         }
-        // Check for NPC collision in StoreMap
+
         else if (currentMap instanceof SRC.MAP.StoreMap) {
             SRC.MAP.StoreMap storeMap = (SRC.MAP.StoreMap) currentMap;
             java.util.ArrayList<NPCEntity> npcs = storeMap.getNPCs();
@@ -392,10 +353,10 @@ public class Player extends Entity {
     }
     
     public void setDefaultValues() {
-        setWorldX(100); // Starting position in the game world (world coordinates)
+        setWorldX(100); 
         setWorldY(150);
-        setSpeed(4); // Movement speed in pixels per frame
-        setDirection("down"); // default direction
+        setSpeed(4);
+        setDirection("down"); 
     }
     
     public void getPlayerImage() {
@@ -430,38 +391,36 @@ public class Player extends Entity {
     public void update() {
         boolean moving = false;
         
-        // Store the player's original position in case a collision happens
         int originalX = getWorldX();
         int originalY = getWorldY();
 
-        // Keyboard movement updates player's world position
         if (keyH.upPressed) {
             setDirection("up");
-            setWorldY(getWorldY() - getSpeed()); // Update worldY
+            setWorldY(getWorldY() - getSpeed()); 
             moving = true;
-        } else if (keyH.downPressed) { // Use else if for mutually exclusive movements
+        } else if (keyH.downPressed) { 
             setDirection("down");
-            setWorldY(getWorldY() + getSpeed()); // Update worldY
+            setWorldY(getWorldY() + getSpeed()); 
             moving = true;
-        } else if (keyH.leftPressed) { // Use else if
+        } else if (keyH.leftPressed) { 
             setDirection("left");
-            setWorldX(getWorldX() - getSpeed()); // Update worldX
+            setWorldX(getWorldX() - getSpeed()); 
             moving = true;
-        } else if (keyH.rightPressed) { // Use else if
+        } else if (keyH.rightPressed) { 
             setDirection("right");
-            setWorldX(getWorldX() + getSpeed()); // Update worldX
+            setWorldX(getWorldX() + getSpeed()); 
             moving = true;
         }
         
-        // Check for collision with map objects
+
         if (checkCollision()) {
-            // If collision, revert to original position
+
             setWorldX(originalX);
             setWorldY(originalY);
         }
         
-        // Ensure the player does not move out of bounds
-        int worldMargin = -70; // Small margin to prevent getting too close to the edge
+
+        int worldMargin = -70; 
         if (getWorldX() < worldMargin) {
             setWorldX(worldMargin);
         } else if (getWorldX() > gp.getMaxWorldWidth() - playerVisualWidth - worldMargin) {
@@ -477,21 +436,21 @@ public class Player extends Entity {
         if (mouseHandler.isHasTarget()) {
             moving = true; 
             
-            // mouseHandler.targetX/Y sudah dalam koordinat dunia (world coordinates)
+            
             int targetWorldX = mouseHandler.getTargetX();
             int targetWorldY = mouseHandler.getTargetY();
 
-            // Calculate vector from player's center to the world target
+            
             int playerCenterX = getWorldX() + playerVisualWidth / 2;
             int playerCenterY = getWorldY() + playerVisualHeight / 2;
             int dx = targetWorldX - playerCenterX;
             int dy = targetWorldY - playerCenterY;
 
-            // Calculate distance to target
+            
             double distance = Math.sqrt(dx * dx + dy * dy);
 
-            // Determine direction based on movement vector
-            if (distance > 0) { // Avoid division by zero if distance is 0
+            
+            if (distance > 0) { 
                 if (Math.abs(dx) > Math.abs(dy)) {
                     if (dx > 0) {
                         setDirection("right");
@@ -506,42 +465,42 @@ public class Player extends Entity {
                     }
                 }
 
-                // If player is close to target, stop moving
+                
                 if (distance < getSpeed()) {
-                    // Position player precisely so that its center is at the center of the target tile
+                    
                     setWorldX(targetWorldX - playerVisualWidth / 2);
                     setWorldY(targetWorldY - playerVisualHeight / 2);
-                    mouseHandler.setHasTarget(false); // Stop moving and remove target indicator
-                    moving = false; // Stop animation
+                    mouseHandler.setHasTarget(false); 
+                    moving = false; 
                     System.out.println("Player reached target tile center at: " + targetWorldX + ", " + targetWorldY);
                 } else {
-                    // Move player towards target in world coordinates
+                    
                     double moveRatio = getSpeed() / distance;
                     int newWorldX = getWorldX() + (int)(dx * moveRatio);
                     int newWorldY = getWorldY() + (int)(dy * moveRatio);
                     
-                    // Save original position
+                    
                     int moveOriginalX = getWorldX();
                     int moveOriginalY = getWorldY();
                     
-                    // Apply movement
+                    
                     setWorldX(newWorldX);
-                    setWorldY(newWorldY);                    // Check for collision after movement
+                    setWorldY(newWorldY);                    
                     if (checkCollision()) {
-                        // Revert to original position
+                        
                         setWorldX(moveOriginalX);
                         setWorldY(moveOriginalY);
                         
-                        // Cancel mouse target immediately when collision is detected
+                        
                         mouseHandler.setHasTarget(false);
                         moving = false;
                         System.out.println("Collision detected, stopped moving to target");
                     }
                     
-                    // Check if new position would be out of bounds
+                    
                     boolean hitBoundary = false;
                     
-                    // Check X boundaries
+                    
                     if (getWorldX() < worldMargin) {
                         setWorldX(worldMargin);
                         hitBoundary = true;
@@ -550,7 +509,7 @@ public class Player extends Entity {
                         hitBoundary = true;
                     }
                     
-                    // Check Y boundaries
+                    
                     if (getWorldY() < worldMargin) {
                         setWorldY(worldMargin);
                         hitBoundary = true;
@@ -559,7 +518,7 @@ public class Player extends Entity {
                         hitBoundary = true;
                     }
                     
-                    // If hit boundary, stop moving towards target
+                    
                     if (hitBoundary) {
                         mouseHandler.setHasTarget(false);
                         moving = false;
@@ -567,33 +526,33 @@ public class Player extends Entity {
                     }
                 }
             } else {
-                // Player is exactly on the target
+                
                 mouseHandler.setHasTarget(false);
                 moving = false;
             }
         } 
         
-        // Update animation only if moving
+        
         if (moving) {
             incrementSpriteCounter();
-            // Change frame every few updates (adjust '5' for animation speed)
-            // A higher number makes the animation slower
-            if (getSpriteCounter() > 8) { // Increased sprite counter threshold slightly for smoother look
+            
+            
+            if (getSpriteCounter() > 8) { 
                 setSpriteNum((getSpriteNum() + 1) % TOTAL_FRAMES);
                 setSpriteCounter(0);
             }
         } else {
-            // Reset animation to the standing frame when not moving
+            
             setSpriteNum(0);
-            setSpriteCounter(0); // Reset counter too
+            setSpriteCounter(0); 
         }
     }
 
-    // Method to draw the player at a specific screen position
+    
     public void draw(Graphics2D g2, int screenX, int screenY) {
         BufferedImage image = null;
 
-        // Select the appropriate image based on direction and animation frame
+        
         switch (super.getDirection()) {
             case "up":
                 image = up[super.getSpriteNum()];
@@ -609,57 +568,58 @@ public class Player extends Entity {
                 break;
         }
         
-        // --- Gambar karakter menggunakan ukuran visual yang diskalakan ---
+        
         if (image != null) {
             g2.drawImage(image, screenX, screenY, playerVisualWidth, playerVisualHeight, null);
         } else {
-            // Fallback: Draw a white rectangle if image not found
+            
             g2.setColor(Color.white);
             g2.fillRect(screenX, screenY, playerVisualWidth, playerVisualHeight);
         }
         
-        // Draw hitbox untuk debug jika showHitbox diaktifkan
+        
         if (showHitbox) {
-            // Outline visual area keseluruhan player
-            g2.setColor(new Color(0, 0, 255, 50)); // Biru transparan
+            
+            g2.setColor(new Color(0, 0, 255, 50)); 
             g2.drawRect(screenX, screenY, playerVisualWidth, playerVisualHeight);
             
-            // Fill collision hitbox yang berada di tengah (merah transparan)
+            
             g2.setColor(new Color(255, 0, 0, 100)); 
             g2.fillRect(screenX + collisionOffsetX, screenY + collisionOffsetY, 
                      collisionWidth, collisionHeight);
                      
-            // Outline hitbox collision dengan warna merah solid
+            
             g2.setColor(Color.RED);
             g2.drawRect(screenX + collisionOffsetX, screenY + collisionOffsetY, 
                      collisionWidth, collisionHeight);
                      
-            // Tambahkan cross-hair di tengah hitbox
+            
             int centerX = screenX + collisionOffsetX + collisionWidth/2;
             int centerY = screenY + collisionOffsetY + collisionHeight/2;
-            g2.drawLine(centerX - 5, centerY, centerX + 5, centerY); // Horizontal line
-            g2.drawLine(centerX, centerY - 5, centerX, centerY + 5); // Vertical line
+            g2.drawLine(centerX - 5, centerY, centerX + 5, centerY); 
+            g2.drawLine(centerX, centerY - 5, centerX, centerY + 5); 
             
-            // Tampilkan informasi hitbox di atas player
+            
             g2.setColor(Color.WHITE);
             g2.drawString(collisionWidth + "x" + collisionHeight, 
                       screenX + collisionOffsetX, 
                       screenY + collisionOffsetY - 5);
 
-            // Visualisasi tile-based collision detection
+            
             int tileSize = gp.getTileSize();
             
-            // Calculate hitbox tile coordinates
+            
             int hitboxWorldX = getWorldX() + collisionOffsetX;
             int hitboxWorldY = getWorldY() + collisionOffsetY;
             int hitboxLeftCol = hitboxWorldX / tileSize;
             int hitboxTopRow = hitboxWorldY / tileSize;
-            int hitboxRightCol = (hitboxWorldX + collisionWidth - 1) / tileSize;            int hitboxBottomRow = (hitboxWorldY + collisionHeight - 1) / tileSize;
+            int hitboxRightCol = (hitboxWorldX + collisionWidth - 1) / tileSize;            
+            int hitboxBottomRow = (hitboxWorldY + collisionHeight - 1) / tileSize;
             
-            // Draw tile-based collision boxes
-            g2.setColor(new Color(0, 255, 0, 100)); // Green with transparency
             
-            // Draw all tiles that the hitbox overlaps
+            g2.setColor(new Color(0, 255, 0, 100)); 
+            
+            
             for (int row = hitboxTopRow; row <= hitboxBottomRow; row++) {
                 for (int col = hitboxLeftCol; col <= hitboxRightCol; col++) {
                     int tileScreenX = (col * tileSize) - gp.getCameraX();
@@ -670,44 +630,37 @@ public class Player extends Entity {
         }
         
         if (mouseHandler.isHasTarget()) {
-            // Set transparent white color
-            Color targetColor = new Color(255, 255, 255, 100); // RGBA format with alpha=100 (semitransparent white)
+            
+            Color targetColor = new Color(255, 255, 255, 100); 
             g2.setColor(targetColor);
             
-            // mouseHandler.targetX/Y sekarang dalam koordinat dunia, konversi ke screen coordinates
+            
             int targetWorldX = mouseHandler.getTargetX();
             int targetWorldY = mouseHandler.getTargetY();
             
-            // Convert world coordinates to screen coordinates
+            
             int targetScreenX = targetWorldX - gp.getCameraX();
             int targetScreenY = targetWorldY - gp.getCameraY();
             
-            // Draw a semi-transparent square centered on the target tile
+            
             int tileSize = gp.getTileSize();
-            g2.fillRect(targetScreenX - tileSize/2, targetScreenY - tileSize/2, tileSize, tileSize);            // Add a white border with slightly higher opacity to make it more visible
+            g2.fillRect(targetScreenX - tileSize/2, targetScreenY - tileSize/2, tileSize, tileSize);            
             g2.setColor(new Color(255, 255, 255, 150));
             g2.drawRect(targetScreenX - tileSize/2, targetScreenY - tileSize/2, tileSize, tileSize);
         }
     }
       
-    // Add holding tool system
+    
     private SRC.ITEMS.Tool currentHoldingTool = null;
-    // Add holding seed system
+    
     private SRC.ITEMS.Seed currentHoldingSeed = null;
     
-    /**
-     * Get currently holding tool
-     * @return Current holding tool or null if none
-     */
     public SRC.ITEMS.Tool getCurrentHoldingTool() {
         return currentHoldingTool;
     }
-      /**
-     * Set currently holding tool
-     * @param tool Tool to hold
-     */
+
     public void setCurrentHoldingTool(SRC.ITEMS.Tool tool) {
-        // Clear any held seed to ensure only one item is held at a time
+        
         if (tool != null && this.currentHoldingSeed != null) {
             this.currentHoldingSeed = null;
             System.out.println("Dropped held seed to hold tool: " + tool.getName());
@@ -734,7 +687,7 @@ public class Player extends Entity {
         return currentHoldingTool != null;
     }
     
-    // Seed holding system methods
+    
     /**
      * Get currently holding seed
      * @return Current holding seed or null if none
@@ -747,7 +700,7 @@ public class Player extends Entity {
      * @param seed Seed to hold
      */
     public void setCurrentHoldingSeed(SRC.ITEMS.Seed seed) {
-        // Clear any held tool to ensure only one item is held at a time
+        
         if (seed != null && this.currentHoldingTool != null) {
             this.currentHoldingTool = null;
             System.out.println("Dropped held tool to hold seed: " + seed.getName());
@@ -788,7 +741,7 @@ public class Player extends Entity {
         }        return null;
     }
 
-    // Additional methods needed by EndGame system
+    
     public void incrementDaysPlayed() {
         this.daysPlayed++;
     }
@@ -805,7 +758,7 @@ public class Player extends Entity {
     }
 
     public List<Fish> getCaughtFish() {
-        return new ArrayList<>(caughtFish); // Return copy to prevent external modification
+        return new ArrayList<>(caughtFish); 
     }    public void setMarried(boolean married) {
         this.married = married;
     }

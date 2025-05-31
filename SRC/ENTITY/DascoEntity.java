@@ -11,17 +11,9 @@ import SRC.DATA.GameData;
 import SRC.ITEMS.Item;
 import java.awt.Graphics2D;
 
-/**
- * DascoEntity - Represents the Dasco NPC in the game
- */
+
 public class DascoEntity extends NPCEntity {
-    private BufferedImage sprite;    /**
-     * Constructor for DascoEntity
-     * 
-     * @param gp GamePanel reference
-     * @param worldX X position in the world
-     * @param worldY Y position in the world
-     */
+    private BufferedImage sprite;    
     public DascoEntity(GamePanel gp, int worldX, int worldY) {
         super(gp, worldX, worldY, "Dasco", "Dasco's House", 
               "Dasco adalah pemilik kasino besar di Spakbor Hills.");
@@ -30,9 +22,7 @@ public class DascoEntity extends NPCEntity {
         loadSprite();
         
         setSpeed(0);
-    }    /**
-     * Set up Dasco's item preferences
-     */
+    }    
     private void setItemPreferences() {
         Set<String> lovedItemNames = Set.of("The Legends of Spakbor", "Cooked Pig's Head", "Wine", "Fugu", "Spakbor Salad");
         for (String itemName : lovedItemNames) {
@@ -103,9 +93,7 @@ public class DascoEntity extends NPCEntity {
         }
     }
     
-    /**
-     * Create a placeholder sprite when the image file can't be loaded
-     */
+
     private void createPlaceholderSprite() {
         System.out.println("Creating placeholder sprite for Dasco");
         
@@ -118,10 +106,7 @@ public class DascoEntity extends NPCEntity {
         g.drawString("DASCO", 5, 24);
         g.dispose();
     }
-      /**
-     * Update method for Dasco's behavior
-     * This will be called by the game loop
-     */
+
     public void update() {
         incrementSpriteCounter();
         
@@ -135,9 +120,7 @@ public class DascoEntity extends NPCEntity {
         }
     }
     
-    /**
-     * Custom interaction method for Dasco
-     */
+ 
     @Override
     public void interact(Player player) {
         super.interact(player);
@@ -157,17 +140,13 @@ public class DascoEntity extends NPCEntity {
         updateRelationshipStatus();
     }
     
-    /**
-     * Update relationship status based on heart points
-     */
+
     private void updateRelationshipStatus() {
         if (getHeartPoints() < 100) {
             setRelationshipStatus("single");}
         
-    }    /**
-     * Custom method to handle gift giving
-     * @param item the item being given
-     */
+    }   
+
     @Override
     public String receiveGift(Item item) {
         String baseMsg = super.receiveGift(item);
@@ -183,40 +162,33 @@ public class DascoEntity extends NPCEntity {
             return "Dasco: Terima kasih, tapi kamu bisa lebih baik dari ini. " + baseMsg;
         }
     }
-      /**
-     * Get Dasco's sprite for rendering
-     * 
-     * @return The sprite image
-     */
+  
     public BufferedImage getSprite() {
         if (sprite == null) {
             System.err.println("WARNING: Dasco sprite is null! Attempting to reload...");
             loadSprite();
         }
         return sprite;
-    }    /**
-     * Draw the Dasco NPC
-     * 
-     * @param g2 Graphics2D object used for drawing
-     */
+    }   
+
     @Override
     public void draw(Graphics2D g2) {
-        // Get the current sprite based on direction and animation frame
+
         BufferedImage image = getSprite();
         
-        // Calculate screen position based on world position and camera
+
         int screenX = getWorldX() - gp.getCameraX();
         int screenY = getWorldY() - gp.getCameraY();
         int tileSize = gp.getTileSize();
         
-        // Only draw if NPC is visible on screen
+
         if (getWorldX() + tileSize > gp.getCameraX() &&
             getWorldX() - tileSize < gp.getCameraX() + gp.getScreenWidth() &&
             getWorldY() + tileSize > gp.getCameraY() &&
             getWorldY() - tileSize < gp.getCameraY() + gp.getScreenHeight()) {
             
             if (image != null) {
-                // Draw the sprite with proper size
+
                 g2.drawImage(image, screenX, screenY, tileSize, tileSize, null);
                 
             } 

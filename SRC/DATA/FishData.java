@@ -7,19 +7,14 @@ import SRC.TIME.GameTime;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Data class for managing all fish items with static initialization
- * Updated to match new fishing system specifications
- */
 public class FishData {
     private static Map<String, Fish> fish = new HashMap<>();
     
-    // Static initializer to load all fish
     static {
         initializeFish();
-    }    /**
-     * Initialize all fish items according to new specifications
-     */    private static void initializeFish() {
+    } 
+ 
+        private static void initializeFish() {
         // Common Fish (3 types) with multiple locations
         fish.put("Bullhead", new Fish("Bullhead", "Common", "Mountain Lake", Season.ANY, Weather.ANY, 
             new GameTime(0, 0), new GameTime(23, 59)));
@@ -67,12 +62,8 @@ public class FishData {
             new GameTime(6, 0), new GameTime(22, 0)));
         fish.put("Flounder_Summer", new Fish("Flounder", "Regular", "Ocean", Season.SUMMER, Weather.ANY, 
             new GameTime(6, 0), new GameTime(22, 0)));
-        
-        // Halibut - two time periods
-        fish.put("Halibut_Morning", new Fish("Halibut", "Regular", "Ocean", Season.ANY, Weather.ANY, 
-            new GameTime(6, 0), new GameTime(11, 0)));
-        fish.put("Halibut_Evening", new Fish("Halibut", "Regular", "Ocean", Season.ANY, Weather.ANY, 
-            new GameTime(19, 0), new GameTime(2, 0)));
+          // Halibut - combined time periods (6-11 and 19-2)
+        fish.put("Halibut", new Fish("Halibut", "Regular", "Ocean", Season.ANY, Weather.ANY, "6-11,19-2"));
         
         fish.put("Octopus", new Fish("Octopus", "Regular", "Ocean", Season.SUMMER, Weather.ANY, 
             new GameTime(6, 0), new GameTime(22, 0)));
@@ -118,19 +109,13 @@ public class FishData {
         
     }
     
-    /**
-     * Get a fish by name (backwards compatibility - returns first match)
-     * @param fishName Name of the fish
-     * @return Fish object or null if not found
-     */
+
     public static Fish getFish(String fishName) {
-        // Try exact match first
         Fish exactMatch = fish.get(fishName);
         if (exactMatch != null) {
             return exactMatch;
         }
         
-        // If no exact match, find first fish with matching name
         for (Map.Entry<String, Fish> entry : fish.entrySet()) {
             if (entry.getValue().getName().equals(fishName)) {
                 return entry.getValue();
@@ -140,21 +125,11 @@ public class FishData {
         return null;
     }
     
-    /**
-     * Get fish by exact key (including location suffix)
-     * @param fishKey Exact key of the fish in the map
-     * @return Fish object or null if not found
-     */
     public static Fish getFishByKey(String fishKey) {
         return fish.get(fishKey);
     }
 
-    /**
-     * Add fish to inventory with specified quantity (returns the fish item)
-     * @param fishName Name of the fish to add
-     * @param quantity Quantity to add (for compatibility, not used in return)
-     * @return Fish item ready to be added to inventory
-     */
+
     public static Fish addFish(String fishName, int quantity) {
         Fish fishItem = getFish(fishName);
         if (fishItem != null) {
@@ -163,18 +138,12 @@ public class FishData {
             return null;
         }
     }
-      /**
-     * Check if fish exists
-     * @param fishName Name of the fish
-     * @return true if fish exists
-     */
+
     public static boolean hasFish(String fishName) {
-        // Try exact key match first
         if (fish.containsKey(fishName)) {
             return true;
         }
         
-        // If no exact match, check if any fish has this name
         for (Fish fishItem : fish.values()) {
             if (fishItem.getName().equals(fishName)) {
                 return true;
@@ -183,11 +152,6 @@ public class FishData {
         
         return false;
     }
-      /**
-     * Get fish by location
-     * @param location Location to filter by
-     * @return Map of fish for the specified location
-     */
     public static Map<String, Fish> getFishByLocation(String location) {
         Map<String, Fish> locationFish = new HashMap<>();
         for (Map.Entry<String, Fish> entry : fish.entrySet()) {
@@ -198,11 +162,6 @@ public class FishData {
         return locationFish;
     }
     
-    /**
-     * Get fish by type (Common, Regular, Legendary)
-     * @param type Type to filter by
-     * @return Map of fish for the specified type
-     */
     public static Map<String, Fish> getFishByType(String type) {
         Map<String, Fish> typeFish = new HashMap<>();
         for (Map.Entry<String, Fish> entry : fish.entrySet()) {
@@ -213,14 +172,7 @@ public class FishData {
         return typeFish;
     }
     
-    /**
-     * Get fish that can be caught at specified conditions
-     * @param location Fishing location
-     * @param currentTime Current game time
-     * @param currentSeason Current season
-     * @param currentWeather Current weather
-     * @return Map of catchable fish
-     */
+
     public static Map<String, Fish> getCatchableFish(String location, GameTime currentTime, Season currentSeason, Weather currentWeather) {
         Map<String, Fish> catchableFish = new HashMap<>();
         for (Map.Entry<String, Fish> entry : fish.entrySet()) {
@@ -233,10 +185,6 @@ public class FishData {
         return catchableFish;
     }
     
-    /**
-     * Get all fish
-     * @return Map of all fish
-     */
     public static Map<String, Fish> getAllFish() {
         return new HashMap<>(fish);
     }

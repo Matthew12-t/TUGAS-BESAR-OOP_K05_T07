@@ -6,15 +6,11 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * ShippingBin class manages the shipping bin functionality
- * Similar to Store structure but for selling items
- */
 public class ShippingBin {
     private List<ShippingItem> shippingBinItems;
     private Map<String, Integer> itemSellPrices;
     
-    // Inner class to hold items with quantities in shipping bin
+
     private static class ShippingItem {
         public Item item;
         public int quantity;
@@ -133,11 +129,10 @@ public class ShippingBin {
             }
         }
     }
-    
-    public int calculateTotalValue() {
+      public int calculateTotalValue() {
         int totalValue = 0;
         for (ShippingItem shippingItem : shippingBinItems) {
-            int sellPrice = itemSellPrices.getOrDefault(shippingItem.item.getName(), 1);
+            int sellPrice = shippingItem.item.getSellPrice();
             totalValue += sellPrice * shippingItem.quantity;
         }
         return totalValue;

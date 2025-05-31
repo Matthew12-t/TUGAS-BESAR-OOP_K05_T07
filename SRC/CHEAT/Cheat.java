@@ -78,14 +78,11 @@ public class Cheat {
         }
     }    private String addItem(String[] parts) {
         try {
-            // Get quantity from last part
             int quantity = Integer.parseInt(parts[parts.length - 1]);
             
-            // Build item name from parts between "item" and quantity preserving original case
             StringBuilder itemName = new StringBuilder();
             for (int i = 2; i < parts.length - 1; i++) {
                 if (i > 2) itemName.append(" ");
-                // Capitalize first letter of each word
                 String word = parts[i];
                 if (word.length() > 0) {
                     word = word.substring(0, 1).toUpperCase() + word.substring(1);
@@ -98,7 +95,6 @@ public class Cheat {
                 return "Item name cannot be empty";
             }
             
-            // Try to get item from GameData
             Item item = GameData.getItem(itemNameStr, quantity);
             if (item != null) {
                 inventory.addItem(item, quantity);
@@ -114,14 +110,11 @@ public class Cheat {
         try {
             int minutes = Integer.parseInt(parts[2]);
             
-            // Add time
             gp.addMinutes(minutes);
             
-            // Check time for auto sleep trigger (2AM-5:59AM)
             SRC.TIME.Time currentTime = gp.getCurrentTime();
             int hour = currentTime.getHour();
             if (hour >= 2 && hour <= 5) {
-                // Trigger auto sleep if time is between 2:00-5:59 AM
                 player.getPlayerAction().checkAutomaticSleep();
             }
             
@@ -187,10 +180,8 @@ public class Cheat {
     
     private String gotoEndgame() {
         try {
-            // Set player gold to exactly 17,209
             player.setGold(17209);
             
-            // Set player married status to true
             player.setMarried(true);
             
             return "EndGame milestone achieved!\n" +

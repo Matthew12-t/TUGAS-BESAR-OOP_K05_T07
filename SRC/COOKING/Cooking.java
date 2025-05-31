@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 
-/**
- * Cooking mengelola semua resep dan logika cooking
- */
 public class Cooking {
     private static List<Recipe> recipes = new ArrayList<>();
     
@@ -15,9 +12,6 @@ public class Cooking {
         initializeRecipes();
     }
     
-    /**
-     * Initialize all cooking recipes
-     */
     private static void initializeRecipes() {
         // Fish n' Chips
         Recipe fishChips = new Recipe("Fish n' Chips", "Crispy fish with golden fries", 50);
@@ -94,19 +88,12 @@ public class Cooking {
         recipes.add(legendsSpakbor);
     }
     
-    /**
-     * Get all available recipes
-     * @return List of all recipes
-     */
+
     public static List<Recipe> getAllRecipes() {
         return new ArrayList<>(recipes);
     }
     
-    /**
-     * Get recipe by dish name
-     * @param dishName Name of the dish
-     * @return Recipe object or null if not found
-     */
+
     public static Recipe getRecipe(String dishName) {
         for (Recipe recipe : recipes) {
             if (recipe.getDishName().equals(dishName)) {
@@ -116,11 +103,7 @@ public class Cooking {
         return null;
     }
     
-    /**
-     * Check if player has enough fuel to cook
-     * @param playerInventory Player's inventory
-     * @return true if player has fuel
-     */
+
     public static boolean hasFuel(Map<String, Integer> playerInventory) {
         int firewood = playerInventory.getOrDefault("Wood", 0);
         int coal = playerInventory.getOrDefault("Coal", 0);
@@ -128,40 +111,29 @@ public class Cooking {
         return (firewood > 0 || coal > 0);
     }
     
-    /**
-     * Get total cooking capacity based on fuel
-     * @param playerInventory Player's inventory
-     * @return Number of dishes that can be cooked
-     */
+
     public static int getCookingCapacity(Map<String, Integer> playerInventory) {
         int firewood = playerInventory.getOrDefault("Wood", 0);
         int coal = playerInventory.getOrDefault("Coal", 0);
         
-        // 1 Firewood = 1 dish, 1 Coal = 2 dishes
         return firewood + (coal * 2);
     }
     
-    /**
-     * Consume fuel for cooking one dish
-     * @param playerInventory Player's inventory (will be modified)
-     * @return true if fuel was consumed successfully
-     */
+
     public static boolean consumeFuel(Map<String, Integer> playerInventory) {
-        // Priority: Use coal first (more efficient), then firewood
         int coal = playerInventory.getOrDefault("Coal", 0);
         int firewood = playerInventory.getOrDefault("Wood", 0);
         
         if (coal > 0) {
-            // Use coal - but we need to track partial usage
-            // For simplicity, let's consume 1 coal per cooking action
+
             playerInventory.put("Coal", coal - 1);
             return true;
         } else if (firewood > 0) {
-            // Use firewood
+
             playerInventory.put("Wood", firewood - 1);
             return true;
         }
         
-        return false; // No fuel available
+        return false; 
     }
 }

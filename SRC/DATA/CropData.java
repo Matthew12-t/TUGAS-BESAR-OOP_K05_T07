@@ -7,20 +7,13 @@ import javax.imageio.ImageIO;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Data class for managing all crop items with static initialization
- */
 public class CropData {
     private static Map<String, Crop> crops = new HashMap<>();
     
-    // Static initializer to load all crops
     static {
         initializeCrops();
     }
     
-    /**
-     * Initialize all crop items
-     */
     private static void initializeCrops() {
         crops.put("Parsnip", new Crop("Parsnip", 20, 50, 1));
         crops.put("Cauliflower", new Crop("Cauliflower", 150, 200, 1));
@@ -37,21 +30,12 @@ public class CropData {
         System.out.println("CropData: Initialized " + crops.size() + " crop types");
     }
     
-    /**
-     * Get a crop by name
-     * @param cropName Name of the crop
-     * @return Crop object or null if not found
-     */
+
     public static Crop getCrop(String cropName) {
         return crops.get(cropName);
     }
     
-    /**
-     * Add crop to inventory with specified quantity (returns the crop item)
-     * @param cropName Name of the crop to add
-     * @param quantity Quantity to add (for compatibility, not used in return)
-     * @return Crop item ready to be added to inventory
-     */
+
     public static Crop addCrop(String cropName, int quantity) {
         Crop crop = getCrop(cropName);
         if (crop != null) {
@@ -62,19 +46,11 @@ public class CropData {
         }
     }
     
-    /**
-     * Check if crop exists
-     * @param cropName Name of the crop
-     * @return true if crop exists
-     */
     public static boolean hasCrop(String cropName) {
         return crops.containsKey(cropName);
     }
     
-    /**
-     * Get all crops
-     * @return Map of all crops
-     */
+
     public static Map<String, Crop> getAllCrops() {
         return new HashMap<>(crops);
     }

@@ -11,19 +11,11 @@ import SRC.DATA.GameData;
 import SRC.ITEMS.Item;
 import java.awt.Graphics2D;
 
-/**
- * MayorTadiEntity - Represents the Mayor Tadi NPC in the game
- */
+
 public class MayorTadiEntity extends NPCEntity {
     private BufferedImage sprite;
     
-    /**
-     * Constructor for MayorTadiEntity
-     * 
-     * @param gp GamePanel reference
-     * @param worldX X position in the world
-     * @param worldY Y position in the world
-     */
+
     public MayorTadiEntity(GamePanel gp, int worldX, int worldY) {
         super(gp, worldX, worldY, "Mayor Tadi", "Mayor Tadi's House", 
               "Mayor Tadi adalah wali kota Spakbor Hills.");
@@ -32,9 +24,8 @@ public class MayorTadiEntity extends NPCEntity {
         
         loadSprite();
         setSpeed(0);
-    }    /**
-     * Set up Mayor Tadi's item preferences
-     */
+    }    
+
     private void setItemPreferences() {
         Set<String> lovedItemNames = Set.of("Legend");
         for (String itemName : lovedItemNames) {
@@ -50,7 +41,7 @@ public class MayorTadiEntity extends NPCEntity {
                 addLikedItem(item);
             }
         }
-        // Mayor Tadi membenci semua item yang bukan loved/liked
+
         Set<String> allItemNames = GameData.getAllItemNames();
         for (String itemName : allItemNames) {
             Item item = GameData.getItem(itemName, 1);
@@ -60,9 +51,7 @@ public class MayorTadiEntity extends NPCEntity {
         }
     }
     
-    /**
-     * Load Mayor Tadi's sprite from the file system
-     */
+
     private void loadSprite() {
         String[] pathsToTry = {
             "RES/ENTITY/NPC/mayortadi.png",
@@ -102,9 +91,7 @@ public class MayorTadiEntity extends NPCEntity {
         }
     }
     
-    /**
-     * Create a placeholder sprite when the image file can't be loaded
-     */
+
     private void createPlaceholderSprite() {
         System.out.println("Creating placeholder sprite for Mayor Tadi");
         
@@ -117,10 +104,7 @@ public class MayorTadiEntity extends NPCEntity {
         g.dispose();
     }
     
-    /**
-     * Update method for Mayor Tadi's behavior
-     * This will be called by the game loop
-     */
+
     public void update() {
         incrementSpriteCounter();
         
@@ -134,9 +118,7 @@ public class MayorTadiEntity extends NPCEntity {
         }
     }
     
-    /**
-     * Custom interaction method for Mayor Tadi
-     */
+
     @Override
     public void interact(Player player) {
         super.interact(player);
@@ -156,18 +138,13 @@ public class MayorTadiEntity extends NPCEntity {
         updateRelationshipStatus();
     }
     
-    /**
-     * Update relationship status based on heart points
-     */
+   
     private void updateRelationshipStatus() {
         if (getHeartPoints() < 100) {
             setRelationshipStatus("single");
         }
     }
-      /**
-     * Custom method to handle gift giving
-     * @param item the item being given
-     */
+
     @Override
     public String receiveGift(Item item) {
         String baseMsg = super.receiveGift(item);
@@ -183,11 +160,7 @@ public class MayorTadiEntity extends NPCEntity {
         }
     }
     
-    /**
-     * Get Mayor Tadi's sprite for rendering
-     * 
-     * @return The sprite image
-     */
+
     public BufferedImage getSprite() {
         if (sprite == null) {
             createPlaceholderSprite();
@@ -195,11 +168,7 @@ public class MayorTadiEntity extends NPCEntity {
         return sprite;
     }
     
-    /**
-     * Draw the Mayor Tadi NPC
-     * 
-     * @param g2 Graphics2D object used for drawing
-     */
+
     @Override
     public void draw(Graphics2D g2) {
         BufferedImage image = getSprite();

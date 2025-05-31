@@ -4,20 +4,16 @@ import SRC.ITEMS.Food;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Data class for managing all food items with static initialization
- */
+
 public class FoodData {
     private static Map<String, Food> foods = new HashMap<>();
     
-    // Static initializer to load all foods
+
     static {
         initializeFoods();
     }
     
-    /**
-     * Initialize all food items
-     */    
+ 
     private static void initializeFoods() {
         
         foods.put("Fish n' Chips", new Food("Fish n' Chips", 135, 150, 50)); 
@@ -35,21 +31,12 @@ public class FoodData {
         System.out.println("FoodData: Initialized " + foods.size() + " food types");
     }
     
-    /**
-     * Get a food by name
-     * @param foodName Name of the food
-     * @return Food object or null if not found
-     */
+
     public static Food getFood(String foodName) {
         return foods.get(foodName);
     }
     
-    /**
-     * Add food to inventory with specified quantity (returns the food item)
-     * @param foodName Name of the food to add
-     * @param quantity Quantity to add (for compatibility, not used in return)
-     * @return Food item ready to be added to inventory
-     */
+
     public static Food addFood(String foodName, int quantity) {
         Food food = getFood(foodName);
         if (food != null) {
@@ -60,19 +47,10 @@ public class FoodData {
         }
     }
     
-    /**
-     * Check if food exists
-     * @param foodName Name of the food
-     * @return true if food exists
-     */
     public static boolean hasFood(String foodName) {
         return foods.containsKey(foodName);
     }
-    
-    /**
-     * Get all foods
-     * @return Map of all foods
-     */
+
     public static Map<String, Food> getAllFoods() {
         return new HashMap<>(foods);
     }
