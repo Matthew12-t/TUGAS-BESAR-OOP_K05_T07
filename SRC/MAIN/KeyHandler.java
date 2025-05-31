@@ -29,6 +29,55 @@ public class KeyHandler implements KeyListener {
     public void keyPressed(KeyEvent e) {
         int code = e.getKeyCode();
         
+        // Handle menu states first
+        if (gamePanel != null) {
+            // Main Menu Navigation
+            if (gamePanel.getGameState() == GamePanel.MAIN_MENU_STATE) {
+                if (gamePanel.getMainMenu() != null) {
+                    gamePanel.getMainMenu().handleKeyPress(e);
+                }
+                return;
+            }
+            
+            // New Game UI Navigation
+            if (gamePanel.getGameState() == GamePanel.NEW_GAME_STATE) {
+                if (gamePanel.getNewGameUI() != null) {
+                    gamePanel.getNewGameUI().handleKeyPress(e);
+                }
+                return;
+            }
+            
+            // Load Game UI Navigation
+            if (gamePanel.getGameState() == GamePanel.LOAD_GAME_STATE) {
+                if (gamePanel.getLoadGameUI() != null) {
+                    gamePanel.getLoadGameUI().handleKeyPress(e);
+                }
+                return;
+            }
+              // Options UI Navigation
+            if (gamePanel.getGameState() == GamePanel.OPTIONS_STATE) {
+                if (gamePanel.getOptionsUI() != null) {
+                    gamePanel.getOptionsUI().handleKeyPress(e);
+                }
+                return;
+            }
+            
+            // Player Statistics UI Navigation
+            if (gamePanel.getGameState() == GamePanel.PLAYER_STATISTICS_STATE) {
+                if (code == KeyEvent.VK_ESCAPE) {
+                    gamePanel.setGameState(GamePanel.OPTIONS_STATE);
+                    System.out.println("ESC key pressed - returning from player statistics to options");
+                }
+                return;
+            }
+            
+            // ESC key to open options menu during gameplay
+            if (gamePanel.getGameState() == GamePanel.PLAY_STATE && code == KeyEvent.VK_ESCAPE) {
+                gamePanel.setGameState(GamePanel.OPTIONS_STATE);
+                return;
+            }
+        }
+        
         // Handle cheat activation with Ctrl+C
         if (gamePanel != null && e.isControlDown() && code == KeyEvent.VK_C) {
             gamePanel.toggleCheatConsole();
@@ -50,8 +99,7 @@ public class KeyHandler implements KeyListener {
                 }
                 return; // Don't process other keys during sleep
             }
-            
-            // Handle ENDGAME_STATE specially - only respond to Enter key
+              // Handle ENDGAME_STATE specially - only respond to Enter key
             if (gamePanel.getGameState() == GamePanel.ENDGAME_STATE) {
                 if (code == KeyEvent.VK_ENTER) {
                     System.out.println("DEBUG: Enter pressed in endgame state");
