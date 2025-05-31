@@ -17,10 +17,12 @@ Spakbor Hills adalah Stardew Valley yang disederhanakan. Game ini dibangun denga
 - Menu: New Game, Load, Help, Player Info, Statistics, Actions, Credits, Exit.
 
 🛠 **Dependensi** 🛠
-
+- JDK 23
+- Git
+- (Opsional) IDE: IntelliJ, VSCode
 
 🖥 **Cara Menggunakan** 🖥
-
-
-🎮 **Cara Bermain** 🎮
-
+1. Clone repository Github
+2. Masukkan perintah berikut: javac -cp . -d . SRC\MAIN\*.java SRC\ENTITY\*.java SRC\MAP\*.java SRC\MAP\NPC_HOUSE\*.java SRC\UI\*.java SRC\INVENTORY\*.java SRC\ITEMS\*.java SRC\SEASON\*.java SRC\WEATHER\*.java SRC\TIME\*.java SRC\DATA\*.java SRC\CHEAT\*.java SRC\ENDGAME\*.java SRC\MAIN\MENU\*.java SRC\SHIPPINGBIN\*.java
+3. Tunggu sampai kompilasi selesai lalu masukkan perintah berikut untuk bermain: javac -cp . SRC/MAIN/Main.java; java -cp . SRC.MAIN.Main
+4. Selamat menikmati ✨

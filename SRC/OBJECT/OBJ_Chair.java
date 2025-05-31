@@ -8,14 +8,14 @@ import SRC.MAIN.GamePanel;
 import java.awt.Graphics2D;
 
 public class OBJ_Chair extends SuperObject {
-    // Ukuran tempat tidur dalam jumlah tile
-    private int chairWidth = 1;  // Lebar kursi (jumlah kolom)
-    private int chairHeight = 1; // Tinggi kursi (jumlah baris)
+    
+    private int chairWidth = 1;  
+    private int chairHeight = 1; 
     private int mode = 1;
     public OBJ_Chair(GamePanel gp, int col, int row, int mode) {
         super(gp, col, row);
         setName("chair");
-        getPosition().setCollision(true); // Chair cannot be passed through
+        getPosition().setCollision(true); 
         this.mode = mode;
         try {
             BufferedImage image = ImageIO.read(getClass().getResourceAsStream("/RES/OBJECT/chair_" + mode + ".png"));
@@ -31,13 +31,13 @@ public class OBJ_Chair extends SuperObject {
         this(gp, col, row, 1);
     }
     public void draw(Graphics2D g2, GamePanel gp) {
-        // Hitung posisi layar berdasarkan posisi kamera
+        
         int worldX = getPosition().getWorldX();
         int worldY = getPosition().getWorldY();
         int screenX = worldX - gp.getCameraX();
         int screenY = worldY - gp.getCameraY();
 
-        // Hanya render jika objek berada dalam area layar yang terlihat
+        
         if(worldX + (chairWidth * gp.getTileSize()) > gp.getCameraX() &&
            worldX - gp.getTileSize() < gp.getCameraX() + gp.getScreenWidth() &&
            worldY + (chairHeight * gp.getTileSize()) > gp.getCameraY() &&

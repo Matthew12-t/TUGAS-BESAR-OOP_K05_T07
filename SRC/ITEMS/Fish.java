@@ -132,18 +132,8 @@ public class Fish extends Item implements Edible {
                 return 20;
         }
     }
-    
-    private static int calculateEnergyValue(String type) {
-        switch (type) {
-            case "Common":
-                return 15;
-            case "Regular":
-                return 25;
-            case "Legendary":
-                return 50;
-            default:
-                return 20;
-        }
+      private static int calculateEnergyValue(String type) {
+        return 1;
     }
 
 
@@ -219,10 +209,10 @@ public class Fish extends Item implements Edible {
     public int getEnergyValue() {
         return this.energy;
     }
-    
-    @Override
+      @Override
     public void consume(Player player) {
         player.setEnergy(player.getEnergy() + getEnergyValue());
+        System.out.println("You consumed " + this.getName() + " and gained " + getEnergyValue() + " energy!");
     }
 }
     

@@ -14,19 +14,16 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * SleepUI handles the display of sleep result screens
- */
+
 public class SleepUI {
     
-    // Sleep trigger types
+    
     public enum SleepTrigger {
-        MANUAL,     // Player pressed sleep key
-        LOW_ENERGY, // Energy <= 20
-        LATE_TIME   // Time = 02:00
+        MANUAL,     
+        LOW_ENERGY, 
+        LATE_TIME   
     }
     
-    // Sleep result data structure
     public static class SleepResult {
         private String message;
         private String backgroundImage;
@@ -47,7 +44,7 @@ public class SleepUI {
             this.trigger = trigger;
         }
         
-        // Getters
+        
         public String getMessage() { return message; }
         public String getBackgroundImage() { return backgroundImage; }
         public int getIncome() { return income; }
@@ -56,7 +53,7 @@ public class SleepUI {
         public Weather getWeather() { return weather; }
         public SleepTrigger getTrigger() { return trigger; }
         
-        // Setters
+        
         public void setMessage(String message) { this.message = message; }
         public void setBackgroundImage(String backgroundImage) { this.backgroundImage = backgroundImage; }
         public void setIncome(int income) { this.income = income; }
@@ -66,14 +63,14 @@ public class SleepUI {
         public void setTrigger(SleepTrigger trigger) { this.trigger = trigger; }
     }
     
-    // Sleep messages based on trigger type
+    
     private static final Map<SleepTrigger, String[]> SLEEP_MESSAGES = new HashMap<>();
     
-    // Background images for sleep screens
+    
     private static final Map<SleepTrigger, String> SLEEP_BACKGROUNDS = new HashMap<>();
     
     static {
-        // Initialize sleep messages
+        
         SLEEP_MESSAGES.put(SleepTrigger.MANUAL, new String[] {
             "You had a good night's rest!",
             "You slept peacefully through the night.",
@@ -98,7 +95,7 @@ public class SleepUI {
             "The late night finally claimed you and you fell asleep."
         });
         
-        // Initialize background images - semua menggunakan background yang sama
+        
         SLEEP_BACKGROUNDS.put(SleepTrigger.MANUAL, "RES/SLEEP/sleeping_Background.png");
         SLEEP_BACKGROUNDS.put(SleepTrigger.LOW_ENERGY, "RES/SLEEP/sleeping_Background.png");
         SLEEP_BACKGROUNDS.put(SleepTrigger.LATE_TIME, "RES/SLEEP/sleeping_Background.png");
@@ -110,10 +107,10 @@ public class SleepUI {
     private BufferedImage backgroundImage;
     private long displayStartTime;
     
-    // UI styling
+    
     private static final Color OVERLAY_COLOR = new Color(0, 0, 0, 150);
     private static final Color TEXT_COLOR = Color.WHITE;
-    private static final Color ACCENT_COLOR = new Color(255, 215, 0); // Gold color
+    private static final Color ACCENT_COLOR = new Color(255, 215, 0); 
     private static final Font TITLE_FONT = new Font("Arial", Font.BOLD, 24);
     private static final Font MESSAGE_FONT = new Font("Arial", Font.PLAIN, 18);
     private static final Font INFO_FONT = new Font("Arial", Font.PLAIN, 16);
@@ -131,7 +128,7 @@ public class SleepUI {
         this.isDisplaying = true;
         this.displayStartTime = System.currentTimeMillis();
         
-        // Load background image based on sleep trigger
+        
         loadBackgroundImage(sleepResult.getBackgroundImage());
         
         System.out.println("Displaying sleep result: " + sleepResult.getTrigger());
@@ -141,26 +138,26 @@ public class SleepUI {
      */
     private void loadBackgroundImage(String imagePath) {
         try {
-            // Prioritas menggunakan path langsung sebagai file
+            
             File imageFile = new File(imagePath);
             if (imageFile.exists()) {
                 backgroundImage = ImageIO.read(imageFile);
                 System.out.println("DEBUG: Sleep background image loaded from file: " + imagePath);
             } else {
-                // Coba sebagai resource
+                
                 backgroundImage = ImageIO.read(getClass().getResourceAsStream(imagePath));
                 if (backgroundImage == null) {
-                    // Fallback untuk backward compatibility
+                    
                     backgroundImage = ImageIO.read(new File("RES/SLEEP/sleeping_Background.png"));
                     System.out.println("DEBUG: Using fallback sleep background: RES/SLEEP/sleeping_Background.png");
                 }
             }
         } catch (IOException | IllegalArgumentException e) {
             System.err.println("Could not load sleep background image: " + imagePath + " - Error: " + e.getMessage());
-            // Create a simple colored background as fallback
+            
             backgroundImage = new BufferedImage(800, 600, BufferedImage.TYPE_INT_RGB);
             Graphics2D g = backgroundImage.createGraphics();
-            g.setColor(new Color(25, 25, 50)); // Dark blue background
+            g.setColor(new Color(25, 25, 50)); 
             g.fillRect(0, 0, 800, 600);
             g.dispose();
         }
@@ -173,7 +170,7 @@ public class SleepUI {
         if (isDisplaying) {
             isDisplaying = false;
             currentSleepResult = null;
-            // Resume normal game flow
+            
             gamePanel.setGameState(GamePanel.PLAY_STATE);
             System.out.println("Sleep screen closed by Enter key");
         }
@@ -190,21 +187,21 @@ public class SleepUI {
         int screenWidth = gamePanel.getScreenWidth();
         int screenHeight = gamePanel.getScreenHeight();
         
-        // Draw background image (scaled to screen)
+        
         if (backgroundImage != null) {
             g2.drawImage(backgroundImage, 0, 0, screenWidth, screenHeight, null);
         }
         
-        // Draw overlay for better text readability
+        
         g2.setColor(OVERLAY_COLOR);
         g2.fillRect(0, 0, screenWidth, screenHeight);
         
-        // Calculate text areas
+        
         int centerX = screenWidth / 2;
         int startY = screenHeight / 4;
         int lineHeight = 30;
         
-        // Draw sleep trigger-specific title
+        
         g2.setFont(TITLE_FONT);
         g2.setColor(ACCENT_COLOR);
         FontMetrics titleMetrics = g2.getFontMetrics();
@@ -213,7 +210,7 @@ public class SleepUI {
         int titleX = centerX - titleMetrics.stringWidth(title) / 2;
         g2.drawString(title, titleX, startY);
         
-        // Draw main sleep message
+        
         g2.setFont(MESSAGE_FONT);
         g2.setColor(TEXT_COLOR);
         FontMetrics messageMetrics = g2.getFontMetrics();
@@ -227,10 +224,10 @@ public class SleepUI {
             g2.drawString(line, lineX, messageY);
             messageY += lineHeight;
         }
-          // Draw game information box
+          
         drawInfoBox(g2, centerX, messageY + 40);
         
-        // Draw "Press Enter to continue" hint instead of progress bar
+        
         drawEnterHint(g2, screenWidth, screenHeight);
     }
       /**
@@ -257,15 +254,15 @@ public class SleepUI {
         int boxHeight = 120;
         int boxX = centerX - boxWidth / 2;
         
-        // Draw box background
+        
         g2.setColor(new Color(0, 0, 0, 180));
         g2.fillRoundRect(boxX, startY, boxWidth, boxHeight, 10, 10);
         
-        // Draw box border
+        
         g2.setColor(ACCENT_COLOR);
         g2.drawRoundRect(boxX, startY, boxWidth, boxHeight, 10, 10);
         
-        // Draw information text
+        
         g2.setFont(INFO_FONT);
         g2.setColor(TEXT_COLOR);
         
@@ -276,7 +273,7 @@ public class SleepUI {
         g2.drawString("Day: " + currentSleepResult.getDay(), textX, textY);
         g2.drawString("Season: " + currentSleepResult.getSeason().toString(), textX, textY + lineSpacing);
         g2.drawString("Weather: " + currentSleepResult.getWeather().toString(), textX, textY + lineSpacing * 2);
-          // Draw income with special formatting
+          
         g2.setColor(ACCENT_COLOR);
         g2.drawString("Shipping Income: " + currentSleepResult.getIncome() + " coins", textX, textY + lineSpacing * 3);
     }
@@ -334,7 +331,7 @@ public class SleepUI {
         currentSleepResult = null;
     }
     
-    // Static methods for compatibility with existing code
+    
     
     /**
      * Get random sleep message based on trigger type
@@ -358,27 +355,27 @@ public class SleepUI {
      * Calculate daily income based on game progress
      */
     public static int calculateDailyIncome(int day, Season season) {
-        // Base income starts at 100 and increases with day progression
+        
         int baseIncome = 100;
-        int dayMultiplier = day / 7; // Every week increases income
+        int dayMultiplier = day / 7; 
         int seasonBonus = 0;
         
-        // Season-based income bonus
+        
         switch (season) {
             case SPRING:
-                seasonBonus = 50; // Good growing season
+                seasonBonus = 50; 
                 break;
             case SUMMER:
-                seasonBonus = 75; // Peak growing season
+                seasonBonus = 75; 
                 break;
             case FALL:
-                seasonBonus = 100; // Harvest season
+                seasonBonus = 100; 
                 break;
             case WINTER:
-                seasonBonus = 25; // Slow season
+                seasonBonus = 25; 
                 break;
             case ANY:
-                seasonBonus = 60; // Average season bonus
+                seasonBonus = 60; 
                 break;
         }
         
@@ -388,7 +385,7 @@ public class SleepUI {
      * Calculate total income including shipping bin earnings
      */
     public static int calculateTotalIncome(int day, Season season, int shippingBinValue) {
-        // Removed daily income - player only gets gold from shipping bin
+        
         return shippingBinValue;
     }
       /**
@@ -398,7 +395,7 @@ public class SleepUI {
                                               Season season, Weather weather) {
         String message = getSleepMessage(trigger);
         String background = getSleepBackground(trigger);
-        int income = 0; // No daily income - only shipping bin income
+        int income = 0; 
         
         return new SleepResult(message, background, income, day, season, weather, trigger);
     }

@@ -31,7 +31,7 @@ public class StoreUI {
     
     private int selectedStoreSlot = 0;
     private int selectedInventorySlot = 0;
-    private boolean selectingStore = true; // true=store, false=inventory
+    private boolean selectingStore = true; 
     
     private BufferedImage backgroundImage;
     private Rectangle buyButton;
@@ -227,16 +227,16 @@ public class StoreUI {
     }
     
     private void drawButtons(Graphics2D g2) {
-        // Buy button
-        g2.setColor(new Color(34, 139, 34)); // Forest green
+        
+        g2.setColor(new Color(34, 139, 34)); 
         g2.fillRect(buyButton.x, buyButton.y, buyButton.width, buyButton.height);
         g2.setColor(Color.WHITE);
         g2.drawRect(buyButton.x, buyButton.y, buyButton.width, buyButton.height);
         g2.setFont(new Font("Arial", Font.BOLD, 14));
         g2.drawString("Buy", buyButton.x + 35, buyButton.y + 25);
         
-        // Exit button
-        g2.setColor(new Color(178, 34, 34)); // Fire brick red
+        
+        g2.setColor(new Color(178, 34, 34)); 
         g2.fillRect(exitButton.x, exitButton.y, exitButton.width, exitButton.height);
         g2.setColor(Color.WHITE);
         g2.drawRect(exitButton.x, exitButton.y, exitButton.width, exitButton.height);
@@ -340,7 +340,7 @@ public class StoreUI {
     
     public void changeCategory(int direction) {
         currentCategory = (currentCategory + direction + categoryNames.length) % categoryNames.length;
-        selectedStoreSlot = 0; // Reset selection when changing category
+        selectedStoreSlot = 0; 
     }
     
     public void buySelectedItem() {
@@ -351,7 +351,7 @@ public class StoreUI {
         
         Item item = currentItems.get(selectedStoreSlot);
         
-        // Use the new simplified store system to purchase item
+        
         if (store.purchaseItem(item, 1, player)) {
             System.out.println("Bought " + item.getName() + " for $" + store.getBuyPrice(item));
         } else {
@@ -374,7 +374,7 @@ public class StoreUI {
         } else if (nextCategoryButton.contains(mouseX, mouseY)) {
             changeCategory(1);
         } else {
-            // Check if clicking on store slots or inventory slots
+            
             handleStoreSlotClick(mouseX, mouseY);
             handleInventorySlotClick(mouseX, mouseY);
         }
@@ -383,19 +383,19 @@ public class StoreUI {
     private void handleStoreSlotClick(int mouseX, int mouseY) {
         if (backgroundImage == null) return;
         
-        // Calculate positions for scaled image
+        
         int scaledWidth = backgroundImage.getWidth() * imageScale;
         int scaledHeight = backgroundImage.getHeight() * imageScale;
         int baseX = (gp.getScreenWidth() - scaledWidth) / 2;
         int baseY = (gp.getScreenHeight() - scaledHeight) / 2 - 20;
         
-        // Calculate store area (left side)
+        
         int storeAreaX = baseX + (int)(scaledWidth * 0.05);
         int storeAreaY = baseY + (int)(scaledHeight * 0.15);
         int storeAreaWidth = (int)(scaledWidth * 0.35);
         int storeAreaHeight = (int)(scaledHeight * 0.70);
         
-        // Calculate slot positions
+        
         int slotSpacing = 2;
         int totalSlotsWidth = (storeCols * slotSize) + ((storeCols - 1) * slotSpacing);
         int totalSlotsHeight = (storeRows * slotSize) + ((storeRows - 1) * slotSpacing);
@@ -426,19 +426,19 @@ public class StoreUI {
     private void handleInventorySlotClick(int mouseX, int mouseY) {
         if (backgroundImage == null) return;
         
-        // Calculate positions for scaled image
+        
         int scaledWidth = backgroundImage.getWidth() * imageScale;
         int scaledHeight = backgroundImage.getHeight() * imageScale;
         int baseX = (gp.getScreenWidth() - scaledWidth) / 2;
         int baseY = (gp.getScreenHeight() - scaledHeight) / 2 - 20;
         
-        // Calculate inventory area (right side)
+        
         int inventoryAreaX = baseX + (int)(scaledWidth * 0.60);
         int inventoryAreaY = baseY + (int)(scaledHeight * 0.15);
         int inventoryAreaWidth = (int)(scaledWidth * 0.35);
         int inventoryAreaHeight = (int)(scaledHeight * 0.70);
         
-        // Calculate slot positions
+        
         int slotSpacing = 2;
         int totalSlotsWidth = (inventoryCols * slotSize) + ((inventoryCols - 1) * slotSpacing);
         int totalSlotsHeight = (inventoryRows * slotSize) + ((inventoryRows - 1) * slotSpacing);
