@@ -192,12 +192,7 @@ public class KeyHandler implements KeyListener {
                         System.out.println("House placement mode: " + (!isPlacing ? "ON" : "OFF"));
                     }
                 }
-                
-                // Harvesting with 'H' key
-                if(code == KeyEvent.VK_H) {
-                    System.out.println("DEBUG: 'H' key pressed for harvesting");
-                    gamePanel.getPlayer().getPlayerAction().performHarvesting();
-                }
+  
                   // Remove object under cursor
                 if(code == KeyEvent.VK_DELETE || code == KeyEvent.VK_BACK_SPACE) {
                     if (gamePanel.getMouseHandler().isHasTarget()) {
@@ -222,26 +217,36 @@ public class KeyHandler implements KeyListener {
                         gamePanel.setGameState(GamePanel.STORE_STATE);
                     } else if (gamePanel.getPlayer().getPlayerAction().isPlayerNearShippingBin()) {
                         System.out.println("DEBUG: 'C' key pressed for shipping bin");
-                        gamePanel.setGameState(GamePanel.SHIPPING_STATE);
-                    } else if (gamePanel.getPlayer().getPlayerAction().isPlayerNearTV()) {
+                        gamePanel.setGameState(GamePanel.SHIPPING_STATE);                    } else if (gamePanel.getPlayer().getPlayerAction().isPlayerNearTV()) {
                         System.out.println("DEBUG: 'C' key pressed for TV watching (near TV)");
                         gamePanel.getPlayer().getPlayerAction().performWatchTV();
-                      } else if (gamePanel.getCurrentMap().getMapName().equals("Farm Map") && 
-                               gamePanel.getPlayer().isHolding("Watering Can")) {
-                        System.out.println("DEBUG: 'C' key pressed for watering (holding watering can in farm map)");
-                        gamePanel.getPlayer().getPlayerAction().performWatering();
-                    } else if (gamePanel.getCurrentMap().getMapName().equals("Farm Map") && 
-                               gamePanel.getPlayer().isHoldingAnySeed()) {
-                        System.out.println("DEBUG: 'C' key pressed for planting (holding seeds in farm map)");
-                        gamePanel.getPlayer().getPlayerAction().performPlanting();
-                    } else if (gamePanel.getCurrentMap().getMapName().equals("Farm Map") && 
-                               gamePanel.getPlayer().isHolding("Hoe")) {
-                        System.out.println("DEBUG: 'C' key pressed for tilling (holding hoe in farm map)");
-                        gamePanel.getPlayer().getPlayerAction().performTilling();
-                    } else if (gamePanel.getCurrentMap().getMapName().equals("Farm Map") && 
-                               gamePanel.getPlayer().isHolding("Pickaxe")) {
-                        System.out.println("DEBUG: 'C' key pressed for land recovery (holding pickaxe in farm map)");
-                        gamePanel.getPlayer().getPlayerAction().performLandRecovery();
+                    } else if (gamePanel.getCurrentMap().getMapName().equals("Farm Map")) {
+                        // Farm Map - check for harvesting first, then other farming actions
+                        // Check if there's a ready crop to harvest at player's position
+                        int tileSize = gamePanel.getTileSize();
+                        int playerCol = (gamePanel.getPlayer().getWorldX() + gamePanel.getPlayer().getPlayerVisualWidth() / 2) / tileSize;
+                        int playerRow = (gamePanel.getPlayer().getWorldY() + gamePanel.getPlayer().getPlayerVisualHeight() / 2) / tileSize;
+                        
+                        if (gamePanel.getTileManager().hasPlantAt(playerCol, playerRow) && 
+                            gamePanel.getTileManager().isPlantReadyToHarvest(playerCol, playerRow)) {
+                            System.out.println("DEBUG: 'C' key pressed for harvesting (ready crop at player position)");
+                            gamePanel.getPlayer().getPlayerAction().performHarvesting();
+                        } else if (gamePanel.getPlayer().isHolding("Watering Can")) {
+                            System.out.println("DEBUG: 'C' key pressed for watering (holding watering can in farm map)");
+                            gamePanel.getPlayer().getPlayerAction().performWatering();
+                        } else if (gamePanel.getPlayer().isHoldingAnySeed()) {
+                            System.out.println("DEBUG: 'C' key pressed for planting (holding seeds in farm map)");
+                            gamePanel.getPlayer().getPlayerAction().performPlanting();
+                        } else if (gamePanel.getPlayer().isHolding("Hoe")) {
+                            System.out.println("DEBUG: 'C' key pressed for tilling (holding hoe in farm map)");
+                            gamePanel.getPlayer().getPlayerAction().performTilling();
+                        } else if (gamePanel.getPlayer().isHolding("Pickaxe")) {
+                            System.out.println("DEBUG: 'C' key pressed for land recovery (holding pickaxe in farm map)");
+                            gamePanel.getPlayer().getPlayerAction().performLandRecovery();
+                        } else {
+                            System.out.println("DEBUG: 'C' key pressed for fishing (no specific farm action available)");
+                            gamePanel.getPlayer().getPlayerAction().performFishing();
+                        };
                     } else {
                         System.out.println("DEBUG: 'C' key pressed for fishing");
                         gamePanel.getPlayer().getPlayerAction().performFishing();
