@@ -20,7 +20,7 @@ public class SeedData {
      */
     private static void initializeSeeds() {
        
-        seeds.put("Parsnip Seed", new Seed("Parsnip Seed", 10, 20, "Spring", 1)); // Sell Price: Setengah dari Buy Price
+        seeds.put("Parsnip Seed", new Seed("Parsnip Seed", 10, 20, "Spring", 1)); 
         seeds.put("Cauliflower Seed", new Seed("Cauliflower Seed", 40, 80, "Spring", 5)); 
         seeds.put("Potato Seed", new Seed("Potato Seed", 25, 50, "Spring", 3));
         seeds.put("Wheat Seed", new Seed("Wheat Seed", 30, 60, "Spring", 1));
