@@ -491,9 +491,41 @@ public class GamePanel extends JPanel implements Runnable {
     public Map getPerryHouseMap() {
         return perryHouseMap;
     }
-    
-    public Map getStoreMap() {
+      public Map getStoreMap() {
         return storeMap;
+    }
+    
+    /**
+     * Generate a random farm map file path for new games
+     * @return Path to a randomly selected farm map file
+     */
+    public String getRandomFarmMapPath() {
+        String[] farmMaps = {
+            "RES/MAP_TXT/farmmap.txt",
+            "RES/MAP_TXT/farmmap1.txt", 
+            "RES/MAP_TXT/farmmap2.txt",
+            "RES/MAP_TXT/farmmap3.txt",
+            "RES/MAP_TXT/farmmap4.txt"
+        };
+        
+        java.util.Random random = new java.util.Random();
+        int randomIndex = random.nextInt(farmMaps.length);
+        
+        System.out.println("Selected farm map: " + farmMaps[randomIndex]);
+        return farmMaps[randomIndex];
+    }
+      /**
+     * Initialize farm map with a specific map file (for new games with randomization)
+     * @param mapFilePath The path to the farm map file to load
+     */
+    public void initializeRandomizedFarmMap(String mapFilePath) {
+        this.farmMap = new FarmMap(this, mapFilePath);
+        // Reset initialization flag so objects get set up when player first enters farm
+        this.isInitializedFarmMap = false;
+        if (currentMap == farmMap) {
+            this.farmMap.setupInitialObjects();
+            this.isInitializedFarmMap = true;
+        }
     }
     
     /**
@@ -750,18 +782,18 @@ public class GamePanel extends JPanel implements Runnable {
                 }
                 FarmMap farmMapRef = (FarmMap) farmMap;
                 player.setWorldX(tileSize * (farmMapRef.getDepanRumahCol() +1));
-                player.setWorldY(tileSize * (farmMapRef.getDepanRumahRow()+ 1));
-            } else {
+                player.setWorldY(tileSize * (farmMapRef.getDepanRumahRow()+ 1));            } else {
                 switchMap(farmMap);
                 if (!isInitializedFarmMap) {
                     farmMap.setupInitialObjects();
                     isInitializedFarmMap = true;
                 }
-                // Pindahkan player ke posisi default masuk dari world
-                player.setWorldX(tileSize * (30));
-                player.setWorldY(tileSize * (10)); // Kolom 30, baris 30
-                // Y tetap
-            }          
+                // Use dynamic positioning based on world map teleport tile location
+                FarmMap farmMapRef = (FarmMap) farmMap;
+                int[] spawnPos = farmMapRef.getWorldMapSpawnPosition();
+                player.setWorldX(tileSize * spawnPos[0]);
+                player.setWorldY(tileSize * spawnPos[1]);
+            }
         } else if (targetMapName.equals("Forest River Map")) {
             switchMap(forestrivermap);
             if (!isInitializedWorldMap) {

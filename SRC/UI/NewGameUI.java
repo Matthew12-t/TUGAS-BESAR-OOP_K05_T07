@@ -344,12 +344,15 @@ public class NewGameUI {
         if (farmName.trim().isEmpty()) {
             farmName = playerName + "'s Farm";
         }
-        
-        // Set player data and start game
+          // Set player data and start game
         gamePanel.getPlayer().setPlayerName(playerName);
         gamePanel.getPlayer().setFarmName(farmName);
         gamePanel.getPlayer().setGender(gender);
         gamePanel.getPlayer().setFavoriteItem(favoriteItem);
+        
+        // Initialize farm map with random layout for new game
+        String randomMapPath = gamePanel.getRandomFarmMapPath();
+        gamePanel.initializeRandomizedFarmMap(randomMapPath);
         
         // Reset to initial state and start game
         resetFields();

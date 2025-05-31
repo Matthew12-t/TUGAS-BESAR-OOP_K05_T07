@@ -10,10 +10,10 @@ import SRC.TILES.Tile;
 public class FarmMap extends Map {
     // Size of the farm (smaller than the world map)
     public static final int FARM_COLS = 32;
-    public static final int FARM_ROWS = 32;
-    
-    // Farmland tracking
+    public static final int FARM_ROWS = 32;    // Farmland tracking
     private boolean[][] tilled; // Tracks which tiles are tilled/farmable
+    private boolean mapLoadedSuccessfully = false; // Track if map loaded successfully
+    private String currentMapFilePath; // Store the path of the currently loaded map file
     
     // Object deployer for placing objects on the map
     private ObjectDeployer objDeployer;
@@ -22,20 +22,36 @@ public class FarmMap extends Map {
     private int teleportToHouseCol = -2;
     private int teleportToHouseRow = -2;
     // Koordinat depan rumah (untuk spawn setelah keluar dari HouseMap)
-    private int depanRumahCol = -1;
-    private int depanRumahRow = -1;
+    private int depanRumahCol = -1;    private int depanRumahRow = -1;
     private boolean foundHouse = false;
 
-    boolean loadSuccess = loadMapFromFile("RES/MAP_TXT/farmmap.txt");
-    
     /**
-     * Constructor for the FarmMap
+     * Constructor for the FarmMap with default map file
      * @param gp GamePanel reference
      */
     public FarmMap(GamePanel gp) {
+        this(gp, "RES/MAP_TXT/farmmap.txt");
+    }
+    
+    /**
+     * Constructor for the FarmMap with specified map file
+     * @param gp GamePanel reference
+     * @param mapFilePath Path to the map txt file to load
+     */    public FarmMap(GamePanel gp, String mapFilePath) {
         super(gp, "Farm Map", FARM_COLS, FARM_ROWS, 10);
         tilled = new boolean[FARM_COLS][FARM_ROWS];
         objDeployer = new ObjectDeployer(gp);
+        
+        this.currentMapFilePath = mapFilePath; // Store the map file path
+        boolean loadSuccess = loadMapFromFile(mapFilePath);
+        this.mapLoadedSuccessfully = loadSuccess;
+        if (!loadSuccess) {
+            System.err.println("Failed to load farm map from: " + mapFilePath);
+            // Fallback to default map if loading fails
+            this.currentMapFilePath = "RES/MAP_TXT/farmmap.txt";
+            loadSuccess = loadMapFromFile("RES/MAP_TXT/farmmap.txt");
+            this.mapLoadedSuccessfully = loadSuccess;
+        }
     }
     
     /**
@@ -57,12 +73,11 @@ public class FarmMap extends Map {
     
     /**
      * Set up initial objects in the farm map based on farmmap.txt
-     */
-    @Override
+     */    @Override
     public void setupInitialObjects() {
         // Jika file berhasil dimuat, gunakan data dari file
-        if (loadSuccess) {
-            System.out.println("Setting up objects from farmmap.txt...");
+        if (mapLoadedSuccessfully) {
+            System.out.println("Setting up objects from farm map file...");
 
             // Cari posisi house (h) di file
             for (int row = 0; row < FARM_ROWS; row++) {
@@ -78,10 +93,8 @@ public class FarmMap extends Map {
                     }
                     if (tileValue == 0) {
                         setTileInMap(col, row, Tile.TILE_LAND); // Set sebagai land tile
-                    }
-
-                    // Periksa karakter dari file asli
-                    char mapChar = super.getMapFileChar(col, row, "RES/MAP_TXT/farmmap.txt");
+                    }                    // Periksa karakter dari file asli
+                    char mapChar = super.getMapFileChar(col, row, currentMapFilePath);
 
                     // Di dalam metode setupInitialObjects()
                     if (mapChar == 'h' && !foundHouse) {
@@ -108,7 +121,6 @@ public class FarmMap extends Map {
                         depanRumahCol = teleportToHouseCol;
                         depanRumahRow = teleportToHouseRow ; // Satu tile di bawah teleport
                     } else if (mapChar == 'h') {
-                        // Untuk 'h' berikutnya, hanya deploy house tanpa mengatur teleport
                         objDeployer.deployHouse(col, row);
                     } 
                     else if (mapChar == 's') {
@@ -118,10 +130,9 @@ public class FarmMap extends Map {
                             objDeployer.deployPond(col, row);                    
                     } else if (mapChar == 't') {
                         // Set tile sebagai tillable land
-                        setTileInMap(col, row, Tile.TILE_TILLABLE);
-                    } else if (mapChar == 'o') {
+                        setTileInMap(col, row, Tile.TILE_TILLABLE);                    } else if (mapChar == 'o') {
                         // Get the full value to check for tree modes (o1, o2, etc.)
-                        String mapValue = super.getMapFileValue(col, row, "RES/MAP_TXT/farmmap.txt");
+                        String mapValue = super.getMapFileValue(col, row, currentMapFilePath);
                         
                         if (mapValue.length() > 1 && mapValue.charAt(0) == 'o' && Character.isDigit(mapValue.charAt(1))) {
                             // Tree with mode (o1, o2, etc.)
@@ -181,9 +192,35 @@ public class FarmMap extends Map {
 
     public int getDepanRumahCol() {
         return depanRumahCol;
-    }
-
-    public int getDepanRumahRow() {
+    }    public int getDepanRumahRow() {
         return depanRumahRow;
+    }
+      /**
+     * Find the teleport tile position that leads to world map (should be at x=31)
+     * @return int array with [col, row] coordinates, or [-1, -1] if not found
+     */
+    public int[] getWorldMapTeleportPosition() {
+        // Look for teleport tile at column 31 (world map teleport)
+        for (int row = 0; row < FARM_ROWS; row++) {
+            int tileType = getTile(31, row);
+            if (tileType == Tile.TILE_TELEPORT) {
+                return new int[]{31, row};
+            }
+        }
+        return new int[]{-1, -1}; // Not found
+    }
+    
+    /**
+     * Get the spawn position when coming from world map (left side of world map teleport at x=30)
+     * @return int array with [col, row] coordinates for player spawn
+     */
+    public int[] getWorldMapSpawnPosition() {
+        int[] teleportPos = getWorldMapTeleportPosition();
+        if (teleportPos[0] != -1 && teleportPos[1] != -1) {
+            // Place player to the left of the world map teleport tile (x=30)
+            return new int[]{30, teleportPos[1]};
+        }
+        // Fallback to default position if teleport not found
+        return new int[]{30, 10}; // Default position at x=30, y=10
     }
 }
