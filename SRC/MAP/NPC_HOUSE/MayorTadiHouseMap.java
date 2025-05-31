@@ -6,42 +6,29 @@ import SRC.MAIN.GamePanel;
 import SRC.ENTITY.MayorTadiEntity;
 import SRC.ENTITY.NPCEntity;
 
-/**
- * Mayor Tadi's House Map - A 12x12 NPC house
- */
+
 public class MayorTadiHouseMap extends NPCHouseMap {
     
     private ArrayList<NPCEntity> npcs;
-    
-    /**
-     * Constructor for MayorTadiHouseMap
-     * @param gp GamePanel reference
-     */
+
     public MayorTadiHouseMap(GamePanel gp) {
         super(gp, "Mayor Tadi's House");
         
         npcs = new ArrayList<>();
     }
     
-    /**
-     * Initialize the map with tiles from mayortadihousemap.txt
-     */
+
     @Override
     protected void initializeMap() {
         initializeFromFile("mayortadihousemap.txt");
     }
-      /**
-     * Set up initial objects in Mayor Tadi's house
-     */
+
     @Override
     public void setupInitialObjects() {
         setupObjectsFromFile("mayortadihousemap.txt");
     }
     
-    /**
-     * Override setupObjectsFromFile to handle NPC placement (character 'n')
-     * @param mapFileName The txt file to read objects from
-     */
+
     @Override
     protected void setupObjectsFromFile(String mapFileName) {
         super.setupObjectsFromFile(mapFileName);
@@ -68,10 +55,7 @@ public class MayorTadiHouseMap extends NPCHouseMap {
         }
     }
     
-    /**
-     * Override draw method to render NPCs in addition to tiles and objects
-     * @param g2 Graphics2D object for drawing
-     */
+
     @Override
     public void draw(Graphics2D g2) {
         super.draw(g2);
@@ -81,27 +65,19 @@ public class MayorTadiHouseMap extends NPCHouseMap {
         }
     }
     
-    /**
-     * Update NPCs behavior
-     */
+  
     public void updateNPCs() {
         for (NPCEntity npc : npcs) {
             npc.update();
         }
     }
     
-    /**
-     * Get the list of NPCs in this house
-     * @return ArrayList of NPCs
-     */
+ 
     public ArrayList<NPCEntity> getNPCs() {
         return npcs;
     }
     
-    /**
-     * Ensure NPCs are placed in visible camera area
-     * Call this after initializing NPCs and centering camera
-     */
+ 
     public void ensureNPCsVisible() {
         int cameraX = gp.getCameraX();
         int cameraY = gp.getCameraY();

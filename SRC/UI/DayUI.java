@@ -14,8 +14,8 @@ public class DayUI {
     private int screenHeight;
     private ClockUI clockUI;
     
-    // UI styling constants
-    private static final Color DAY_BACKGROUND_COLOR = new Color(206, 156, 95); // Semi-transparent black
+    
+    private static final Color DAY_BACKGROUND_COLOR = new Color(206, 156, 95); 
     private static final Color DAY_BORDER_COLOR = new Color(51, 34, 17);
     private static final Color DAY_TEXT_COLOR = Color.WHITE;
     private static final Font DAY_FONT = new Font("Arial", Font.BOLD, 16);
@@ -37,39 +37,39 @@ public class DayUI {
      * @param g2 Graphics2D object to draw with
      */
     public void drawDayInfo(Graphics2D g2) {
-        // Get current day from ClockUI
+        
         int currentDay = clockUI.getCurrentDay();
         String dayText = "Day: " + currentDay;
         
-        // Set font and get metrics
+        
         g2.setFont(DAY_FONT);
         FontMetrics fm = g2.getFontMetrics();
         
-        // Calculate text dimensions
+        
         int textWidth = fm.stringWidth(dayText);
         int textHeight = fm.getHeight();
         
-        // Position below the clock (clock is 128x128 pixels at top-right)
+        
         int clockWidth = 128;
         int clockX = screenWidth - clockWidth - 10;
         int clockY = 10;
         int clockHeight = 128;
         
-        // Day UI positioning - centered below clock with some spacing
-        int dayBoxWidth = textWidth + 20; // Add padding
-        int dayBoxHeight = textHeight + 10; // Add padding
-        int dayBoxX = clockX + (clockWidth - dayBoxWidth) / 2; // Center horizontally with clock
-        int dayBoxY = clockY + clockHeight -10; // 10px gap below clock
         
-        // Draw background box
+        int dayBoxWidth = textWidth + 20; 
+        int dayBoxHeight = textHeight + 10; 
+        int dayBoxX = clockX + (clockWidth - dayBoxWidth) / 2; 
+        int dayBoxY = clockY + clockHeight -10; 
+        
+        
         g2.setColor(DAY_BACKGROUND_COLOR);
         g2.fillRoundRect(dayBoxX, dayBoxY, dayBoxWidth, dayBoxHeight, 8, 8);
         
-        // Draw border
+        
         g2.setColor(DAY_BORDER_COLOR);
         g2.drawRoundRect(dayBoxX, dayBoxY, dayBoxWidth, dayBoxHeight, 8, 8);
         
-        // Draw day text centered in the box
+        
         g2.setColor(DAY_TEXT_COLOR);
         int textX = dayBoxX + (dayBoxWidth - textWidth) / 2;
         int textY = dayBoxY + (dayBoxHeight + fm.getAscent()) / 2 - 2;

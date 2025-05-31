@@ -670,36 +670,19 @@ public class Player extends Entity {
         System.out.println("Player is now holding: " + (tool != null ? tool.getName() : "nothing"));
     }
     
-    /**
-     * Check if player is holding a specific tool
-     * @param toolName Name of the tool to check
-     * @return true if holding the specified tool
-     */
-    public boolean isHolding(String toolName) {
+        public boolean isHolding(String toolName) {
         return currentHoldingTool != null && currentHoldingTool.getName().equals(toolName);
     }
     
-    /**
-     * Check if player is holding any tool
-     * @return true if holding any tool
-     */
-    public boolean isHoldingAnyTool() {
+        public boolean isHoldingAnyTool() {
         return currentHoldingTool != null;
     }
     
     
-    /**
-     * Get currently holding seed
-     * @return Current holding seed or null if none
-     */
-    public SRC.ITEMS.Seed getCurrentHoldingSeed() {
+        public SRC.ITEMS.Seed getCurrentHoldingSeed() {
         return currentHoldingSeed;
     }
-      /**
-     * Set currently holding seed
-     * @param seed Seed to hold
-     */
-    public void setCurrentHoldingSeed(SRC.ITEMS.Seed seed) {
+          public void setCurrentHoldingSeed(SRC.ITEMS.Seed seed) {
         
         if (seed != null && this.currentHoldingTool != null) {
             this.currentHoldingTool = null;
@@ -710,28 +693,15 @@ public class Player extends Entity {
         System.out.println("Player is now holding seed: " + (seed != null ? seed.getName() : "nothing"));
     }
     
-    /**
-     * Check if player is holding a specific seed
-     * @param seedName Name of the seed to check
-     * @return true if holding the specified seed
-     */
-    public boolean isHoldingSeed(String seedName) {
+        public boolean isHoldingSeed(String seedName) {
         return currentHoldingSeed != null && currentHoldingSeed.getName().equals(seedName);
     }
     
-    /**
-     * Check if player is holding any seed
-     * @return true if holding any seed
-     */
-    public boolean isHoldingAnySeed() {
+        public boolean isHoldingAnySeed() {
         return currentHoldingSeed != null;
     }
     
-    /**
-     * Get the currently held item (for seed detection in planting logic)
-     * @return Item currently selected in inventory, or null if none selected
-     */
-    public Item getCurrentlyHeldItem() {
+        public Item getCurrentlyHeldItem() {
         int selectedSlotIndex = gp.getMouseHandler().getSelectedSlotIndex();
         if (selectedSlotIndex >= 0) {
             Item[] items = getInventoryItems();

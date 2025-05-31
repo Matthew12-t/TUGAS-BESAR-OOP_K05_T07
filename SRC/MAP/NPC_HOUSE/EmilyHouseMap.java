@@ -6,44 +6,32 @@ import SRC.MAIN.GamePanel;
 import SRC.ENTITY.EmilyEntity;
 import SRC.ENTITY.NPCEntity;
 
-/**
- * Emily's House Map - A 12x12 NPC house
- */
+
 public class EmilyHouseMap extends NPCHouseMap {
     
-    // List to store NPCs in this house
+
     private ArrayList<NPCEntity> npcs;
     
-    /**
-     * Constructor for EmilyHouseMap
-     * @param gp GamePanel reference
-     */
+
     public EmilyHouseMap(GamePanel gp) {
         super(gp, "Emily's House");
         
-        // Initialize NPC list
+
         npcs = new ArrayList<>();
     }
     
-    /**
-     * Initialize the map with tiles from emilyhousemap.txt
-     */
+
     @Override
     protected void initializeMap() {
         initializeFromFile("emilyhousemap.txt");
     }
-      /**
-     * Set up initial objects in Emily's house
-     */
+
     @Override
     public void setupInitialObjects() {
         setupObjectsFromFile("emilyhousemap.txt");
     }
     
-    /**
-     * Override setupObjectsFromFile to handle NPC placement (character 'n')
-     * @param mapFileName The txt file to read objects from
-     */
+
     @Override
     protected void setupObjectsFromFile(String mapFileName) {
         super.setupObjectsFromFile(mapFileName);
@@ -72,42 +60,29 @@ public class EmilyHouseMap extends NPCHouseMap {
         }
     }
     
-    /**
-     * Override draw method to render NPCs in addition to tiles and objects
-     * @param g2 Graphics2D object for drawing
-     */
+
     @Override
     public void draw(Graphics2D g2) {
-        // Call parent draw method to render tiles and objects
         super.draw(g2);
         
-        // Draw NPCs on top
         for (NPCEntity npc : npcs) {
             npc.draw(g2);
         }
     }
     
-    /**
-     * Update NPCs behavior
-     */
+
     public void updateNPCs() {
         for (NPCEntity npc : npcs) {
             npc.update();
         }
     }
     
-    /**
-     * Get the list of NPCs in this house
-     * @return ArrayList of NPCs
-     */
+
     public ArrayList<NPCEntity> getNPCs() {
         return npcs;
     }
     
-    /**
-     * Ensure NPCs are placed in visible camera area
-     * Call this after initializing NPCs and centering camera
-     */
+
     public void ensureNPCsVisible() {
         int cameraX = gp.getCameraX();
         int cameraY = gp.getCameraY();

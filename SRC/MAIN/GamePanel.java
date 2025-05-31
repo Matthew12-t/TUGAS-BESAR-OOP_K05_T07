@@ -47,15 +47,15 @@ import SRC.TILES.TileManager;
 import SRC.MAIN.MusicManager;
 
 public class GamePanel extends JPanel implements Runnable {
-    private final int originalTileSize = 16; // 16x16 tile from source image
+    private final int originalTileSize = 16; 
     private final int scale = 3;
-    private final int tileSize = originalTileSize * scale; // 48x48 tile displayed on screen
-    private final int maxScreenCol = 16; // Number of tiles horizontally on screen
-    private final int maxScreenRow = 14; // Number of tiles vertically on screen
-    private final int screenWidth = tileSize * maxScreenCol; // 768 pixels
-    private final int screenHeight = tileSize * maxScreenRow; // 576 pixels
+    private final int tileSize = originalTileSize * scale; 
+    private final int maxScreenCol = 16; 
+    private final int maxScreenRow = 14; 
+    private final int screenWidth = tileSize * maxScreenCol; 
+    private final int screenHeight = tileSize * maxScreenRow; 
     private final int FPS = 60;
-        // Game states
+        
     public static final int MAIN_MENU_STATE = -1;
     public static final int NEW_GAME_STATE = -2;
     public static final int LOAD_GAME_STATE = -3;
@@ -70,102 +70,102 @@ public class GamePanel extends JPanel implements Runnable {
     public static final int TV_STATE = 7;    public static final int CHEAT_STATE = 8;
     public static final int ENDGAME_STATE = 9;
     public static final int PLAYER_STATISTICS_STATE = 10;
-    private int gameState = MAIN_MENU_STATE; // Start with main menu instead of play state
+    private int gameState = MAIN_MENU_STATE; 
 
-    // Menu system components
+    
     private SRC.MAIN.MENU.MainMenu mainMenu;
     private SRC.UI.NewGameUI newGameUI;
     private SRC.UI.LoadGameUI loadGameUI;
     private SRC.UI.OptionsUI optionsUI;
 
-    // Inventory UI properties
+    
     private BufferedImage inventoryImage;
     
-    // Map menu
+    
     private BufferedImage[] mapMenuImages;
     private int currentMapMenuIndex = 0;
-    private final int TOTAL_WORLD_MAPS = 9; // Total world map options in menu
+    private final int TOTAL_WORLD_MAPS = 9; 
     
-    // WORLD SETTINGS
-    // Default world dimensions (for WorldMap)
+    
+    
     private final int maxWorldCol = 32;
-    private final int maxWorldRow = 32;    private boolean isInitializedFarmMap = false; // Flag to check if farm map is initialized
-    private boolean isInitializedHouseMap = false; // Flag to check if house map is initialized
-    private boolean isInitializedWorldMap = false; // Flag to check if world map is initialized
-    private boolean isInitializedMountainLake = false; // Flag to check if mountain lake map is initialized
-    private boolean isInitializedOceanMap = false; // Flag to check if ocean map is initialized
-    private boolean isInitializedStoreMap = false; // Flag to check if store map is initialized
+    private final int maxWorldRow = 32;    private boolean isInitializedFarmMap = false; 
+    private boolean isInitializedHouseMap = false; 
+    private boolean isInitializedWorldMap = false; 
+    private boolean isInitializedMountainLake = false; 
+    private boolean isInitializedOceanMap = false; 
+    private boolean isInitializedStoreMap = false; 
     
-    // NPC House initialization flags
+    
     private boolean isInitializedAbigailHouse = false;
     private boolean isInitializedCarolineHouse = false;
     private boolean isInitializedDascoHouse = false;
     private boolean isInitializedEmilyHouse = false;
     private boolean isInitializedMayorTadiHouse = false;
-    private boolean isInitializedPerryHouse = false;    // SYSTEM
+    private boolean isInitializedPerryHouse = false;    
     private KeyHandler keyHandler = new KeyHandler(this);
     private MouseHandler mouseHandler = new MouseHandler(this);
     private Thread gameThread;
 
-    // TILES
+    
     private TileManager tileManager;
 
-    // ENTITY
-    private Player player = new Player(this, keyHandler, mouseHandler);    // MAP
-     // Current active map
-    private Map forestrivermap;   // Forest river map instance
-    private Map mountainLake;     // Mountain lake map instance
-    private Map oceanMap;         // Ocean map instance
-    private Map farmMap;          // Farm map instance
-    private Map currentMap;       // Default to farm map
-    private Map houseMap;         // House map instance
-    private Map storeMap;         // Store map instance
     
-    // NPC House Maps
-    private Map abigailHouseMap;   // Abigail's house instance
-    private Map carolineHouseMap;  // Caroline's house instance
-    private Map dascoHouseMap;     // Dasco's house instance
-    private Map emilyHouseMap;     // Emily's house instance
-    private Map mayorTadiHouseMap; // Mayor Tadi's house instance
-    private Map perryHouseMap;     // Perry's house instance    // CAMERA
+    private Player player = new Player(this, keyHandler, mouseHandler);    
+     
+    private Map forestrivermap;   
+    private Map mountainLake;     
+    private Map oceanMap;         
+    private Map farmMap;          
+    private Map currentMap;       
+    private Map houseMap;         
+    private Map storeMap;         
+    
+    
+    private Map abigailHouseMap;   
+    private Map carolineHouseMap;  
+    private Map dascoHouseMap;     
+    private Map emilyHouseMap;     
+    private Map mayorTadiHouseMap; 
+    private Map perryHouseMap;     
     private int cameraX = 0; 
-    private int cameraY = 0;    // Clock UI system
+    private int cameraY = 0;    
     private ClockUI clockUI;
     private DayUI dayUI;
-      // Energy UI system
+      
     private EnergyUI energyUI;
     
-    // Holding Item UI system
+    
     private HoldingItemUI holdingItemUI;
     
-    // Brightness system for day/night cycle
-    private float currentBrightness = 1.0f; // Normal brightness (1.0 = 100%, 0.5 = 50%)
     
-    // Inventory constants
+    private float currentBrightness = 1.0f; 
+    
+    
     private static final int INVENTORY_ROWS = 4;
     private static final int INVENTORY_COLS = 4;
     
-    // Shipping Bin system
+    
     private ShippingBin ShippingBin;
     private ShippingBinUI shippingBinUI;
-      // Store system
+      
     private StoreUI storeUI;
     
-    // Cooking system
-    private CookingUI cookingUI;    // Cheat system
+    
+    private CookingUI cookingUI;    
     private SRC.UI.CheatUI cheatUI;
     private SRC.CHEAT.Cheat cheat;
     
-    // Music system
-    private MusicManager musicManager;// ENDGAME SYSTEM
+    
+    private MusicManager musicManager;
     private SRC.ENDGAME.EndGame endGame;
-    private SRC.UI.EndGameUI endGameUI;    // PLAYER STATISTICS SYSTEM
+    private SRC.UI.EndGameUI endGameUI;    
     private SRC.UI.PlayerStatisticsUI playerStatisticsUI;
     
-    // Flag to track if milestone achievement has been shown
+    
     private boolean milestonesShown = false;
 
-    // Getters and setters
+    
     public int getTileSize() {
         return tileSize;
     }
@@ -230,7 +230,7 @@ public class GamePanel extends JPanel implements Runnable {
     public int getMaxWorldRow() {
         return maxWorldRow;
     }    public int getMaxWorldWidth() {
-        // Get width based on the active map
+        
         if (currentMap.getMapName().equals("Farm Map")) {
             return tileSize * FarmMap.FARM_COLS;
         } else if (currentMap.getMapName().equals("House Map")) {
@@ -243,7 +243,7 @@ public class GamePanel extends JPanel implements Runnable {
     }
     
     public int getMaxWorldHeight() {
-        // Get height based on the active map
+        
         if (currentMap.getMapName().equals("Farm Map")) {
             return tileSize * FarmMap.FARM_ROWS;
         } else if (currentMap.getMapName().equals("House Map")) {
@@ -283,11 +283,7 @@ public class GamePanel extends JPanel implements Runnable {
       public void setCameraY(int cameraY) {
         this.cameraY = cameraY;
     }
-    
-    /**
-     * Get the current active map
-     * @return The currently active map
-     */
+
     public Map getCurrentMap() {
         return currentMap;
     }
@@ -426,7 +422,7 @@ public class GamePanel extends JPanel implements Runnable {
         return isInitializedStoreMap;
     }
     
-    // NPC House initialization getters and setters
+    
     public void setIsInitializedAbigailHouse(boolean isInitialized) {
         this.isInitializedAbigailHouse = isInitialized;
     }
@@ -469,7 +465,7 @@ public class GamePanel extends JPanel implements Runnable {
         return isInitializedPerryHouse;
     }
     
-    // Map getters for accessing NPC data
+    
     public Map getAbigailHouseMap() {
         return abigailHouseMap;
     }
@@ -497,18 +493,12 @@ public class GamePanel extends JPanel implements Runnable {
         return storeMap;
     }
     
-    /**
-     * Get the farm map directly (for direct access regardless of current map)
-     * @return The farm map instance
-     */
+
     public Map getFarmMap() {
         return farmMap;
     }
     
-    /**
-     * Generate a random farm map file path for new games
-     * @return Path to a randomly selected farm map file
-     */
+
     public String getRandomFarmMapPath() {
         String[] farmMaps = {
             "RES/MAP_TXT/farmmap.txt",
@@ -524,13 +514,10 @@ public class GamePanel extends JPanel implements Runnable {
         System.out.println("Selected farm map: " + farmMaps[randomIndex]);
         return farmMaps[randomIndex];
     }
-      /**
-     * Initialize farm map with a specific map file (for new games with randomization)
-     * @param mapFilePath The path to the farm map file to load
-     */
+
     public void initializeRandomizedFarmMap(String mapFilePath) {
         this.farmMap = new FarmMap(this, mapFilePath);
-        // Reset initialization flag so objects get set up when player first enters farm
+        
         this.isInitializedFarmMap = false;
         if (currentMap == farmMap) {
             this.farmMap.setupInitialObjects();
@@ -538,15 +525,12 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
     
-    /**
-     * Get objects from the current map
-     * @return Array of objects on the current map
-     */
+
     public SuperObject[] getCurrentObjects() {
         return currentMap.getObjects();
     }
       public GamePanel() {
-        // Set the size of the game panel
+        
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.black);
         this.setDoubleBuffered(true); 
@@ -554,38 +538,30 @@ public class GamePanel extends JPanel implements Runnable {
         this.addMouseListener(mouseHandler);
         this.setFocusable(true);
 
-        // Initialize map menu images
+        
         mapMenuImages = new BufferedImage[TOTAL_WORLD_MAPS];
-        loadMapMenuImages();        // Initialize clock UI
+        loadMapMenuImages();        
         this.clockUI = new ClockUI(screenWidth, screenHeight, this);
 
-        // Initialize day UI 
+        
         this.dayUI = new DayUI(screenWidth, screenHeight, clockUI);
-        
-        // Initialize energy UI
         this.energyUI = new EnergyUI(screenWidth, screenHeight);
-        
-        // Initialize holding item UI
         this.holdingItemUI = new HoldingItemUI(screenWidth, screenHeight);
         
-        // Initialize cheat system
+        
         this.cheatUI = new CheatUI(this);
         this.cheat = new Cheat(player, player.getPlayerAction().getInventory(), clockUI, this);
         this.cheatUI.setCheat(cheat);
 
-        // Load inventory image
-        loadInventoryImage();// Initialize shipping bin system
+        
+        loadInventoryImage();
         this.ShippingBin = new ShippingBin();
-        this.shippingBinUI = new ShippingBinUI(this, ShippingBin, player.getPlayerAction().getInventory());        // Initialize store system
+        this.shippingBinUI = new ShippingBinUI(this, ShippingBin, player.getPlayerAction().getInventory());        
         this.storeUI = new StoreUI(this, player, player.getPlayerAction().getInventory());
-        
-        // Initialize cooking system
         this.cookingUI = new CookingUI(this);
-        
-        // Initialize tile manager
         this.tileManager = new TileManager(this);
         
-        // Initialize maps
+        
         this.forestrivermap = new ForestRiverMap(this);
         this.mountainLake = new MountainLake(this);
         this.oceanMap = new OceanMap(this);
@@ -593,7 +569,7 @@ public class GamePanel extends JPanel implements Runnable {
         this.houseMap = new HouseMap(this);
         this.storeMap = new StoreMap(this);
         
-        // Initialize NPC house maps
+        
         this.abigailHouseMap = new AbigailHouseMap(this);
         this.carolineHouseMap = new CarolineHouseMap(this);
         this.dascoHouseMap = new DascoHouseMap(this);
@@ -602,12 +578,13 @@ public class GamePanel extends JPanel implements Runnable {
         this.perryHouseMap = new PerryHouseMap(this);
         
         this.currentMap = houseMap;
-        setIsInitializedHouseMap(true);// Setup initial objects in maps
+        setIsInitializedHouseMap(true);
         if(currentMap == farmMap){
             this.farmMap.setupInitialObjects();
         }
         else if (currentMap == forestrivermap){
-            this.forestrivermap.setupInitialObjects();        }
+            this.forestrivermap.setupInitialObjects();        
+        }
         else if (currentMap == mountainLake){
             this.mountainLake.setupInitialObjects();
         }
@@ -622,14 +599,14 @@ public class GamePanel extends JPanel implements Runnable {
         }
         else{
             this.forestrivermap.setupInitialObjects();
-        }        // Set house map as the active map (since it's the current map)
+        }        
         this.farmMap.setActive(false);
         this.forestrivermap.setActive(false);
         this.mountainLake.setActive(false);
         this.oceanMap.setActive(false);
         this.storeMap.setActive(false);
         
-        // Set all NPC houses inactive
+        
         this.abigailHouseMap.setActive(false);
         this.carolineHouseMap.setActive(false);
         this.dascoHouseMap.setActive(false);
@@ -638,18 +615,18 @@ public class GamePanel extends JPanel implements Runnable {
         this.perryHouseMap.setActive(false);
         
         this.houseMap.setActive(true);
-        this.npcUi = new NPCUi(this);        // Inisialisasi EndGame dan EndGameUI
+        this.npcUi = new NPCUi(this);        
         this.endGame = new SRC.ENDGAME.EndGame(player, this);
         this.endGameUI = new SRC.UI.EndGameUI(this);
         
-        // Initialize PlayerStatisticsUI
+        
         this.playerStatisticsUI = new SRC.UI.PlayerStatisticsUI(this);
-          // Initialize menu system components
+          
         this.mainMenu = new SRC.MAIN.MENU.MainMenu(this);
         this.newGameUI = new SRC.UI.NewGameUI(this);
         this.loadGameUI = new SRC.UI.LoadGameUI(this);
         this.optionsUI = new SRC.UI.OptionsUI(this);
-          // Initialize music system and start background music
+          
         this.musicManager = new MusicManager();
         this.musicManager.playMusic("RES/SOUND/music.wav");
     }
@@ -697,13 +674,13 @@ public class GamePanel extends JPanel implements Runnable {
             timer += (currentTime - lastTime);
             lastTime = currentTime;
 
-            // Update clock UI time every 1 second (real world)
+            
             clockUI.updateIfNeeded();
             
             if (delta >= 1) {
                 update();
                 
-                // Check for automatic sleep triggers (low energy and late time)
+                
                 if (gameState == PLAY_STATE) {
                     player.getPlayerAction().checkAutomaticSleep();
                 }
@@ -713,7 +690,7 @@ public class GamePanel extends JPanel implements Runnable {
                 drawCount++;
             }
 
-            // Display FPS
+            
             if(timer >= 1000000000) {
                 System.out.println("FPS: " + drawCount);
                 drawCount = 0;
@@ -721,38 +698,33 @@ public class GamePanel extends JPanel implements Runnable {
             }        
         }
     }
-      /**
-     * Center the camera on a map with specific dimensions
-     * This ensures the map is centered on screen with a black background visible around it
-     * @param mapCols Number of columns in the map
-     * @param mapRows Number of rows in the map
-     */
+
     public void centerCameraOnMap(int mapCols, int mapRows) {
-        // Calculate the total width and height of the map in pixels
+        
         int mapWidth = mapCols * tileSize;
         int mapHeight = mapRows * tileSize;
         
-        // Check if the map is smaller than the screen
+        
         if (mapWidth < screenWidth || mapHeight < screenHeight) {
-            // Calculate the camera position to center the map on screen
-            // For X: (screenWidth - mapWidth) / 2 is the offset needed to center horizontally
+            
+            
             int centerX = Math.max(0, (screenWidth - mapWidth) / 2);
             
-            // For Y: (screenHeight - mapHeight) / 2 is the offset needed to center vertically
+            
             int centerY = Math.max(0, (screenHeight - mapHeight) / 2);
             
-            // Set camera position
-            // We subtract the offset from zero because camera coordinates are negative of the offset
+            
+            
             cameraX = -centerX;
             cameraY = -centerY;
             
-            //System.out.println("Map centered with camera at: " + cameraX + ", " + cameraY);
+            
         } else {
-            // If map is larger than the screen, use default camera centering on player
+            
             cameraX = player.getWorldX() - screenWidth / 2 + player.getPlayerVisualWidth() / 2;
             cameraY = player.getWorldY() - screenHeight / 2 + player.getPlayerVisualHeight() / 2;
             
-            // Clamp to map boundaries
+            
             if (cameraX < 0) cameraX = 0;
             if (cameraY < 0) cameraY = 0;
             if (cameraX > mapWidth - screenWidth) cameraX = mapWidth - screenWidth;
@@ -760,16 +732,14 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
 
-    /**
-     * Teleport player to another map by name, keeping logic transition as before
-     * @param targetMapName Nama map tujuan ("Farm Map" atau "World Map")    */          
+        
     public void teleportToMap(String targetMapName) {
         if (currentMap.getMapName().equals(targetMapName)) {
-            // Sudah di map tujuan, tidak perlu teleport
+            
             return;
         }
         
-        // Reset mouse target to prevent continued walking after teleporting
+        
         mouseHandler.setHasTarget(false);
         
         if (targetMapName.equals("World Map")) {
@@ -778,13 +748,13 @@ public class GamePanel extends JPanel implements Runnable {
                 forestrivermap.setupInitialObjects();
                 isInitializedWorldMap = true;
             }
-            // Pindahkan player ke posisi default masuk dari farm
-            player.setWorldX(tileSize * 1); // Kolom ke-2
-            // Y tetap
+            
+            player.setWorldX(tileSize * 1); 
+            
         } else if (targetMapName.equals("Farm Map")) {
-            // Jika teleport dari HouseMap, posisikan player di depan rumah
+            
             if (currentMap.getMapName().equals("House Map")) {
-                //farmMap.setupInitialObjects();
+                
                 switchMap(farmMap);
                 if (!isInitializedFarmMap) {
                     farmMap.setupInitialObjects();
@@ -798,7 +768,7 @@ public class GamePanel extends JPanel implements Runnable {
                     farmMap.setupInitialObjects();
                     isInitializedFarmMap = true;
                 }
-                // Use dynamic positioning based on world map teleport tile location
+                
                 FarmMap farmMapRef = (FarmMap) farmMap;
                 int[] spawnPos = farmMapRef.getWorldMapSpawnPosition();
                 player.setWorldX(tileSize * spawnPos[0]);
@@ -811,12 +781,12 @@ public class GamePanel extends JPanel implements Runnable {
                 isInitializedWorldMap = true;
             }
             
-            // Position player next to the teleport tile at position (0,2)
-            // Teleport tile is at column 0, row 2, so we place player at column 1, row 2
-            player.setWorldX(tileSize * 1); // Column 1 (right after teleport column)
-            player.setWorldY(tileSize * 2); // Row 2 (same as teleport tile)
             
-            // Center camera on map
+            
+            player.setWorldX(tileSize * 1); 
+            player.setWorldY(tileSize * 2); 
+            
+            
             centerCameraOnMap(ForestRiverMap.FOREST_COLS, ForestRiverMap.FOREST_ROWS);
         } else if (targetMapName.equals("Mountain Lake")) {
             switchMap(mountainLake);
@@ -825,11 +795,11 @@ public class GamePanel extends JPanel implements Runnable {
                 isInitializedMountainLake = true;
             }
             
-            // Position player next to the teleport tile at position (0,2)
-            player.setWorldX(tileSize * 1); // Column 1 (right after teleport column)
-            player.setWorldY(tileSize * 2); // Row 2 (same as teleport tile)
             
-            // Center camera on map
+            player.setWorldX(tileSize * 1); 
+            player.setWorldY(tileSize * 2); 
+            
+            
             centerCameraOnMap(MountainLake.MOUNTAIN_COLS, MountainLake.MOUNTAIN_ROWS);
         } else if (targetMapName.equals("House Map")) {
             switchMap(houseMap);
@@ -837,11 +807,11 @@ public class GamePanel extends JPanel implements Runnable {
                 houseMap.setupInitialObjects();
                 isInitializedHouseMap = true;
             }
-            // Pindahkan player ke posisi default di tengah pintu masuk
-            int doorStart = (HouseMap.HOUSE_COLS / 2) - 1; // Center of the door
+            
+            int doorStart = (HouseMap.HOUSE_COLS / 2) - 1; 
             player.setWorldX(tileSize * doorStart);
-            player.setWorldY(tileSize * (HouseMap.HOUSE_ROWS - 2)); // One tile above the door
-              // For consistency, also center the camera on the house map
+            player.setWorldY(tileSize * (HouseMap.HOUSE_ROWS - 2)); 
+              
             centerCameraOnMap(HouseMap.HOUSE_COLS, HouseMap.HOUSE_ROWS);        } 
             else if (targetMapName.equals("Store Map")) {
             switchMap(storeMap);
@@ -849,11 +819,11 @@ public class GamePanel extends JPanel implements Runnable {
                 storeMap.setupInitialObjects();
                 isInitializedStoreMap = true;
             }
-            // Position player at the entrance of the store
+            
             player.setWorldX(tileSize * ((StoreMap.STORE_COLS / 2) - 2)); 
             player.setWorldY(tileSize * (StoreMap.STORE_ROWS - 4)); 
             
-            // Center camera on the store map
+            
             centerCameraOnMap(StoreMap.STORE_COLS, StoreMap.STORE_ROWS);
             ((StoreMap)storeMap).ensureNPCsVisible();
         } else if (targetMapName.equals("Abigail's House")) {
@@ -862,7 +832,7 @@ public class GamePanel extends JPanel implements Runnable {
                 abigailHouseMap.setupInitialObjects();
                 isInitializedAbigailHouse = true;
             }
-            // Position player at the entrance
+            
             player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 2));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 4));
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
@@ -873,7 +843,7 @@ public class GamePanel extends JPanel implements Runnable {
                 carolineHouseMap.setupInitialObjects();
                 isInitializedCarolineHouse = true;
             }
-            // Position player at the entrance
+            
             player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 2));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 4));
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);  
@@ -884,7 +854,7 @@ public class GamePanel extends JPanel implements Runnable {
                 dascoHouseMap.setupInitialObjects();
                 isInitializedDascoHouse = true;
             }
-            // Position player at the entrance
+            
             player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 2));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 4));
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
@@ -895,7 +865,7 @@ public class GamePanel extends JPanel implements Runnable {
                 emilyHouseMap.setupInitialObjects();
                 isInitializedEmilyHouse = true;
             }
-            // Position player at the entrance
+            
             player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 2));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 4));
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
@@ -906,7 +876,7 @@ public class GamePanel extends JPanel implements Runnable {
                 mayorTadiHouseMap.setupInitialObjects();
                 isInitializedMayorTadiHouse = true;
             }
-            // Position player at the entrance
+            
             player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 2));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 4));
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
@@ -917,64 +887,64 @@ public class GamePanel extends JPanel implements Runnable {
                 perryHouseMap.setupInitialObjects();
                 isInitializedPerryHouse = true;
             }
-            // Position player at the entrance
+            
             player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 2));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 4));
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
             ((PerryHouseMap)perryHouseMap).ensureNPCsVisible();        }
     }
       public void update() {
-        // Handle menu states
+        
         if (gameState == MAIN_MENU_STATE) {
             if (mainMenu != null) {
                 mainMenu.update();
             }
-            return; // Don't process game logic in menu states
+            return; 
         } else if (gameState == NEW_GAME_STATE || gameState == LOAD_GAME_STATE || gameState == OPTIONS_STATE) {
-            // These UI states don't need updates
+            
             return;
         }
-        // Handle different game states
+        
         else if (gameState == PLAY_STATE || gameState == INVENTORY_STATE) {
-            // Update player in both PLAY_STATE and INVENTORY_STATE (background still visible)
+            
             if (gameState == PLAY_STATE) {
-                player.update(); // Only update position in PLAY_STATE
+                player.update(); 
             }
-              // Always update PlayerAction (includes TV UI, Sleep UI, Fishing UI updates)
+              
             player.getPlayerAction().update();
-            // Hitung posisi tengah player
+            
             int playerCenterX = player.getWorldX() + player.getPlayerVisualWidth() / 2;
             int playerCenterY = player.getWorldY() + player.getPlayerVisualHeight() / 2;
     
-            // Check for teleport tile berdasarkan posisi tengah player
+            
             int playerCol = playerCenterX / tileSize;
             int playerRow = playerCenterY / tileSize;
             int tileType = currentMap.getTile(playerCol, playerRow);
-            if (tileType == 5) { // TILE_TELEPORT value is 5
+            if (tileType == 5) { 
             if (currentMap.getMapName().equals("Farm Map")) {
                 FarmMap farmMapRef = (FarmMap) farmMap;
-                // Teleport ke HouseMap jika di bawah rumah
+                
                 if (playerCol == farmMapRef.getTeleportToHouseCol() && playerRow == farmMapRef.getTeleportToHouseRow() || playerCol == farmMapRef.getTeleportToHouseCol()+1 &&playerRow == farmMapRef.getTeleportToHouseRow()) {
                     teleportToMap("House Map");
                 } else if (playerCol == FarmMap.FARM_COLS - 1) {
-                    // Instead of teleporting directly, enter the map menu state
+                    
                     enterMapMenuState();
                 }
             } else if (currentMap.getMapName().equals("World Map")) {
                 teleportToMap("Farm Map");
             } else if (currentMap.getMapName().equals("House Map")) {
-                // When stepping on teleport tile in house, go to farm map
+                
                 teleportToMap("Farm Map");
             } else if (currentMap.getMapName().equals("Forest River Map")) {
-                if (playerCol == 0) { // Jika di kolom paling kiri
+                if (playerCol == 0) { 
                     teleportToMap("Farm Map");
                 }
             } else if (currentMap.getMapName().equals("Mountain Lake")) {
-                if (playerCol == 0) { // Jika di kolom paling kiri
+                if (playerCol == 0) { 
                     teleportToMap("Farm Map");
                 }
             } else if (currentMap.getMapName().equals("Ocean Map")) {
-                if (playerCol == 0) { // Jika di kolom paling kiri
+                if (playerCol == 0) { 
                     teleportToMap("Farm Map");
                 }
             } else if (currentMap.getMapName().equals("Store Map")) {
@@ -986,24 +956,24 @@ public class GamePanel extends JPanel implements Runnable {
                        currentMap.getMapName().equals("Emily's House") ||
                        currentMap.getMapName().equals("Mayor Tadi's House") ||
                        currentMap.getMapName().equals("Perry's House")) {
-                // For NPC houses, teleport back to house map
+                
                 teleportToMap("Farm Map");
             }
         }
         }
         
-        // Update camera position based on map type
+        
         if (currentMap.getMapName().equals("Forest River Map")) {
-            // For the ForestRiverMap, maintain the centered position
+            
             centerCameraOnMap(ForestRiverMap.FOREST_COLS, ForestRiverMap.FOREST_ROWS);
         } else if (currentMap.getMapName().equals("Mountain Lake")) {
-            // For the MountainLake, maintain the centered position
+            
             centerCameraOnMap(MountainLake.MOUNTAIN_COLS, MountainLake.MOUNTAIN_ROWS);
         } else if (currentMap.getMapName().equals("Ocean Map")) {
-            // For the OceanMap, maintain the centered position
+            
             centerCameraOnMap(OceanMap.OCEAN_COLS, OceanMap.OCEAN_ROWS);       
         } else if (currentMap.getMapName().equals("Store Map")) {
-            // For the StoreMap, maintain the centered position
+            
             centerCameraOnMap(StoreMap.STORE_COLS, StoreMap.STORE_ROWS);
         } else if (currentMap.getMapName().equals("Abigail's House") ||
                    currentMap.getMapName().equals("Caroline's House") ||
@@ -1011,10 +981,10 @@ public class GamePanel extends JPanel implements Runnable {
                    currentMap.getMapName().equals("Emily's House") ||
                    currentMap.getMapName().equals("Mayor Tadi's House") ||
                    currentMap.getMapName().equals("Perry's House")) {
-            // For NPC houses, maintain the centered position
+            
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
         } else {
-            // For other maps, camera follows the player
+            
             cameraX = player.getWorldX() - screenWidth / 2 + player.getPlayerVisualWidth() / 2;
             cameraY = player.getWorldY() - screenHeight / 2 + player.getPlayerVisualHeight() / 2;
             if (cameraX < 0) cameraX = 0;
@@ -1022,10 +992,10 @@ public class GamePanel extends JPanel implements Runnable {
             if (cameraX > getMaxWorldWidth() - screenWidth) cameraX = getMaxWorldWidth() - screenWidth;
             if (cameraY > getMaxWorldHeight() - screenHeight) cameraY = getMaxWorldHeight() - screenHeight;
         }
-          // Update brightness for day/night cycle
-        updateBrightness();        // Check for EndGame milestones (only in PLAY_STATE)
+          
+        updateBrightness();        
         if (gameState == PLAY_STATE) {
-            // Check milestone conditions directly from player
+            
             boolean goldMilestone = player.getGold() >= 17209;
             boolean marriageMilestone = player.isMarried();
             
@@ -1035,25 +1005,25 @@ public class GamePanel extends JPanel implements Runnable {
                 System.out.println("Marriage status: " + (player.isMarried() ? "MARRIED" : "SINGLE") + " (Required: MARRIED)");
                 System.out.println("Creating new EndGame instance with updated data...");
                 
-                // Create fresh EndGame instance with current player data
+                
                 this.endGame = new SRC.ENDGAME.EndGame(player, this);
                 
-                // Show EndGame UI with updated data
+                
                 endGameUI.showEndGameScreen(endGame);
                 
                 System.out.println("Switching to EndGame state...");
                 gameState = ENDGAME_STATE;
-                milestonesShown = true; // Set flag to prevent re-showing
+                milestonesShown = true; 
             }
         }
         
-        // Handle TV_STATE updates 
+        
         if (gameState == TV_STATE) {
-            // Update PlayerAction for TV auto-close functionality
+            
             player.getPlayerAction().update();
         }
         
-        // MAP_MENU_STATE doesn't need update logic as it's controlled by key inputs
+        
     }
     
     /**
@@ -1061,10 +1031,10 @@ public class GamePanel extends JPanel implements Runnable {
      * @param newMap The map to switch to
      */
     public void switchMap(Map newMap) {
-        // Deactivate current map
+        
         currentMap.setActive(false);
         
-        // Set new map as active and current
+        
         newMap.setActive(true);
         currentMap = newMap;
         
@@ -1075,7 +1045,7 @@ public class GamePanel extends JPanel implements Runnable {
 
         Graphics2D g2 = (Graphics2D) g;
 
-        // Handle menu states
+        
         if (gameState == MAIN_MENU_STATE) {
             if (mainMenu != null) {
                 mainMenu.draw(g2);
@@ -1093,31 +1063,34 @@ public class GamePanel extends JPanel implements Runnable {
                 optionsUI.draw(g2);
             }
         } 
-        // Draw background and game world for play state and cheat state
+        
         else if (gameState == PLAY_STATE || gameState == CHEAT_STATE) {
-            // Set the background to black (will be visible around small maps)
+            
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
-            // Draw the current map (tiles and objects)
+            
             currentMap.draw(g2);
-            // --- Draw Player ---
-            // Calculate player's screen position (relative to camera)
+            
+            
             int playerScreenX = player.getWorldX() - cameraX;
             int playerScreenY = player.getWorldY() - cameraY;
-            // Draw the player at their screen position
+            
             player.draw(g2, playerScreenX, playerScreenY);
             
-            // Apply night lighting effect after drawing game content but before UI elements
+            
             applyNightEffect(g2);
-              // --- Draw Time Info ---
-            clockUI.drawTimeInfo(g2, player);            // --- Draw Day Info ---
+              
+            clockUI.drawTimeInfo(g2, player);            
             dayUI.drawDayInfo(g2);
-              // --- Draw Energy Bar ---
+              
             energyUI.drawEnergyBar(g2, player);
             
-            // --- Draw Held Items Info ---
-            holdingItemUI.drawHeldItems(g2, player);        } else if (gameState == INVENTORY_STATE) {
-            // First draw the game world in the background
+            
+            holdingItemUI.drawHeldItems(g2, player);       
+        } 
+        
+        else if (gameState == INVENTORY_STATE) {
+            
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
             currentMap.draw(g2);
@@ -1125,12 +1098,15 @@ public class GamePanel extends JPanel implements Runnable {
             int playerScreenY = player.getWorldY() - cameraY;
             player.draw(g2, playerScreenX, playerScreenY);
             
-            // Apply night lighting effect after drawing game content but before UI elements
+            
             applyNightEffect(g2);
             
-            // Then draw inventory overlay
-            drawInventoryScreen(g2);        } else if (gameState == SLEEP_STATE) {
-            // First draw current map and player as background
+            
+            drawInventoryScreen(g2);       
+        } 
+            
+        else if (gameState == SLEEP_STATE) {
+            
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
             currentMap.draw(g2);
@@ -1138,18 +1114,18 @@ public class GamePanel extends JPanel implements Runnable {
             int playerScreenY = player.getWorldY() - cameraY;
             player.draw(g2, playerScreenX, playerScreenY);
             
-            // Apply night lighting effect after drawing game content but before UI elements
+            
             applyNightEffect(g2);
             
-            // Then draw sleep UI on top
+            
             player.getPlayerAction().getSleepUI().draw(g2);
         } else if (gameState == MAP_MENU_STATE) {
-            // Draw map selection menu
+            
             if (mapMenuImages != null && currentMapMenuIndex >= 0 && currentMapMenuIndex < mapMenuImages.length) {
                 BufferedImage currentImage = mapMenuImages[currentMapMenuIndex];
                 if (currentImage != null) {
-                    // Center the map image on the screen with scaling
-                    // Scale factor - make the image 80% of screen width
+                    
+                    
                     double scaleFactor = (double)(screenWidth * 0.4) / currentImage.getWidth();
                     int scaledWidth = (int)(currentImage.getWidth() * scaleFactor);
                     int scaledHeight = (int)(currentImage.getHeight() * scaleFactor);
@@ -1157,28 +1133,31 @@ public class GamePanel extends JPanel implements Runnable {
                     int x = (screenWidth - scaledWidth) / 2;
                     int y = (screenHeight - scaledHeight) / 2;
                     
-                    // Draw larger scaled image
+                    
                     g2.drawImage(currentImage, x, y, scaledWidth, scaledHeight, null);
                     
                 }                else {
                     g2.setColor(Color.RED);
                     g2.drawString("Error loading map image", screenWidth/2 - 80, screenHeight/2);
                 }
-            }        } else if (gameState == SHIPPING_STATE) {
-            // First draw the game world in the background
+            }        
+        } 
+        else if (gameState == SHIPPING_STATE) {
+            
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
             currentMap.draw(g2);
             int playerScreenX = player.getWorldX() - cameraX;
-            int playerScreenY = player.getWorldY() - cameraY;            player.draw(g2, playerScreenX, playerScreenY);
+            int playerScreenY = player.getWorldY() - cameraY;            
+            player.draw(g2, playerScreenX, playerScreenY);
             
-            // Apply night lighting effect after drawing game content but before UI elements
+            
             applyNightEffect(g2);
-              // Then draw shipping bin UI overlay
+              
             if (shippingBinUI != null) {
                 shippingBinUI.draw(g2);
             }        } else if (gameState == STORE_STATE) {
-            // First draw the game world in the background
+            
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
             currentMap.draw(g2);
@@ -1186,29 +1165,34 @@ public class GamePanel extends JPanel implements Runnable {
             int playerScreenY = player.getWorldY() - cameraY;
             player.draw(g2, playerScreenX, playerScreenY);
             
-            // Apply night lighting effect after drawing game content but before UI elements
+            
             applyNightEffect(g2);
             
-            // Then draw store UI overlay
+            
             if (this.getStoreUI() != null) {
                 this.getStoreUI().draw(g2);
-            }        } else if (gameState == COOKING_STATE) {
-            // First draw the game world in the background
+            }        
+        } 
+        
+        else if (gameState == COOKING_STATE) {
+            
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
             currentMap.draw(g2);
             int playerScreenX = player.getWorldX() - cameraX;
             int playerScreenY = player.getWorldY() - cameraY;
             player.draw(g2, playerScreenX, playerScreenY);
-            
-            // Apply night lighting effect after drawing game content but before UI elements
+
             applyNightEffect(g2);
             
-            // Then draw cooking UI overlay
+            
             if (cookingUI != null) {
                 cookingUI.draw(g2);
-            }        } else if (gameState == TV_STATE) {
-            // First draw the game world in the background
+            }        
+        } 
+        
+        else if (gameState == TV_STATE) {
+            
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
             currentMap.draw(g2);
@@ -1216,54 +1200,54 @@ public class GamePanel extends JPanel implements Runnable {
             int playerScreenY = player.getWorldY() - cameraY;
             player.draw(g2, playerScreenX, playerScreenY);
             
-            // Apply night lighting effect after drawing game content but before UI elements
+            
             applyNightEffect(g2);
             
-            // Then draw TV UI overlay
+            
             if (player.getPlayerAction().getTvUI() != null) {
                 player.getPlayerAction().getTvUI().draw(g2);
-            }        } else if (gameState == ENDGAME_STATE) {
-            // First draw the game world in the background
+            }        
+        }
+         else if (gameState == ENDGAME_STATE) {
+            
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
             currentMap.draw(g2);
             int playerScreenX = player.getWorldX() - cameraX;
             int playerScreenY = player.getWorldY() - cameraY;
             player.draw(g2, playerScreenX, playerScreenY);
-            // Apply night lighting effect after drawing game content but before UI elements
+            
             applyNightEffect(g2);
-            // Draw EndGameUI overlay
+            
             if (endGameUI != null) {
                 endGameUI.draw(g2);
             }
         } else if (gameState == PLAYER_STATISTICS_STATE) {
-            // First draw the game world in the background
+            
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
             currentMap.draw(g2);
             int playerScreenX = player.getWorldX() - cameraX;
             int playerScreenY = player.getWorldY() - cameraY;
             player.draw(g2, playerScreenX, playerScreenY);
-            // Apply night lighting effect after drawing game content but before UI elements
+            
             applyNightEffect(g2);
-            // Draw PlayerStatisticsUI overlay
+            
             if (playerStatisticsUI != null) {
                 playerStatisticsUI.draw(g2);
             }
         }
         
-        // Draw cheat console UI if in cheat state
+        
         if (gameState == CHEAT_STATE) {
             cheatUI.draw(g2);
         }
         
         npcUi.drawMessagePanel(g2);
         g2.dispose();
-    } // Release system resources
+    } 
     
-      /**
-     * Enter map menu mode when player teleports from Farm Map
-     */
+
     public void enterMapMenuState() {
         System.out.println("Entering map menu state");
         this.gameState = MAP_MENU_STATE;
@@ -1272,178 +1256,171 @@ public class GamePanel extends JPanel implements Runnable {
         player.consumeEnergy(10);
         System.out.println("Game state is now: " + (gameState == PLAY_STATE ? "PLAY_STATE" : "MAP_MENU_STATE"));
         
-        // Force an immediate repaint to show the menu
+        
         repaint();
-    }    /**
-     * Exit map menu mode and enter the selected map
-     */    
+    }   
     public void exitMapMenuState() {
         System.out.println("Exiting map menu state");
-        
-        // Save the selected map index before changing state
+
         int selectedMap = currentMapMenuIndex;
-        
-        // Change state back to play
+
         this.gameState = PLAY_STATE;
-        
-        // Load the selected map (worldmap1, worldmap2, etc)
+ 
         System.out.println("Selected map: worldmap" + (selectedMap + 1));
-        
-        // Choose map based on the selection
+
         if (selectedMap == 0) {
-            // Switch to forest map (first option)
+            
             switchMap(forestrivermap);
             if (!isInitializedWorldMap) {
                 forestrivermap.setupInitialObjects();
                 isInitializedWorldMap = true;
             }
-            
-            // Position player next to the teleport tile at position (0,2)
-            player.setWorldX(tileSize * 1); // Column 1 (right after teleport column)
-            player.setWorldY(tileSize * 2); // Row 2 (next to teleport tile)
+
+            player.setWorldX(tileSize * 1); 
+            player.setWorldY(tileSize * 2); 
             
             System.out.println("Teleported player to ForestRiverMap at position (1, 2)");
             
-            // Center camera on map
+            
             centerCameraOnMap(ForestRiverMap.FOREST_COLS, ForestRiverMap.FOREST_ROWS);        }
         else if (selectedMap == 1) {
-            // Switch to mountain lake map (second option)
+            
             switchMap(mountainLake);
             if (!isInitializedMountainLake) {
                 mountainLake.setupInitialObjects();
                 isInitializedMountainLake = true;
             }
             
-            // Position player next to the teleport tile at position (0,2)
-            player.setWorldX(tileSize * 1); // Column 1 (right after teleport column)
-            player.setWorldY(tileSize * 2); // Row 2 (next to teleport tile)
+            
+            player.setWorldX(tileSize * 1); 
+            player.setWorldY(tileSize * 2); 
             
             System.out.println("Teleported player to Mountain Lake at position (1, 2)");
             
-            // Center camera on map
+            
             centerCameraOnMap(MountainLake.MOUNTAIN_COLS, MountainLake.MOUNTAIN_ROWS);        }
         else if (selectedMap == 2) {
-            // Switch to ocean map (third option)
+            
             switchMap(oceanMap);
             if (!isInitializedOceanMap) {
                 oceanMap.setupInitialObjects();
                 isInitializedOceanMap = true;
             }
             
-            // Position player next to the teleport tile at position (0,2)
-            player.setWorldX(tileSize * 1); // Column 1 (right after teleport column)
-            player.setWorldY(tileSize * 2); // Row 2 (next to teleport tile)
+            
+            player.setWorldX(tileSize * 1); 
+            player.setWorldY(tileSize * 2); 
             
             System.out.println("Teleported player to Ocean Map at position (1, 2)");
             
-            // Center camera on map
+            
             centerCameraOnMap(OceanMap.OCEAN_COLS, OceanMap.OCEAN_ROWS);
         }
         else if (selectedMap == 3) {
-            // Switch to store map (fourth option)
+            
             switchMap(storeMap);
             if (!isInitializedStoreMap) {
                 storeMap.setupInitialObjects();
                 isInitializedStoreMap = true;
             }
             
-            // Position player at the entrance of the store
+            
             player.setWorldX(tileSize * ((StoreMap.STORE_COLS / 2) - 1)); 
             player.setWorldY(tileSize * (StoreMap.STORE_ROWS - 2));
 
             System.out.println("Teleported player to Store Map at entrance");
-              // Center camera on map
+              
             centerCameraOnMap(StoreMap.STORE_COLS, StoreMap.STORE_ROWS);
         }
         else if (selectedMap == 9) {
-            // Switch to Abigail's house (fifth option)
+            
             switchToAbigailHouse();
             if (!isInitializedAbigailHouse) {
                 abigailHouseMap.setupInitialObjects();
                 isInitializedAbigailHouse = true;
             }
             
-            // Position player at the entrance
+            
             player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 1));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
             
             System.out.println("Teleported player to Abigail's House at entrance");
             
-            // Center camera on map
+            
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
             ((AbigailHouseMap)abigailHouseMap).ensureNPCsVisible();
         }
         else if (selectedMap == 5) {
-            // Switch to Caroline's house (sixth option)
+            
             switchToCarolineHouse();
             if (!isInitializedCarolineHouse) {
                 carolineHouseMap.setupInitialObjects();
                 isInitializedCarolineHouse = true;
             }
             
-            // Position player at the entrance
+            
             player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 1));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
             
             System.out.println("Teleported player to Caroline's House at entrance");
             
-            // Center camera on map
+            
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
             ((CarolineHouseMap)carolineHouseMap).ensureNPCsVisible();
         }
         else if (selectedMap == 7) {
-            // Switch to Dasco's house (seventh option)
+            
             switchToDascoHouse();
             if (!isInitializedDascoHouse) {
                 dascoHouseMap.setupInitialObjects();
                 isInitializedDascoHouse = true;
             }
             
-            // Position player at the entrance
+            
             player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 1));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
             
             System.out.println("Teleported player to Dasco's House at entrance");
             
-            // Center camera after the map and NPCs are initialized
+            
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
             
-            // Ensure NPCs are visible after camera centering
+            
             ((DascoHouseMap)dascoHouseMap).ensureNPCsVisible();
         }
         else if (selectedMap == 8) {
-            // Switch to Emily's house (eighth option)
+            
             switchToEmilyHouse();
             if (!isInitializedEmilyHouse) {
                 emilyHouseMap.setupInitialObjects();
                 isInitializedEmilyHouse = true;
             }
             
-            // Position player at the entrance
+            
             player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 1));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
             
             System.out.println("Teleported player to Emily's House at entrance");
             
-            // Center camera on map
+            
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
             ((EmilyHouseMap)emilyHouseMap).ensureNPCsVisible();
         }
         else if (selectedMap == 4) {
-            // Switch to Mayor Tadi's house (ninth option)
+            
             switchToMayorTadiHouse();
             if (!isInitializedMayorTadiHouse) {
                 mayorTadiHouseMap.setupInitialObjects();
                 isInitializedMayorTadiHouse = true;
             }
             
-            // Position player at the entrance
+            
             player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 1));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
             
             System.out.println("Teleported player to Mayor Tadi's House at entrance");
             
-            // Center camera on map
+            
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
             ((MayorTadiHouseMap)mayorTadiHouseMap).ensureNPCsVisible();
 
@@ -1455,33 +1432,33 @@ public class GamePanel extends JPanel implements Runnable {
                 isInitializedPerryHouse = true;
             }
             
-            // Position player at the entrance
+            
             player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 1));
             player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
             
             System.out.println("Teleported player to Perry's House at entrance");
             
-            // Center camera on map
+            
             centerCameraOnMap(NPCHouseMap.NPC_HOUSE_COLS, NPCHouseMap.NPC_HOUSE_ROWS);
             ((PerryHouseMap)perryHouseMap).ensureNPCsVisible();
         }
         else {
-            // Default to forest map for other options
+            
             switchMap(forestrivermap);
             if (!isInitializedWorldMap) {
                 forestrivermap.setupInitialObjects();
                 isInitializedWorldMap = true;
             }
             
-            // Position player next to the teleport tile
+            
             player.setWorldX(tileSize * 1);
             player.setWorldY(tileSize * 2);
             
-            // Center camera on map
+            
             centerCameraOnMap(ForestRiverMap.FOREST_COLS, ForestRiverMap.FOREST_ROWS);
         }
         
-        // Force repaint to update the screen immediately
+        
         repaint();
     }
       /**
@@ -1490,10 +1467,10 @@ public class GamePanel extends JPanel implements Runnable {
     public void selectPreviousMap() {
         currentMapMenuIndex--;
         if (currentMapMenuIndex < 0) {
-            currentMapMenuIndex = TOTAL_WORLD_MAPS - 1; // Wrap around to the last map
+            currentMapMenuIndex = TOTAL_WORLD_MAPS - 1; 
         }
         System.out.println("Selected map index: " + (currentMapMenuIndex + 1));
-        // Force repaint to show new selection immediately
+        
         repaint();
     }
     
@@ -1503,13 +1480,13 @@ public class GamePanel extends JPanel implements Runnable {
     public void selectNextMap() {
         currentMapMenuIndex++;
         if (currentMapMenuIndex >= TOTAL_WORLD_MAPS) {
-            currentMapMenuIndex = 0; // Wrap around to the first map
+            currentMapMenuIndex = 0; 
         }
         System.out.println("Selected map index: " + (currentMapMenuIndex + 1));
-        // Force repaint to show new selection immediately
+        
         repaint();    }
 
-    // Delegate clock-related methods to ClockUI
+    
     public Season getSeason() {
         return clockUI.getCurrentSeason();
     }
@@ -1534,68 +1511,65 @@ public class GamePanel extends JPanel implements Runnable {
         return clockUI.getCurrentWeather().getDisplayName();
     }
     
-    /**
-     * Draws the inventory screen
-     * @param g2 Graphics2D object to draw with
-     */
+
     private void drawInventoryScreen(Graphics2D g2) {
-        // Draw semi-transparent black overlay across entire screen
-        g2.setColor(new Color(0, 0, 0, 180)); // Black with 70% opacity
+        
+        g2.setColor(new Color(0, 0, 0, 180)); 
         g2.fillRect(0, 0, screenWidth, screenHeight);
         
-        // Calculate inventory position to center it on screen
-        int inventoryWidth = 128 * scale; // 128 pixels * 3 = 384 pixels
-        int inventoryHeight = 128 * scale; // 128 pixels * 3 = 384 pixels
+        
+        int inventoryWidth = 128 * scale; 
+        int inventoryHeight = 128 * scale; 
         int x = (screenWidth - inventoryWidth) / 2;
         int y = (screenHeight - inventoryHeight) / 2;
         
-        // Draw inventory background
+        
         if (inventoryImage != null) {
             g2.drawImage(inventoryImage, x, y, inventoryWidth, inventoryHeight, null);
         } else {
-            // Fallback if image fails to load
-            g2.setColor(new Color(139, 69, 19, 200)); // Brown with transparency
+            
+            g2.setColor(new Color(139, 69, 19, 200)); 
             g2.fillRoundRect(x, y, inventoryWidth, inventoryHeight, 15, 15);
             g2.setColor(Color.BLACK);
             g2.drawRoundRect(x, y, inventoryWidth, inventoryHeight, 15, 15);
         }
         
-        // Draw grid for item slots (4x4 grid)
-        int slotSize = 32 * scale; // 32x32 pixel slots * scale
-        int slotSpacing = 0; // No spacing between slots
-        int slotOffsetX = 0; // Offset from left edge of inventory
-        int slotOffsetY = 0; // Offset from top edge of inventory
         
-        // Get selected slot index from mouse handler
+        int slotSize = 32 * scale; 
+        int slotSpacing = 0; 
+        int slotOffsetX = 0; 
+        int slotOffsetY = 0; 
+        
+        
         int selectedSlotIndex = mouseHandler.getSelectedSlotIndex();
         
-        // Draw item slots and items
+        
         for (int row = 0; row < INVENTORY_ROWS; row++) {
             for (int col = 0; col < INVENTORY_COLS; col++) {
-                // Calculate slot position
+                
                 int slotX = x + slotOffsetX + col * (slotSize + slotSpacing);
                 int slotY = y + slotOffsetY + row * (slotSize + slotSpacing);
                 
-                // Calculate slot index (0-15)
+                
                 int slotIndex = row * INVENTORY_COLS + col;
                 
-                // Only draw slot background if selected (remove black grid)
+                
                 if (slotIndex == selectedSlotIndex) {
-                    g2.setColor(new Color(255, 255, 100, 180)); // Yellow highlight for selected slot
+                    g2.setColor(new Color(255, 255, 100, 180)); 
                     g2.fillRect(slotX, slotY, slotSize, slotSize);
                     g2.setColor(Color.BLACK);
                     g2.drawRect(slotX, slotY, slotSize, slotSize);
                 }
-                  // Draw item in slot if it exists
+                  
                 Item[] playerItems = player.getInventoryItems();
                 int[] playerQuantities = player.getInventoryQuantities();
                 if (slotIndex < playerItems.length && playerItems[slotIndex] != null) {
                     Item item = playerItems[slotIndex];
                     int quantity = playerQuantities[slotIndex];
                     
-                    // Draw item image centered in slot with bigger scale
+                    
                     if (item.getImage() != null) {
-                        // Scale item images to be bigger (1.5x the original size)
+                        
                         int scaledWidth = (int)(item.getImage().getWidth() * 1.5);
                         int scaledHeight = (int)(item.getImage().getHeight() * 1.5);
                         int itemX = slotX + (slotSize - scaledWidth) / 2;
@@ -1603,7 +1577,7 @@ public class GamePanel extends JPanel implements Runnable {
                         g2.drawImage(item.getImage(), itemX, itemY, scaledWidth, scaledHeight, null);
                     }
                     
-                    // Draw item quantity
+                    
                     if (quantity > 1) {
                         g2.setColor(Color.WHITE);
                         g2.setFont(g2.getFont().deriveFont(Font.BOLD, 12));
@@ -1614,28 +1588,28 @@ public class GamePanel extends JPanel implements Runnable {
             }
         }
         
-        // Draw inventory title centered above the inventory
+        
         g2.setColor(Color.WHITE);
         g2.setFont(g2.getFont().deriveFont(Font.BOLD, 24));
         String titleText = "Inventory";
         int titleWidth = g2.getFontMetrics().stringWidth(titleText);
         int titleX = x + (inventoryWidth - titleWidth) / 2;
         g2.drawString(titleText, titleX, y - 15);
-          // Draw remove button on the right side of inventory (wider button)
-        int removeButtonWidth = 80; // Increased width from 60 to 80
+          
+        int removeButtonWidth = 80; 
         int removeButtonHeight = 30;
         int removeButtonX = x + inventoryWidth + 10;
         int removeButtonY = y + 20;
         
-        // Draw remove button background
-        g2.setColor(new Color(200, 60, 60)); // Red button
+        
+        g2.setColor(new Color(200, 60, 60)); 
         g2.fillRoundRect(removeButtonX, removeButtonY, removeButtonWidth, removeButtonHeight, 10, 10);
         
-        // Draw remove button border
+        
         g2.setColor(Color.BLACK);
         g2.drawRoundRect(removeButtonX, removeButtonY, removeButtonWidth, removeButtonHeight, 10, 10);
         
-        // Draw remove button text centered in button
+        
         g2.setColor(Color.WHITE);
         g2.setFont(g2.getFont().deriveFont(Font.BOLD, 14));
         String removeButtonText = "Remove";
@@ -1643,64 +1617,50 @@ public class GamePanel extends JPanel implements Runnable {
         int removeButtonTextX = removeButtonX + (removeButtonWidth - removeButtonTextWidth) / 2;
         g2.drawString(removeButtonText, removeButtonTextX, removeButtonY + 20);
         
-        // Draw use button below remove button
+        
         int useButtonWidth = 80;
         int useButtonHeight = 30;
         int useButtonX = x + inventoryWidth + 10;
-        int useButtonY = removeButtonY + removeButtonHeight + 10; // 10px gap below remove button
+        int useButtonY = removeButtonY + removeButtonHeight + 10; 
         
-        // Draw use button background
-        g2.setColor(new Color(60, 200, 60)); // Green button
+        
+        g2.setColor(new Color(60, 200, 60)); 
         g2.fillRoundRect(useButtonX, useButtonY, useButtonWidth, useButtonHeight, 10, 10);
         
-        // Draw use button border
+        
         g2.setColor(Color.BLACK);
         g2.drawRoundRect(useButtonX, useButtonY, useButtonWidth, useButtonHeight, 10, 10);
         
-        // Draw use button text centered in button
+        
         g2.setColor(Color.WHITE);
         g2.setFont(g2.getFont().deriveFont(Font.BOLD, 14));        String useButtonText = "Use";
         int useButtonTextWidth = g2.getFontMetrics().stringWidth(useButtonText);
         int useButtonTextX = useButtonX + (useButtonWidth - useButtonTextWidth) / 2;        g2.drawString(useButtonText, useButtonTextX, useButtonY + 20);
     }
-      /**
-     * Pause the game time during fishing
-     */
+
     public void pauseTime() {
         clockUI.pauseTime();
     }
     
-    /**
-     * Resume the game time after fishing
-     */
+
     public void resumeTime() {
         clockUI.resumeTime();
     }
     
-    /**
-     * Add specific minutes to the game time
-     * @param minutes Minutes to add
-     */
+
     public void addGameTime(int minutes) {
         clockUI.addGameTime(minutes);
     }
-    /**
-     * Tambah waktu dalam menit
-     */
+
     public void addMinutes(int minutes) {
         clockUI.addGameTime(minutes);
     }
 
-    /**
-     * Tambah waktu dalam jam
-     */
     public void addHours(int hours) {
         clockUI.addGameTime(hours * 60);
     }
 
-    /**
-     * Timeskip ke jam dan menit tertentu, dan teleport ke rumah jika married
-     */
+
     public void timeskipTo(int hour, int minute, boolean teleportHomeIfMarried) {
         Time t = clockUI.getCurrentTime();
         t.setHour(hour);
@@ -1711,38 +1671,30 @@ public class GamePanel extends JPanel implements Runnable {
         }
     }
 
-    /**
-     * Get current time object
-     * @return Current Time object
-     */
+
     public Time getCurrentTime() {
         return clockUI.getCurrentTime();
     }
     
-    /**
-     * Get current day
-     * @return Current day
-     */
     public int getCurrentDay() {
         return clockUI.getCurrentDay();
-    }    /**
-     * Advance to next day (doesn't change time)
-     */
+    }   
+
     public void advanceToNextDay() {
         clockUI.advanceToNextDay();
         
-        // Remove plants that don't match the new season
+        
         int removedPlants = tileManager.removeMismatchedSeasonPlants();
         if (removedPlants > 0) {
             System.out.println("Removed " + removedPlants + " plants due to season change.");
         }
     }
     
-    // --- Message Pane for NPC interaction ---
-    // Removed drawMessagePanel(Graphics2D g2) as it's now handled by NPCUi
+    
+    
     private NPCUi npcUi;
 
-    // --- PLAYER-NPC INTERACTION (GIFT/TALK) ---
+    
     public void tryGiftToNearbyNPC() {
         npcUi.tryGiftToNearbyNPC();
     }
@@ -1759,9 +1711,7 @@ public class GamePanel extends JPanel implements Runnable {
         return npcUi.getGiftingTargetNPC();
     }
 
-    /**
-     * Returns the first NPC exactly 'distance' tiles away from the player, or null if none.
-     */
+
     public NPCEntity getNearbyNPC(int distance) {
         return npcUi.getNearbyNPC(distance);
     }
@@ -1769,27 +1719,23 @@ public class GamePanel extends JPanel implements Runnable {
     public NPCUi getNPCUi() {
         return npcUi;
     }
-    /**
-     * Tampilkan pesan ke message panel NPC (UI)
-     */
+
     public void showMessagePanel(String text) {
         npcUi.showMessagePanel(text);
-    }    // --- NPC INTERACTION MENU ---
-    /**
-     * Show the NPC interaction menu if near an NPC
-     */
+    }    
+
     public void showNPCInteractionMenu(SRC.ENTITY.NPCEntity npc) {
-        // Use the new NPCUi system for interaction menu
+        
         if (npc != null) {
             npcUi.openNPCInteractionMenu(npc);
         }
         repaint();
-    }    public void closeNPCInteractionMenu() {
-        // Use the new NPCUi system to close the menu
-
+    }    
+    public void closeNPCInteractionMenu() {
         npcUi.closeNPCInteractionMenu();
         repaint();
-    }    public boolean isNPCInteractionMenuOpen() {
+    }    
+    public boolean isNPCInteractionMenuOpen() {
         return npcUi.isNPCInteractionMenuOpen();
     }
 
@@ -1799,21 +1745,15 @@ public class GamePanel extends JPanel implements Runnable {
 
     public boolean isMessagePanelActive() {
         return npcUi.isMessagePanelActive();
-    }    /**
-     * Check if current time is night time (18:00 - 05:59)
-     * @return true if it's night time
-     */
+    }   
     private boolean isNightTime() {
         Time currentTime = clockUI.getCurrentTime();
         int hour = currentTime.getHour();
-        // Night time: 18:00 (6 PM) to 05:59 (5:59 AM)
+        
         return hour >= 18 || hour < 6;
     }
     
-    /**
-     * Check if current map should have night effects
-     * @return true if map should be affected by night brightness
-     */
+
     private boolean isMapAffectedByNight() {
         String mapName = currentMap.getMapName();
         return mapName.equals("Farm Map") || 
@@ -1822,23 +1762,18 @@ public class GamePanel extends JPanel implements Runnable {
                mapName.equals("Forest River Map");
     }
     
-    /**
-     * Update brightness based on time and map
-     */
+
     private void updateBrightness() {
         if (isMapAffectedByNight() && isNightTime()) {
-            currentBrightness = 0.5f; // 50% brightness for night
+            currentBrightness = 0.5f; 
         } else {
-            currentBrightness = 1.0f; // Normal brightness for day or indoor maps
+            currentBrightness = 1.0f; 
         }
     }
-      /**
-     * Apply night effect overlay to the graphics
-     * @param g2 Graphics2D object
-     */
+  
     private void applyNightEffect(Graphics2D g2) {
         if (currentBrightness < 1.0f) {
-            // Create dark overlay for night effect
+            
             int alpha = (int)((1.0f - currentBrightness) * 255);
             Color nightOverlay = new Color(0, 0, 0, alpha);
             g2.setColor(nightOverlay);
@@ -1852,7 +1787,7 @@ public class GamePanel extends JPanel implements Runnable {
         if (gameState == CHEAT_STATE) {
             gameState = PLAY_STATE;
             cheatUI.toggle();
-            // Reset key states to prevent stuck movement keys
+            
             keyHandler.resetAllKeyStates();
             System.out.println("DEBUG: Cheat console closed, key states reset");
         } else {
@@ -1860,7 +1795,7 @@ public class GamePanel extends JPanel implements Runnable {
             cheatUI.toggle();
             System.out.println("DEBUG: Cheat console opened");
         }
-    }// Game Time management
+    }
     private GameTime gameTime;
 
     public void setSeason(Season season) {
@@ -1898,23 +1833,17 @@ public class GamePanel extends JPanel implements Runnable {
         return optionsUI;
     }
     
-    /**
-     * Get the music manager instance
-     * @return The music manager
-     */
+
     public MusicManager getMusicManager() {
         return musicManager;
     }
     
-    /**
-     * Cleanup resources when GamePanel is disposed
-     * This should be called when the game is closed
-     */
+
     public void cleanup() {
         if (musicManager != null) {
             musicManager.dispose();
         }
-        // Stop the game thread
+        
         gameThread = null;
     }
 }

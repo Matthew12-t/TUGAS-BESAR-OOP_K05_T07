@@ -4,23 +4,18 @@ import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * MusicManager handles background music playback with looping capability
- */
+
 public class MusicManager {
     private Clip musicClip;
     private boolean isPlaying = true;
     private String currentMusicPath;
     
-    /**
-     * Load and play music from file path
-     * @param musicPath Path to the music file
-     */    public void playMusic(String musicPath) {
+   public void playMusic(String musicPath) {
         try {
-            // Stop any currently playing music
+            
             stopMusic();
             
-            // Load the music file
+            
             File musicFile = new File(musicPath);
             if (!musicFile.exists()) {
                 System.err.println("Music file not found: " + musicPath);
@@ -29,7 +24,7 @@ public class MusicManager {
             
             System.out.println("Attempting to load music file: " + musicFile.getAbsolutePath());
             
-            // Load audio stream (WAV format is supported natively)
+            
             AudioInputStream audioStream;
             try {
                 audioStream = AudioSystem.getAudioInputStream(musicFile);
@@ -40,7 +35,7 @@ public class MusicManager {
                 e.printStackTrace();
                 return;
             }
-              // Get audio format and create clip
+              
             AudioFormat format = audioStream.getFormat();
             System.out.println("Audio format: " + format);
             DataLine.Info info = new DataLine.Info(Clip.class, format);
@@ -55,10 +50,10 @@ public class MusicManager {
             musicClip = (Clip) AudioSystem.getLine(info);
             musicClip.open(audioStream);
             
-            // Set to loop continuously
+            
             musicClip.loop(Clip.LOOP_CONTINUOUSLY);
             
-            // Start playing
+            
             musicClip.start();
             isPlaying = true;
             currentMusicPath = musicPath;
@@ -66,7 +61,7 @@ public class MusicManager {
             System.out.println("Music started successfully: " + musicPath);
             System.out.println("Music clip status - Running: " + musicClip.isRunning() + ", Open: " + musicClip.isOpen());
             
-            // Close the audio stream as it's no longer needed
+            
             audioStream.close();
             
         } catch (LineUnavailableException | IOException e) {
@@ -75,9 +70,7 @@ public class MusicManager {
         }
     }
     
-    /**
-     * Stop the currently playing music
-     */
+
     public void stopMusic() {
         if (musicClip != null && isPlaying) {
             musicClip.stop();
@@ -88,9 +81,7 @@ public class MusicManager {
         }
     }
     
-    /**
-     * Pause the music
-     */
+
     public void pauseMusic() {
         if (musicClip != null && isPlaying) {
             musicClip.stop();
@@ -99,9 +90,7 @@ public class MusicManager {
         }
     }
     
-    /**
-     * Resume the music
-     */
+
     public void resumeMusic() {
         if (musicClip != null && !isPlaying) {
             musicClip.start();
@@ -110,10 +99,7 @@ public class MusicManager {
         }
     }
     
-    /**
-     * Set music volume (0.0 to 1.0)
-     * @param volume Volume level
-     */
+
     public void setVolume(float volume) {
         if (musicClip != null) {
             if (volume < 0.0f) volume = 0.0f;
@@ -125,25 +111,16 @@ public class MusicManager {
         }
     }
     
-    /**
-     * Check if music is currently playing
-     * @return true if music is playing
-     */
     public boolean isPlaying() {
         return isPlaying && musicClip != null && musicClip.isRunning();
     }
     
-    /**
-     * Get the current music file path
-     * @return current music path
-     */
+
     public String getCurrentMusicPath() {
         return currentMusicPath;
     }
     
-    /**
-     * Clean up resources when MusicManager is no longer needed
-     */
+
     public void dispose() {
         stopMusic();
     }

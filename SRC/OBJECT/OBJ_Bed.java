@@ -8,13 +8,13 @@ import SRC.MAIN.GamePanel;
 import java.awt.Graphics2D;
 
 public class OBJ_Bed extends SuperObject {
-    // Ukuran tempat tidur dalam jumlah tile
-    private int bedWidth = 2;  // Lebar tempat tidur (jumlah kolom)
-    private int bedHeight = 4; // Tinggi tempat tidur (jumlah baris)
+    
+    private int bedWidth = 2;  
+    private int bedHeight = 4; 
     public OBJ_Bed(GamePanel gp, int col, int row) {
         super(gp, col, row);
         setName("Bed");
-        getPosition().setCollision(true); // Bed cannot be passed through
+        getPosition().setCollision(true); 
         try {
             BufferedImage image = ImageIO.read(getClass().getResourceAsStream("/RES/OBJECT/bed.png"));
             if (image == null) {
@@ -26,13 +26,13 @@ public class OBJ_Bed extends SuperObject {
         }
     }
     public void draw(Graphics2D g2, GamePanel gp) {
-        // Hitung posisi layar berdasarkan posisi kamera
+        
         int worldX = getPosition().getWorldX();
         int worldY = getPosition().getWorldY();
         int screenX = worldX - gp.getCameraX();
         int screenY = worldY - gp.getCameraY();
 
-        // Hanya render jika objek berada dalam area layar yang terlihat
+        
         if(worldX + (bedWidth * gp.getTileSize()) > gp.getCameraX() &&
            worldX - gp.getTileSize() < gp.getCameraX() + gp.getScreenWidth() &&
            worldY + (bedHeight * gp.getTileSize()) > gp.getCameraY() &&

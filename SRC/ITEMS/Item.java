@@ -20,10 +20,7 @@ public abstract class Item {
         this.image = null;
     }
     
-    /**
-     * Load image for this item
-     * @param imagePath Path to the image file
-     */
+
     protected void loadImage(String imagePath) {
         try {
             this.image = ImageIO.read(new File(imagePath));

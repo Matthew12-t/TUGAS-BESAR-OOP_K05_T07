@@ -14,19 +14,19 @@ public class SuperObject {
     private String name;
     private Tile position;
     
-    // Constructor
+    
     public SuperObject(GamePanel gp, int col, int row) {
         this.position = new Tile(gp, col, row);
     }
     
     public void draw(Graphics2D g2, GamePanel gp) {
-        // Calculate screen position based on camera position
+        
         int worldX = position.getWorldX();
         int worldY = position.getWorldY();
         int screenX = worldX - gp.getCameraX();
         int screenY = worldY - gp.getCameraY();
 
-        // Only render if the object is within the visible screen area
+        
         if(worldX + gp.getTileSize() > gp.getCameraX() &&
            worldX - gp.getTileSize() < gp.getCameraX() + gp.getScreenWidth() &&
            worldY + gp.getTileSize() > gp.getCameraY() &&
@@ -36,7 +36,7 @@ public class SuperObject {
         }
     }
 
-    // Getters and setters
+    
     public BufferedImage getImage() {
         return image;
     }

@@ -9,7 +9,7 @@ public class Food extends Item implements Edible {
         super(name, "Food", sellPrice, buyPrice);
         this.energy = energy;
         
-        // Load image for this food item
+
         String imagePath = "RES/FOOD/" + name.toLowerCase().replace(" ", "_") + ".png";
         loadImage(imagePath);
     }

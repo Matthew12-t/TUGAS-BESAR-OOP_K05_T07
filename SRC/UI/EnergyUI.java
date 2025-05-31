@@ -12,19 +12,19 @@ import SRC.ENTITY.Player;
 public class EnergyUI {
     private int screenWidth;
     private int screenHeight;
-      // Energy bar properties
+      
     private static final int BAR_WIDTH = 200;
     private static final int BAR_HEIGHT = 20;
-    private static final int BAR_X = 10; // Top-left corner
-    private static final int BAR_Y = 30; // Moved down slightly for better positioning
+    private static final int BAR_X = 10; 
+    private static final int BAR_Y = 30; 
     
-    // Colors
-    private static final Color BACKGROUND_COLOR = new Color(50, 50, 50, 150); // Dark gray semi-transparent
+    
+    private static final Color BACKGROUND_COLOR = new Color(50, 50, 50, 150); 
     private static final Color BORDER_COLOR = Color.WHITE;
-    private static final Color HIGH_ENERGY_COLOR = new Color(76, 175, 80); // Green
-    private static final Color MEDIUM_ENERGY_COLOR = new Color(255, 193, 7); // Yellow
-    private static final Color LOW_ENERGY_COLOR = new Color(244, 67, 54); // Red
-    private static final Color NEGATIVE_ENERGY_COLOR = new Color(139, 0, 0); // Dark red for negative energy
+    private static final Color HIGH_ENERGY_COLOR = new Color(76, 175, 80); 
+    private static final Color MEDIUM_ENERGY_COLOR = new Color(255, 193, 7); 
+    private static final Color LOW_ENERGY_COLOR = new Color(244, 67, 54); 
+    private static final Color NEGATIVE_ENERGY_COLOR = new Color(139, 0, 0); 
 
     /**
      * Constructor for EnergyUI
@@ -41,49 +41,49 @@ public class EnergyUI {
      * @param g2 Graphics2D object to draw with
      * @param player Player object to get energy information from
      */    public void drawEnergyBar(Graphics2D g2, Player player) {
-        // Draw background (empty bar)
+        
         g2.setColor(BACKGROUND_COLOR);
         g2.fillRect(BAR_X, BAR_Y, BAR_WIDTH, BAR_HEIGHT);
         
-        // Draw border
+        
         g2.setColor(BORDER_COLOR);
         g2.drawRect(BAR_X, BAR_Y, BAR_WIDTH, BAR_HEIGHT);
         
-        // Calculate energy fill width
+        
         double energyPercentage = player.getEnergyPercentage();
         int fillWidth;
         
         if (energyPercentage >= 0) {
             fillWidth = (int) (BAR_WIDTH * energyPercentage);
         } else {
-            fillWidth = (int) (BAR_WIDTH * (Math.max(-1.0, energyPercentage))); // Cap at -100%
+            fillWidth = (int) (BAR_WIDTH * (Math.max(-1.0, energyPercentage))); 
         }
-          // Set color based on energy percentage
+          
         g2.setColor(getEnergyBarColor(energyPercentage));
         
         if (energyPercentage >= 0) {
             g2.fillRect(BAR_X + 1, BAR_Y + 1, fillWidth - 2, BAR_HEIGHT - 2);
         } else {
-            // For negative energy, fill from the center to the left
+            
             int centerX = BAR_X + BAR_WIDTH / 2;
             g2.fillRect(centerX - fillWidth + 1, BAR_Y + 1, fillWidth - 2, BAR_HEIGHT - 2);
         }
-          // Draw energy text
+          
         g2.setFont(new Font("Arial", Font.BOLD, 12));
         String energyText = player.getCurrentEnergy() + "/" + player.getMaxEnergy();
         FontMetrics fm = g2.getFontMetrics();
         int textX = BAR_X + (BAR_WIDTH - fm.stringWidth(energyText)) / 2;
         int textY = BAR_Y + (BAR_HEIGHT + fm.getAscent()) / 2 - 2;
         
-        // Set text color based on energy level
+        
         if (player.getCurrentEnergy() < 0) {
-            g2.setColor(NEGATIVE_ENERGY_COLOR); // Use dark red for negative values
+            g2.setColor(NEGATIVE_ENERGY_COLOR); 
         } else {
             g2.setColor(Color.WHITE);
         }
         g2.drawString(energyText, textX, textY);
         
-        // Draw "Energy" label above the bar
+        
         g2.setFont(new Font("Arial", Font.BOLD, 10));
         g2.drawString("Energy", BAR_X, BAR_Y - 2);
     }

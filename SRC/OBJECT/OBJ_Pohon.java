@@ -8,14 +8,14 @@ import SRC.MAIN.GamePanel;
 import java.awt.Graphics2D;
 
 public class OBJ_Pohon extends SuperObject {
-    // Ukuran tempat tidur dalam jumlah tile
-    private int pohonWidth = 3;  // Lebar kursi (jumlah kolom)
-    private int pohonHeight = 4; // Tinggi kursi (jumlah baris)
+    
+    private int pohonWidth = 3;  
+    private int pohonHeight = 4; 
     private int mode = 1;
     public OBJ_Pohon(GamePanel gp, int col, int row, int mode) {
         super(gp, col, row);
         setName("pohon");
-        getPosition().setCollision(true); // pohon cannot be passed through
+        getPosition().setCollision(true); 
         
         this.mode = mode;
         try {
@@ -32,13 +32,13 @@ public class OBJ_Pohon extends SuperObject {
         this(gp, col, row, 1);
     }
     public void draw(Graphics2D g2, GamePanel gp) {
-        // Hitung posisi layar berdasarkan posisi kamera
+        
         int worldX = getPosition().getWorldX() - 1 * gp.getTileSize();
         int worldY = getPosition().getWorldY() - 3 * gp.getTileSize();
         int screenX = worldX - gp.getCameraX();
         int screenY = worldY - gp.getCameraY();
 
-        // Hanya render jika objek berada dalam area layar yang terlihat
+        
         if(worldX + (pohonWidth * gp.getTileSize()) > gp.getCameraX() &&
            worldX - gp.getTileSize() < gp.getCameraX() + gp.getScreenWidth() &&
            worldY + (pohonHeight * gp.getTileSize()) > gp.getCameraY() &&
