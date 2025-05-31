@@ -198,7 +198,7 @@ public class NPCEntity extends Entity implements NPC {    // Basic NPC propertie
                 System.out.println(message);
                 showMessageToUI(message);
                 player.setMarried(true);
-                gp.timeskipTo(22, 00, hasRing);
+                gp.timeskipTo(22, 00, true);
                 break;
             }
             default:

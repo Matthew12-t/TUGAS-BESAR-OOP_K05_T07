@@ -173,7 +173,7 @@ public class CarolineEntity extends NPCEntity {
         String baseMsg = super.receiveGift(item);
         updateRelationshipStatus();
         if (baseMsg.contains("loves")) {
-            return "Caroline: Wah, akan uubah menjadi suatu karya seni. " + baseMsg;
+            return "Caroline: Wah, akan ku ubah menjadi suatu karya seni. " + baseMsg;
         } else if (baseMsg.contains("likes")) {
             return "Caroline: Terima kasih, aku suka ini! " + baseMsg;
         } else if (baseMsg.contains("hates")) {

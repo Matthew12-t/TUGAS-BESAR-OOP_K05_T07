@@ -1601,8 +1601,10 @@ public class GamePanel extends JPanel implements Runnable {
         Time t = clockUI.getCurrentTime();
         t.setHour(hour);
         t.setMinute(minute);
-        // Teleport logic if needed
-        // ...
+        if (teleportHomeIfMarried){
+            teleportToMap("House Map");
+            System.out.println("harusnya teleport ke rumah");
+        }
     }
 
     /**

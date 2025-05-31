@@ -217,10 +217,9 @@ public class GameData {
     /**
      * Get starter items for new players
      * @return Array of Items for starter inventory
-     */
-    public static Item[] getStarterItems() {
+     */    public static Item[] getStarterItems() {
         return new Item[] {
-            addSeed("Parsnip Seeds", 15),
+            addSeed("Parsnip Seed", 15),
             addTool("Hoe", 1),
             addTool("Watering Can", 1),
             addTool("Pickaxe", 1),

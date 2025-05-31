@@ -943,7 +943,7 @@ public class PlayerAction {
         
         if (currentEnergy <= 0) {
             // If energy <= 0, add only 10 energy
-            newEnergy = currentEnergy + 10;
+            newEnergy = 10;
         } else if (currentEnergy < (MAX_ENERGY * 0.1)) {
             // If energy < 10% of MAX_ENERGY, restore to half MAX_ENERGY
             newEnergy = MAX_ENERGY / 2;

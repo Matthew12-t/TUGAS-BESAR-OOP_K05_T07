@@ -33,9 +33,12 @@ public class EmilyEntity extends NPCEntity {
         setSpeed(0);
     }    /**
      * Set up Emily's item preferences
-     */
-    private void setItemPreferences() {
-        Set<String> lovedItemNames = Set.of("Parsnip Seeds", "Cauliflower Seeds", "Potato Seeds", "Blueberry Seeds");
+     */    private void setItemPreferences() {
+        Set<String> lovedItemNames = Set.of(
+            "Parsnip Seed", "Cauliflower Seed", "Potato Seed", "Wheat Seed",
+            "Blueberry Seed", "Tomato Seed", "Hot Pepper Seed", "Melon Seed",
+            "Cranberry Seed", "Pumpkin Seed", "Grape Seed"
+        );
         for (String itemName : lovedItemNames) {
             Item item = GameData.getItem(itemName, 1);
             if (item != null) {
