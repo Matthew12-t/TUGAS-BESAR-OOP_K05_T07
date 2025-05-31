@@ -168,18 +168,7 @@ public class KeyHandler implements KeyListener {
                 }
                 
                 // Map switching
-                if(code == KeyEvent.VK_1) {
-                    gamePanel.switchToWorldMap();
-                    System.out.println("Switched to World Map");
-                }
-                if(code == KeyEvent.VK_2) {
-                    gamePanel.switchToFarmMap();
-                    System.out.println("Switched to Farm Map");
-                }
-                if(code == KeyEvent.VK_3) {
-                    gamePanel.switchToHouseMap();
-                    System.out.println("Switched to House Map");
-                }                  // Object placement mode vs Planting mode
+                
                 if(code == KeyEvent.VK_P) {
                     // Check if player has a seed selected for planting
                     if (gamePanel.getPlayer().getPlayerAction().getHeldSeedName() != null) {
@@ -281,21 +270,7 @@ public class KeyHandler implements KeyListener {
                 }
             }
               // Drop held tool or seed with 'Q' key - works in both PLAY_STATE and INVENTORY_STATE
-            if(code == KeyEvent.VK_Q) {
-                if (gamePanel.getGameState() == GamePanel.PLAY_STATE || 
-                    gamePanel.getGameState() == GamePanel.INVENTORY_STATE) {
-                    // Drop the currently held tool or seed
-                    if (gamePanel.getPlayer().isHoldingAnyTool()) {
-                        gamePanel.getPlayer().getPlayerAction().dropHeldTool();
-                        System.out.println("DEBUG: 'Q' key pressed to drop held tool");
-                    } else if (gamePanel.getPlayer().isHoldingAnySeed()) {
-                        gamePanel.getPlayer().getPlayerAction().dropHeldSeed();
-                        System.out.println("DEBUG: 'Q' key pressed to drop held seed");
-                    } else {
-                        System.out.println("DEBUG: 'Q' key pressed but nothing to drop");
-                    }
-                }
-            }
+            
             
             else if (gamePanel.getGameState() == GamePanel.MAP_MENU_STATE) {
                 // Map menu navigation

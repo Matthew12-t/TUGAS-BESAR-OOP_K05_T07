@@ -326,7 +326,7 @@ public class NPCUi {
                 int playerTileX = gamePanel.getPlayer().getWorldX() / gamePanel.getTileSize();
                 int playerTileY = gamePanel.getPlayer().getWorldY() / gamePanel.getTileSize();
                 for (NPCEntity npc : npcs) {
-                    if ((playerTileX == 4 && playerTileY == 3)) {
+                    if ((playerTileX == 6 && playerTileY == 5)) {
                         return npc;
                     }
                 }
@@ -336,7 +336,7 @@ public class NPCUi {
             int playerTileX = gamePanel.getPlayer().getWorldX() / gamePanel.getTileSize();
             int playerTileY = gamePanel.getPlayer().getWorldY() / gamePanel.getTileSize();
             for (NPCEntity npc : npcs) {
-                if ((playerTileX == 2 && playerTileY == 3)) {
+                if ((playerTileX == 4 && playerTileY == 5)) {
                         return npc;
                     }
             }

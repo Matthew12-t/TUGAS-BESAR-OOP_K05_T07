@@ -749,8 +749,8 @@ public class GamePanel extends JPanel implements Runnable {
                     isInitializedFarmMap = true;
                 }
                 FarmMap farmMapRef = (FarmMap) farmMap;
-                player.setWorldX(tileSize * farmMapRef.getDepanRumahCol());
-                player.setWorldY(tileSize * farmMapRef.getDepanRumahRow());
+                player.setWorldX(tileSize * (farmMapRef.getDepanRumahCol() +1));
+                player.setWorldY(tileSize * (farmMapRef.getDepanRumahRow()+ 1));
             } else {
                 switchMap(farmMap);
                 if (!isInitializedFarmMap) {
@@ -758,8 +758,8 @@ public class GamePanel extends JPanel implements Runnable {
                     isInitializedFarmMap = true;
                 }
                 // Pindahkan player ke posisi default masuk dari world
-                player.setWorldX(tileSize * (28));
-                player.setWorldY(tileSize * (8)); // Kolom 30, baris 30
+                player.setWorldX(tileSize * (30));
+                player.setWorldY(tileSize * (10)); // Kolom 30, baris 30
                 // Y tetap
             }          
         } else if (targetMapName.equals("Forest River Map")) {
@@ -798,9 +798,10 @@ public class GamePanel extends JPanel implements Runnable {
             // Pindahkan player ke posisi default di tengah pintu masuk
             int doorStart = (HouseMap.HOUSE_COLS / 2) - 1; // Center of the door
             player.setWorldX(tileSize * doorStart);
-            player.setWorldY(tileSize * (HouseMap.HOUSE_ROWS - 5)); // One tile above the door
+            player.setWorldY(tileSize * (HouseMap.HOUSE_ROWS - 2)); // One tile above the door
               // For consistency, also center the camera on the house map
-            centerCameraOnMap(HouseMap.HOUSE_COLS, HouseMap.HOUSE_ROWS);        } else if (targetMapName.equals("Store Map")) {
+            centerCameraOnMap(HouseMap.HOUSE_COLS, HouseMap.HOUSE_ROWS);        } 
+            else if (targetMapName.equals("Store Map")) {
             switchMap(storeMap);
             if (!isInitializedStoreMap) {
                 storeMap.setupInitialObjects();
@@ -1288,8 +1289,8 @@ public class GamePanel extends JPanel implements Runnable {
             }
             
             // Position player next to the teleport tile at position (0,2)
-            player.setWorldX(tileSize * 0); // Column 1 (right after teleport column)
-            player.setWorldY(tileSize * 1); // Row 2 (next to teleport tile)
+            player.setWorldX(tileSize * 1); // Column 1 (right after teleport column)
+            player.setWorldY(tileSize * 2); // Row 2 (next to teleport tile)
             
             System.out.println("Teleported player to Ocean Map at position (1, 2)");
             
@@ -1305,8 +1306,8 @@ public class GamePanel extends JPanel implements Runnable {
             }
             
             // Position player at the entrance of the store
-            player.setWorldX(tileSize * ((StoreMap.STORE_COLS / 2) - 2)); // Center horizontally
-            player.setWorldY(tileSize * (StoreMap.STORE_ROWS - 4)); // Near the bottom entrance
+            player.setWorldX(tileSize * ((StoreMap.STORE_COLS / 2) - 1)); 
+            player.setWorldY(tileSize * (StoreMap.STORE_ROWS - 2));
 
             System.out.println("Teleported player to Store Map at entrance");
               // Center camera on map
@@ -1321,8 +1322,8 @@ public class GamePanel extends JPanel implements Runnable {
             }
             
             // Position player at the entrance
-            player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 2));
-            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 4));
+            player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 1));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
             
             System.out.println("Teleported player to Abigail's House at entrance");
             
@@ -1339,8 +1340,8 @@ public class GamePanel extends JPanel implements Runnable {
             }
             
             // Position player at the entrance
-            player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 2));
-            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 4));
+            player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 1));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
             
             System.out.println("Teleported player to Caroline's House at entrance");
             
@@ -1357,8 +1358,8 @@ public class GamePanel extends JPanel implements Runnable {
             }
             
             // Position player at the entrance
-            player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 2));
-            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 4));
+            player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 1));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
             
             System.out.println("Teleported player to Dasco's House at entrance");
             
@@ -1377,8 +1378,8 @@ public class GamePanel extends JPanel implements Runnable {
             }
             
             // Position player at the entrance
-            player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 2));
-            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 4));
+            player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 1));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
             
             System.out.println("Teleported player to Emily's House at entrance");
             
@@ -1395,8 +1396,8 @@ public class GamePanel extends JPanel implements Runnable {
             }
             
             // Position player at the entrance
-            player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 2));
-            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 4));
+            player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 1));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
             
             System.out.println("Teleported player to Mayor Tadi's House at entrance");
             
@@ -1413,8 +1414,8 @@ public class GamePanel extends JPanel implements Runnable {
             }
             
             // Position player at the entrance
-            player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 2));
-            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 4));
+            player.setWorldX(tileSize * ((NPCHouseMap.NPC_HOUSE_COLS / 2) - 1));
+            player.setWorldY(tileSize * (NPCHouseMap.NPC_HOUSE_ROWS - 2));
             
             System.out.println("Teleported player to Perry's House at entrance");
             
