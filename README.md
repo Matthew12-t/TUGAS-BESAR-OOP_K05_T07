@@ -17,10 +17,12 @@ Spakbor Hills adalah Stardew Valley yang disederhanakan. Game ini dibangun denga
 - Menu: New Game, Load, Help, Player Info, Statistics, Actions, Credits, Exit.
 
 🛠 **Dependensi** 🛠
-
+- JDK 23
+- Git
+- (Opsional) IDE: IntelliJ, VSCode
 
 🖥 **Cara Menggunakan** 🖥
-
-
-🎮 **Cara Bermain** 🎮
-
+1. Clone repository Github
+2. Buka IDE dan impor folder proyek sebagai proyek Gradle.
+3. Gunakan perintah gradlew build (Windows) atau ./gradlew build (Linux/macOS) di terminal untuk mengkompilasi kode dan menghasilkan file aplikasi (JAR).
+4. Jalankan aplikasi langsung dari kode sumbernya dengan perintah gradlew run (Windows) atau ./gradlew run (Linux/macOS).
