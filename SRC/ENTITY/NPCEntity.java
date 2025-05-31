@@ -161,9 +161,17 @@ public class NPCEntity extends Entity implements NPC {    // Basic NPC propertie
                 showMessageToUI(message);
                 gp.addHours(1); // Advance time by 1 hour after proposing
                 break;
-            }
-            case "married": {
+            }            case "married": {
                 String message;
+                
+                // Check if player is already married to someone else first
+                if (player.isMarried() && !name.equals(player.getSpouseName())) {
+                    message = "CIEE udah ga setia sama pasangan sendiri, gaboleh poligami yaaa";
+                    System.out.println(message);
+                    showMessageToUI(message);
+                    break;
+                }
+                
                 boolean hasRing = false;
                 Item[] items = player.getInventoryItems();
                 for (Item item : items) {
@@ -177,7 +185,7 @@ public class NPCEntity extends Entity implements NPC {    // Basic NPC propertie
                     System.out.println(message);
                     showMessageToUI(message);
                     break;
-                }                if (relationshipStatus.equals("fiance")) {
+                }if (relationshipStatus.equals("fiance")) {
                     // Check if at least one day has passed since engagement
                     int currentDay = gp.getCurrentDay();
                     if (currentDay <= engagementDay) {
@@ -189,15 +197,21 @@ public class NPCEntity extends Entity implements NPC {    // Basic NPC propertie
                     
                     relationshipStatus = "spouse";
                     player.setEnergy(player.getEnergy() - 80);
+                    player.setMarried(true, name); // Set marriage status with spouse name
                     message = name + " sekarang menjadi pasanganmu! Selamat yaaa semoga bahagia selalu.";
                 } else if (relationshipStatus.equals("spouse")) {
-                    message =  "Aku pasanganmu, bukan suami/istri orang lain!!!!";
+                    // Check if player is already married to this specific NPC
+                    if (player.isMarried() && name.equals(player.getSpouseName())) {
+                        message = "Aku pasanganmu, bukan suami/istri orang lain!!!!";
+                    } else if (player.isMarried() && !name.equals(player.getSpouseName())) {
+                        message = "CIEE udah ga setia sama pasangan sendiri, gaboleh poligami yaaa";
+                    } else {
+                        message = "Aku pasanganmu, bukan suami/istri orang lain!!!!";
+                    }
                 } else {
-                    message = "Minimal dilamar dulu kalii";
-                }
+                    message = "Minimal dilamar dulu kalii";                }
                 System.out.println(message);
                 showMessageToUI(message);
-                player.setMarried(true);
                 gp.timeskipTo(22, 00, true);
                 break;
             }

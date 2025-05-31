@@ -25,6 +25,7 @@ public class Player extends Entity {
     private int gold; // Player's gold amount
     private final int TOTAL_FRAMES = 2;
     private boolean married;
+    private String spouseName; // Store the name of the spouse
 
     // Statistics tracking for EndGame system
     private int totalIncome;
@@ -66,9 +67,9 @@ public class Player extends Entity {
     // ----------------------------------    //contructor
     public Player(GamePanel gp, KeyHandler keyH, MouseHandler mouseHandler) {
         super(gp, 100, 100); // Panggil konstruktor Entity dengan posisi awal
-        this.gp = gp;        
-        this.keyH = keyH;
+        this.gp = gp;          this.keyH = keyH;
         this.married = false;
+        this.spouseName = null; // Initialize spouse name as null
         this.mouseHandler = mouseHandler;
         this.energy = 100; 
         this.gold = 500; // Initialize gold with 500
@@ -805,9 +806,20 @@ public class Player extends Entity {
 
     public List<Fish> getCaughtFish() {
         return new ArrayList<>(caughtFish); // Return copy to prevent external modification
-    }
-
-    public void setMarried(boolean married) {
+    }    public void setMarried(boolean married) {
         this.married = married;
+    }
+    
+    public String getSpouseName() {
+        return spouseName;
+    }
+    
+    public void setSpouseName(String spouseName) {
+        this.spouseName = spouseName;
+    }
+    
+    public void setMarried(boolean married, String spouseName) {
+        this.married = married;
+        this.spouseName = spouseName;
     }
 }
