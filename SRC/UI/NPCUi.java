@@ -100,7 +100,7 @@ public class NPCUi {
         // Draw instructions
         g2.setColor(Color.LIGHT_GRAY);
         g2.setFont(g2.getFont().deriveFont(Font.PLAIN, 10));
-        String instruction = "Press T, G, or P to select option, then ENTER to confirm. ESC to cancel.";
+        String instruction = "Press T, G, or P to select option, then ENTER to confirm. Q to cancel.";
         int instrX = x + (panelWidth - g2.getFontMetrics().stringWidth(instruction)) / 2;
         g2.drawString(instruction, instrX, y + panelHeight - 15);
     }

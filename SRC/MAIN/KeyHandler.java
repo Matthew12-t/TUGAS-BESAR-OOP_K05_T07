@@ -130,7 +130,7 @@ public class KeyHandler implements KeyListener {
                         gamePanel.getNPCUi().handleProposeKey();
                     } else if (code == KeyEvent.VK_ENTER) {
                         gamePanel.getNPCUi().handleEnterKey();
-                    } else if (code == KeyEvent.VK_ESCAPE) {
+                    } else if (code == KeyEvent.VK_Q) {
                         gamePanel.closeNPCInteractionMenu();
                     }
                     return; // Don't process any other keys when NPC menu is open
