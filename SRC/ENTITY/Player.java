@@ -18,7 +18,8 @@ import java.util.List;
 public class Player extends Entity {
     private GamePanel gp;
     private KeyHandler keyH;
-    private MouseHandler mouseHandler;    private PlayerAction playerAction;
+    private MouseHandler mouseHandler;    
+    private PlayerAction playerAction;
     private int energy;
     private final int MAX_ENERGY = 100; // Maximum energy value
     private int gold; // Player's gold amount
@@ -51,7 +52,7 @@ public class Player extends Entity {
     private BufferedImage[] right;
 
     // --- Tambahkan skala visual player ---
-    private final int visualScale = 4;
+    private final int visualScale = 1;
     private int playerVisualWidth;
     private int playerVisualHeight;
     // -------------------------------------
@@ -396,36 +397,32 @@ public class Player extends Entity {
     
     public void setDefaultValues() {
         setWorldX(100); // Starting position in the game world (world coordinates)
-        setWorldY(100);
+        setWorldY(150);
         setSpeed(4); // Movement speed in pixels per frame
         setDirection("down"); // default direction
     }
     
     public void getPlayerImage() {
         try {
-            // Load images for each direction and frame
-            // Using getClass().getResourceAsStream is generally better for deploying in a JAR
-            for (int i = 0; i < TOTAL_FRAMES; i++) {
-                 // Attempt to load from classpath first
-                 up[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/cw belakang/barcode" + (i+1) + ".png"));
-                 down[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/cw depan/barcode" + (i+1) + ".png"));
-                 left[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/cw kiri/barcode" + (i+1) + ".png"));
-                 right[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/cw kanan/barcode" + (i+1) + ".png"));
 
-                 // Fallback for direct file access if running outside JAR (less recommended)
-                 if (up[i] == null) up[i] = ImageIO.read(new File("RES/ENTITY/PLAYER/cw belakang/barcode" + (i+1) + ".png"));
-                 if (down[i] == null) down[i] = ImageIO.read(new File("RES/ENTITY/PLAYER/cw depan/barcode" + (i+1) + ".png"));
-                 if (left[i] == null) left[i] = ImageIO.read(new File("RES/ENTITY/PLAYER/cw kiri/barcode" + (i+1) + ".png"));
-                 if (right[i] == null) right[i] = ImageIO.read(new File("RES/ENTITY/PLAYER/cw kanan/barcode" + (i+1) + ".png"));
-            }
-
-            // Check if any images failed to load and print a warning
-            if (up[0] == null || down[0] == null || left[0] == null || right[0] == null) {
-                 System.err.println("Warning: Some player images failed to load. Check file paths and if resources are included in classpath.");
-            } else {
-                System.out.println("All player images successfully loaded!");
-            }
-        } catch (IOException e) {
+            if(gender.equals("BOY")){
+                for (int i = 0; i < TOTAL_FRAMES; i++) {
+                    down[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/BOY/boy-walk-" + (i+1) + "-100.png"));
+                    up[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/BOY/boy-walk-back" + (i+1) + "-100.png"));
+                    left[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/BOY/boy-walk-left" + (i+1) + "-100.png"));
+                    right[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/BOY/boy-walk-right" + (i+1) + "-100.png"));
+                }
+            } 
+            else {                
+                for (int i = 0; i < TOTAL_FRAMES; i++) {
+                    down[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/GIRL/girl-walk-" + (i+1) + "-100.png"));
+                    up[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/GIRL/girl-walk-back" + (i+1) + "-100.png"));
+                    left[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/GIRL/girl-walk-left" + (i+1) + "-100.png"));
+                    right[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/GIRL/girl-walk-right" + (i+1) + "-100.png"));
+                }
+            } 
+        }     
+        catch (IOException e) {
             System.err.println("Error loading player images: " + e.getMessage());
             e.printStackTrace();
         } catch (IllegalArgumentException e) {
