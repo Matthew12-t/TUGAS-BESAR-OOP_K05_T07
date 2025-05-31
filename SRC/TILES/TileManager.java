@@ -3,8 +3,13 @@ package SRC.TILES;
 import SRC.MAIN.GamePanel;
 import SRC.MAP.Map;
 import SRC.TIME.Time;
+import SRC.DATA.SeedData;
+import SRC.ITEMS.Seed;
+import SRC.SEASON.Season;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
@@ -139,26 +144,29 @@ public class TileManager {
         if (daysPassed < 0) {
             return 1;
         }
-        
-        // Growth stage calculation:
+          // Growth stage calculation (MODIFIED: plants need watering every 2 days):
         // - Stage 1: Day of planting (day 0)
-        // - Stage 2: Day 1 after planting (if watered on day 0)
-        // - Stage 3: Day 2 after planting (if watered on day 1)
+        // - Stage 2: Day 2 after planting (if watered on day 0 or day 1)
+        // - Stage 3: Day 4 after planting (if watered on day 2 or day 3)
         // - etc.
         
         int growthStage = 1; // Start at stage 1 (newly planted)
         
-        // For each day that has passed, check if plant was watered
+        // For each 2-day period that has passed, check if plant was watered at least once
         // and advance growth stage if it was
-        for (int day = 0; day < daysPassed; day++) {
-            // Calculate which day to check for watering
-            int dayToCheck = plantInfo.plantedDay + day;
+        for (int period = 0; period < (daysPassed + 1) / 2; period++) {
+            // Calculate which days to check for watering (2-day periods)
+            int firstDayToCheck = plantInfo.plantedDay + (period * 2);
+            int secondDayToCheck = firstDayToCheck + 1;
             
-            // Check if plant was watered during this day
-            if (wasPlantWateredOnDay(plantInfo, dayToCheck)) {
+            // Check if plant was watered during either day in this 2-day period
+            boolean wateredInPeriod = wasPlantWateredOnDay(plantInfo, firstDayToCheck) || 
+                                      wasPlantWateredOnDay(plantInfo, secondDayToCheck);
+            
+            if (wateredInPeriod) {
                 growthStage++;
             }
-            // If not watered, growth stage doesn't advance for this day
+            // If not watered in this 2-day period, growth stage doesn't advance
             
             // Stop if we've reached maximum growth stage
             if (growthStage > plantInfo.daysToGrow + 1) {
@@ -483,5 +491,129 @@ public class TileManager {
      */
     public int getTotalPlantedTiles() {
         return plantedTiles.size();
+    }
+    
+    /**
+     * Find all plant coordinates where the seed season doesn't match the current season
+     * @return List of coordinate strings in format "col,row" for plants with mismatched seasons
+     */
+    public List<String> getMismatchedSeasonPlants() {
+        List<String> mismatchedCoordinates = new ArrayList<>();
+        
+        // Get current season from GamePanel
+        Season currentSeason = gamePanel.getSeason();
+        String currentSeasonName = currentSeason.getDisplayName();
+        
+        // Check each planted tile
+        for (String coordinate : plantedTiles.keySet()) {
+            PlantedTileInfo plantInfo = plantedTiles.get(coordinate);
+            
+            // Get seed data to check season requirement
+            Seed seedData = SeedData.getSeed(plantInfo.seedName);
+            
+            if (seedData != null) {
+                String requiredSeason = seedData.getSeason();
+                
+                // Compare seed's required season with current season
+                // Skip if seed season is "Any" or matches current season
+                if (!requiredSeason.equalsIgnoreCase("Any") && 
+                    !requiredSeason.equalsIgnoreCase(currentSeasonName)) {
+                    
+                    mismatchedCoordinates.add(coordinate);
+                    
+                    // Debug output
+                    System.out.println("DEBUG: Mismatched season plant found at " + coordinate + 
+                                     " - Seed: " + plantInfo.seedName + 
+                                     " (requires " + requiredSeason + 
+                                     ") but current season is " + currentSeasonName);
+                }
+            }
+        }
+        
+        System.out.println("DEBUG: Found " + mismatchedCoordinates.size() + 
+                          " plants with mismatched seasons");
+        
+        return mismatchedCoordinates;
+    }
+    
+    /**
+     * Get detailed information about plants with mismatched seasons
+     * @return List of strings with detailed info about each mismatched plant
+     */
+    public List<String> getMismatchedSeasonPlantsDetails() {
+        List<String> detailsList = new ArrayList<>();
+        
+        // Get current season from GamePanel
+        Season currentSeason = gamePanel.getSeason();
+        String currentSeasonName = currentSeason.getDisplayName();
+        
+        // Check each planted tile
+        for (String coordinate : plantedTiles.keySet()) {
+            PlantedTileInfo plantInfo = plantedTiles.get(coordinate);
+            
+            // Get seed data to check season requirement
+            Seed seedData = SeedData.getSeed(plantInfo.seedName);
+            
+            if (seedData != null) {
+                String requiredSeason = seedData.getSeason();
+                
+                // Compare seed's required season with current season
+                // Skip if seed season is "Any" or matches current season
+                if (!requiredSeason.equalsIgnoreCase("Any") && 
+                    !requiredSeason.equalsIgnoreCase(currentSeasonName)) {
+                    
+                    String[] coords = coordinate.split(",");
+                    String details = String.format("Plant at (%s, %s): %s (needs %s season, current: %s)", 
+                                                  coords[0], coords[1], 
+                                                  plantInfo.seedName, 
+                                                  requiredSeason, 
+                                                  currentSeasonName);
+                    detailsList.add(details);
+                }
+            }
+        }
+        
+        return detailsList;
+    }
+    
+    /**
+     * Remove all plants with mismatched seasons and reset their tiles to tilled soil
+     * @return Number of plants removed
+     */
+    public int removeMismatchedSeasonPlants() {
+        List<String> mismatchedCoordinates = getMismatchedSeasonPlants();
+        int removedCount = 0;
+        
+        // Remove each mismatched plant
+        for (String coordinate : mismatchedCoordinates) {
+            String[] coords = coordinate.split(",");
+            int col = Integer.parseInt(coords[0]);
+            int row = Integer.parseInt(coords[1]);
+            
+            // Get plant info before removing for logging
+            PlantedTileInfo plantInfo = plantedTiles.get(coordinate);
+            
+            // Remove plant data
+            plantedTiles.remove(coordinate);
+              // Reset tile back to tilled soil (use direct farm map reference)
+            gamePanel.getFarmMap().setTileInMap(col, row, Tile.TILE_TILLED);
+            
+            removedCount++;
+            
+            // Log the removal
+            if (plantInfo != null) {
+                System.out.println("DEBUG: Removed mismatched season plant at (" + col + ", " + row + 
+                                 "): " + plantInfo.seedName);
+            }
+        }
+        
+        if (removedCount > 0) {
+            System.out.println("DEBUG: Successfully removed " + removedCount + 
+                             " plants with mismatched seasons");
+        } else {
+            System.out.println("DEBUG: No mismatched season plants found to remove");
+        }
+        
+        return removedCount;
     }
 }

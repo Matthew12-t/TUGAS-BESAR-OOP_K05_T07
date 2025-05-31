@@ -35,9 +35,11 @@ public class ClockUI {
     
     // Weather management system
     private SRC.WEATHER.WeatherManager weatherManager;
-    
-    // Time management for fishing system
+      // Time management for fishing system
     private boolean isTimePaused = false;
+    
+    // GamePanel reference for day change callbacks
+    private SRC.MAIN.GamePanel gamePanel;
     
     // Screen dimensions for drawing
     private int screenWidth;
@@ -45,10 +47,12 @@ public class ClockUI {
      * Constructor for ClockUI
      * @param screenWidth The screen width for positioning
      * @param screenHeight The screen height for positioning
+     * @param gamePanel Reference to GamePanel for day change callbacks
      */
-    public ClockUI(int screenWidth, int screenHeight) {
+    public ClockUI(int screenWidth, int screenHeight, SRC.MAIN.GamePanel gamePanel) {
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
+        this.gamePanel = gamePanel;
           // Initialize weather management system
         this.weatherManager = new SRC.WEATHER.WeatherManager();
         
@@ -157,6 +161,14 @@ public class ClockUI {
             minute = 0;
             day++;
             dayOfWeek = (dayOfWeek + 1) % 7;
+            
+            // Remove plants that don't match the new season (natural time progression)
+            if (gamePanel != null && gamePanel.getTileManager() != null) {
+                int removedPlants = gamePanel.getTileManager().removeMismatchedSeasonPlants();
+                if (removedPlants > 0) {
+                    System.out.println("Natural time progression: Removed " + removedPlants + " plants due to season change.");
+                }
+            }
             
             // Update weather using WeatherManager for guaranteed rainy days
             Weather oldWeather = currentWeather;

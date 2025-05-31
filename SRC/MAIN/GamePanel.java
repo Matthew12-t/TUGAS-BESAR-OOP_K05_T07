@@ -44,6 +44,7 @@ import SRC.UI.DayUI;
 import SRC.UI.EnergyUI;
 import SRC.UI.HoldingItemUI;
 import SRC.TILES.TileManager;
+import SRC.MAIN.MusicManager;
 
 public class GamePanel extends JPanel implements Runnable {
     private final int originalTileSize = 16; // 16x16 tile from source image
@@ -151,11 +152,12 @@ public class GamePanel extends JPanel implements Runnable {
     private StoreUI storeUI;
     
     // Cooking system
-    private CookingUI cookingUI;
-
-    // Cheat system
+    private CookingUI cookingUI;    // Cheat system
     private SRC.UI.CheatUI cheatUI;
-    private SRC.CHEAT.Cheat cheat;    // ENDGAME SYSTEM
+    private SRC.CHEAT.Cheat cheat;
+    
+    // Music system
+    private MusicManager musicManager;// ENDGAME SYSTEM
     private SRC.ENDGAME.EndGame endGame;
     private SRC.UI.EndGameUI endGameUI;    // PLAYER STATISTICS SYSTEM
     private SRC.UI.PlayerStatisticsUI playerStatisticsUI;
@@ -496,6 +498,14 @@ public class GamePanel extends JPanel implements Runnable {
     }
     
     /**
+     * Get the farm map directly (for direct access regardless of current map)
+     * @return The farm map instance
+     */
+    public Map getFarmMap() {
+        return farmMap;
+    }
+    
+    /**
      * Generate a random farm map file path for new games
      * @return Path to a randomly selected farm map file
      */
@@ -546,10 +556,8 @@ public class GamePanel extends JPanel implements Runnable {
 
         // Initialize map menu images
         mapMenuImages = new BufferedImage[TOTAL_WORLD_MAPS];
-        loadMapMenuImages();
-
-        // Initialize clock UI
-        this.clockUI = new ClockUI(screenWidth, screenHeight);
+        loadMapMenuImages();        // Initialize clock UI
+        this.clockUI = new ClockUI(screenWidth, screenHeight, this);
 
         // Initialize day UI 
         this.dayUI = new DayUI(screenWidth, screenHeight, clockUI);
@@ -636,12 +644,14 @@ public class GamePanel extends JPanel implements Runnable {
         
         // Initialize PlayerStatisticsUI
         this.playerStatisticsUI = new SRC.UI.PlayerStatisticsUI(this);
-        
-        // Initialize menu system components
+          // Initialize menu system components
         this.mainMenu = new SRC.MAIN.MENU.MainMenu(this);
         this.newGameUI = new SRC.UI.NewGameUI(this);
         this.loadGameUI = new SRC.UI.LoadGameUI(this);
         this.optionsUI = new SRC.UI.OptionsUI(this);
+          // Initialize music system and start background music
+        this.musicManager = new MusicManager();
+        this.musicManager.playMusic("RES/SOUND/music.wav");
     }
     
     /**
@@ -1715,13 +1725,17 @@ public class GamePanel extends JPanel implements Runnable {
      */
     public int getCurrentDay() {
         return clockUI.getCurrentDay();
-    }
-
-    /**
+    }    /**
      * Advance to next day (doesn't change time)
      */
     public void advanceToNextDay() {
         clockUI.advanceToNextDay();
+        
+        // Remove plants that don't match the new season
+        int removedPlants = tileManager.removeMismatchedSeasonPlants();
+        if (removedPlants > 0) {
+            System.out.println("Removed " + removedPlants + " plants due to season change.");
+        }
     }
     
     // --- Message Pane for NPC interaction ---
@@ -1772,6 +1786,7 @@ public class GamePanel extends JPanel implements Runnable {
         repaint();
     }    public void closeNPCInteractionMenu() {
         // Use the new NPCUi system to close the menu
+
         npcUi.closeNPCInteractionMenu();
         repaint();
     }    public boolean isNPCInteractionMenuOpen() {
@@ -1779,7 +1794,7 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public SRC.ENTITY.NPCEntity getNPCInteractionTarget() {
-        return npcUi.getNPCInteractionTarget();
+               return npcUi.getNPCInteractionTarget();
     }
 
     public boolean isMessagePanelActive() {
@@ -1879,8 +1894,27 @@ public class GamePanel extends JPanel implements Runnable {
     public SRC.UI.LoadGameUI getLoadGameUI() {
         return loadGameUI;
     }
-    
-    public SRC.UI.OptionsUI getOptionsUI() {
+      public SRC.UI.OptionsUI getOptionsUI() {
         return optionsUI;
+    }
+    
+    /**
+     * Get the music manager instance
+     * @return The music manager
+     */
+    public MusicManager getMusicManager() {
+        return musicManager;
+    }
+    
+    /**
+     * Cleanup resources when GamePanel is disposed
+     * This should be called when the game is closed
+     */
+    public void cleanup() {
+        if (musicManager != null) {
+            musicManager.dispose();
+        }
+        // Stop the game thread
+        gameThread = null;
     }
 }
