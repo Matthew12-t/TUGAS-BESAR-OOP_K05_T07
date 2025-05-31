@@ -40,8 +40,7 @@ public class KeyHandler implements KeyListener {
             gamePanel.getCheatUI().handleKeyInput(e);
             return; // Don't process other keys when in cheat state
         }
-        
-        // Only handle these if we have a gamePanel reference
+          // Only handle these if we have a gamePanel reference
         if (gamePanel != null) {
             // Handle SLEEP_STATE specially - only respond to Enter key
             if (gamePanel.getGameState() == GamePanel.SLEEP_STATE) {
@@ -50,6 +49,15 @@ public class KeyHandler implements KeyListener {
                     gamePanel.getPlayer().getPlayerAction().getSleepUI().handleEnterPress();
                 }
                 return; // Don't process other keys during sleep
+            }
+            
+            // Handle ENDGAME_STATE specially - only respond to Enter key
+            if (gamePanel.getGameState() == GamePanel.ENDGAME_STATE) {
+                if (code == KeyEvent.VK_ENTER) {
+                    System.out.println("DEBUG: Enter pressed in endgame state");
+                    gamePanel.getEndGameUI().handleEnterPress();
+                }
+                return; // Don't process other keys during endgame screen
             }
             
             // Toggle inventory with 'i' key - works in any state

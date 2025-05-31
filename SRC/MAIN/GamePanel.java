@@ -54,8 +54,7 @@ public class GamePanel extends JPanel implements Runnable {
     private final int screenWidth = tileSize * maxScreenCol; // 768 pixels
     private final int screenHeight = tileSize * maxScreenRow; // 576 pixels
     private final int FPS = 60;
-      
-    // Game states
+        // Game states
     public static final int PLAY_STATE = 0;
     public static final int MAP_MENU_STATE = 1;
     public static final int INVENTORY_STATE = 2;
@@ -65,6 +64,7 @@ public class GamePanel extends JPanel implements Runnable {
     public static final int COOKING_STATE = 6;
     public static final int TV_STATE = 7;
     public static final int CHEAT_STATE = 8;
+    public static final int ENDGAME_STATE = 9;
     private int gameState = PLAY_STATE;
 
     // Inventory UI properties
@@ -146,6 +146,10 @@ public class GamePanel extends JPanel implements Runnable {
     // Cheat system
     private SRC.UI.CheatUI cheatUI;
     private SRC.CHEAT.Cheat cheat;
+
+    // ENDGAME SYSTEM
+    private SRC.ENDGAME.EndGame endGame;
+    private SRC.UI.EndGameUI endGameUI;
 
     // Getters and setters
     public int getTileSize() {
@@ -450,6 +454,36 @@ public class GamePanel extends JPanel implements Runnable {
     public boolean isInitializedPerryHouse() {
         return isInitializedPerryHouse;
     }
+    
+    // Map getters for accessing NPC data
+    public Map getAbigailHouseMap() {
+        return abigailHouseMap;
+    }
+    
+    public Map getCarolineHouseMap() {
+        return carolineHouseMap;
+    }
+    
+    public Map getDascoHouseMap() {
+        return dascoHouseMap;
+    }
+    
+    public Map getEmilyHouseMap() {
+        return emilyHouseMap;
+    }
+    
+    public Map getMayorTadiHouseMap() {
+        return mayorTadiHouseMap;
+    }
+    
+    public Map getPerryHouseMap() {
+        return perryHouseMap;
+    }
+    
+    public Map getStoreMap() {
+        return storeMap;
+    }
+    
     /**
      * Get objects from the current map
      * @return Array of objects on the current map
@@ -553,6 +587,9 @@ public class GamePanel extends JPanel implements Runnable {
         
         this.houseMap.setActive(true);
         this.npcUi = new NPCUi(this);
+          // Inisialisasi EndGame dan EndGameUI
+        this.endGame = new SRC.ENDGAME.EndGame(player, this);
+        this.endGameUI = new SRC.UI.EndGameUI(this);
     }
     
     /**
@@ -913,9 +950,29 @@ public class GamePanel extends JPanel implements Runnable {
             if (cameraX > getMaxWorldWidth() - screenWidth) cameraX = getMaxWorldWidth() - screenWidth;
             if (cameraY > getMaxWorldHeight() - screenHeight) cameraY = getMaxWorldHeight() - screenHeight;
         }
-        
-        // Update brightness for day/night cycle
-        updateBrightness();
+          // Update brightness for day/night cycle
+        updateBrightness();        // Check for EndGame milestones (only in PLAY_STATE)
+        if (gameState == PLAY_STATE) {
+            // Check milestone conditions directly from player
+            boolean goldMilestone = player.getGold() >= 17209;
+            boolean marriageMilestone = player.isMarried();
+            
+            if (goldMilestone && marriageMilestone) {
+                System.out.println("*** BOTH MILESTONES ACHIEVED! ***");
+                System.out.println("Player gold: " + player.getGold() + " (Required: 17,209)");
+                System.out.println("Marriage status: " + (player.isMarried() ? "MARRIED" : "SINGLE") + " (Required: MARRIED)");
+                System.out.println("Creating new EndGame instance with updated data...");
+                
+                // Create fresh EndGame instance with current player data
+                this.endGame = new SRC.ENDGAME.EndGame(player, this);
+                
+                // Show EndGame UI with updated data
+                endGameUI.showEndGameScreen(endGame);
+                
+                System.out.println("Switching to EndGame state...");
+                gameState = ENDGAME_STATE;
+            }
+        }
         
         // Handle TV_STATE updates 
         if (gameState == TV_STATE) {
@@ -1074,6 +1131,20 @@ public class GamePanel extends JPanel implements Runnable {
             // Then draw TV UI overlay
             if (player.getPlayerAction().getTvUI() != null) {
                 player.getPlayerAction().getTvUI().draw(g2);
+            }
+        } else if (gameState == ENDGAME_STATE) {
+            // First draw the game world in the background
+            g2.setColor(Color.black);
+            g2.fillRect(0, 0, screenWidth, screenHeight);
+            currentMap.draw(g2);
+            int playerScreenX = player.getWorldX() - cameraX;
+            int playerScreenY = player.getWorldY() - cameraY;
+            player.draw(g2, playerScreenX, playerScreenY);
+            // Apply night lighting effect after drawing game content but before UI elements
+            applyNightEffect(g2);
+            // Draw EndGameUI overlay
+            if (endGameUI != null) {
+                endGameUI.draw(g2);
             }
         }
         
@@ -1666,17 +1737,19 @@ public class GamePanel extends JPanel implements Runnable {
 
     public CheatUI getCheatUI() {
         return cheatUI;
-    }
-
-    public void toggleCheatConsole() {
+    }    public void toggleCheatConsole() {
         if (gameState == CHEAT_STATE) {
             gameState = PLAY_STATE;
             cheatUI.toggle();
+            // Reset key states to prevent stuck movement keys
+            keyHandler.resetAllKeyStates();
+            System.out.println("DEBUG: Cheat console closed, key states reset");
         } else {
             gameState = CHEAT_STATE;
             cheatUI.toggle();
+            System.out.println("DEBUG: Cheat console opened");
         }
-    }    // Game Time management
+    }// Game Time management
     private GameTime gameTime;
 
     public void setSeason(Season season) {
@@ -1689,5 +1762,13 @@ public class GamePanel extends JPanel implements Runnable {
         if (gameTime != null) {
             gameTime.setCurrentWeather(weather);
         }
+    }
+
+    public SRC.ENDGAME.EndGame getEndGame() {
+        return endGame;
+    }
+
+    public SRC.UI.EndGameUI getEndGameUI() {
+        return endGameUI;
     }
 }

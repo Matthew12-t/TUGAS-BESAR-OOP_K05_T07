@@ -8,9 +8,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
 import SRC.ITEMS.Item;
+import SRC.ITEMS.Fish;
 import SRC.MAIN.GamePanel;
 import SRC.MAIN.KeyHandler;
 import SRC.MAIN.MouseHandler;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Player extends Entity {
     private GamePanel gp;
@@ -21,6 +24,14 @@ public class Player extends Entity {
     private int gold; // Player's gold amount
     private final int TOTAL_FRAMES = 8;
     private boolean married;
+
+    // Statistics tracking for EndGame system
+    private int totalIncome;
+    private int totalExpenditure;
+    private int daysPlayed;
+    private int totalCropsHarvested;
+    private int totalFishCaught;
+    private List<Fish> caughtFish;
 
     // --- Variabel Entitas (Deklarasikan jika tidak di Entity) ---
     private Rectangle solidArea; // Collision area for the player
@@ -55,6 +66,14 @@ public class Player extends Entity {
         this.energy = 100; 
         this.gold = 500; // Initialize gold with 500
         this.playerAction = new PlayerAction(gp, this);
+        
+        // Initialize statistics tracking
+        this.totalIncome = 0;
+        this.totalExpenditure = 0;
+        this.daysPlayed = 0;
+        this.totalCropsHarvested = 0;
+        this.totalFishCaught = 0;
+        this.caughtFish = new ArrayList<>();
         
         // Hitung ukuran visual player berdasarkan skala
         this.playerVisualWidth = gp.getTileSize() * visualScale; // 48 * 4 = 192 pixels
@@ -109,12 +128,14 @@ public class Player extends Entity {
     public void addGold(int amount) {
         if (amount > 0) {
             this.gold += amount;
+            this.totalIncome += amount; // Track income for statistics
         }
     }
 
     public boolean spendGold(int amount) {
         if (amount > 0 && this.gold >= amount) {
             this.gold -= amount;
+            this.totalExpenditure += amount; // Track expenditure for statistics
             return true; // Successfully spent gold
         }
         return false; // Not enough gold
@@ -707,5 +728,45 @@ public class Player extends Entity {
 
     public void setMarried(boolean married) {
         this.married = married;
+    }
+
+    // Statistics tracking methods for EndGame system
+    public int getTotalIncome() {
+        return totalIncome;
+    }
+
+    public int getTotalExpenditure() {
+        return totalExpenditure;
+    }
+
+    public int getDaysPlayed() {
+        return daysPlayed;
+    }
+
+    public void incrementDaysPlayed() {
+        this.daysPlayed++;
+    }
+
+    public int getTotalCropsHarvested() {
+        return totalCropsHarvested;
+    }
+
+    public void incrementCropsHarvested(int amount) {
+        this.totalCropsHarvested += amount;
+    }
+
+    public int getTotalFishCaught() {
+        return totalFishCaught;
+    }
+
+    public void incrementFishCaught(Fish fish) {
+        this.totalFishCaught++;
+        if (fish != null) {
+            this.caughtFish.add(fish);
+        }
+    }
+
+    public List<Fish> getCaughtFish() {
+        return new ArrayList<>(caughtFish); // Return copy to prevent external modification
     }
 }

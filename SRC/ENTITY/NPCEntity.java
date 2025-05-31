@@ -14,7 +14,7 @@ public class NPCEntity extends Entity implements NPC {
     private String name;
     private String location;
     private String description;
-      private int heartPoints;
+    private int heartPoints;
     private static final int MAX_HEART_POINTS = 150;
     private String relationshipStatus; 
     private List<Item> lovedItems;

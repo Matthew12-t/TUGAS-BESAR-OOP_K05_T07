@@ -5,7 +5,6 @@ import SRC.INVENTORY.Inventory;
 import SRC.DATA.GameData;
 import SRC.UI.ClockUI;
 import SRC.MAIN.GamePanel;
-import SRC.TIME.Time;
 import SRC.ITEMS.Item;
 import SRC.SEASON.Season;
 import SRC.WEATHER.Weather;
@@ -50,10 +49,12 @@ public class Cheat {
                         return addItem(parts);
                     default:
                         return "Invalid add command. Valid options: gold, time, item";
-                }
-            } else if (parts[0].equals("goto")) {
-                if (parts.length != 3) {
+                }            } else if (parts[0].equals("goto")) {
+                if (parts.length == 2 && parts[1].equals("endgame")) {
+                    return gotoEndgame();
+                } else if (parts.length != 3) {
                     return "Invalid goto command format. Use:\n" +
+                           "goto endgame\n" +
                            "goto season {winter/spring/fall/summer}\n" +
                            "goto weather {rainy/sunny}";
                 }
@@ -64,7 +65,7 @@ public class Cheat {
                     case "weather":
                         return changeWeather(parts);
                     default:
-                        return "Invalid goto command. Valid options: season, weather";
+                        return "Invalid goto command. Valid options: endgame, season, weather";
                 }
             } else {
                 return "Invalid command. Valid commands start with: add, goto";
@@ -164,8 +165,24 @@ public class Cheat {
             default:
                 return "Invalid weather. Use: sunny, rainy";
         }
-        
-        gp.setWeather(newWeather);
+          gp.setWeather(newWeather);
         return "Changed weather to " + newWeather.getDisplayName();
+    }
+    
+    private String gotoEndgame() {
+        try {
+            // Set player gold to exactly 17,209
+            player.setGold(17209);
+            
+            // Set player married status to true
+            player.setMarried(true);
+            
+            return "EndGame milestone achieved!\n" +
+                   "Player gold set to: 17,209\n" +
+                   "Player married to Emily: Yes\n" +
+                   "EndGame UI should now trigger!";
+        } catch (Exception e) {
+            return "Error setting endgame conditions: " + e.getMessage();
+        }
     }
 }

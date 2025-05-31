@@ -206,7 +206,7 @@ public class PlayerAction {
             case "Watering Can":
                 return 2; // Watering energy cost
             case "Scythe":
-                return 4; // Harvesting energy cost
+                return 5; // Harvesting energy cost
             case "Pickaxe":
                 return 6; // Mining energy cost
             default:
@@ -427,13 +427,15 @@ public class PlayerAction {
         
         // Resume game time
         resumeGameTime();
-        
-        if (caughtFish != null) {
+          if (caughtFish != null) {
             // Add fish to inventory using FishData system
             SRC.ITEMS.Fish fishItem = SRC.DATA.FishData.getFish(caughtFish);
             if (fishItem != null) {
                 inventory.addItem(fishItem, 1);
                 fishingUI.showFishingResult(caughtFish, true);
+                
+                // Update player fish caught statistics
+                player.incrementFishCaught(fishItem);
             }
         } else {
             fishingUI.showFishingResult("", false);
@@ -1211,7 +1213,8 @@ public class PlayerAction {
         }
         
         // Get player's current position in tile coordinates
-        int tileSize = gamePanel.getTileSize();        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
+        int tileSize = gamePanel.getTileSize();        
+        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
         int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
         
         // Initialize TileManager if needed
@@ -1234,12 +1237,15 @@ public class PlayerAction {
             // Add crop to inventory
             try {                
                 SRC.ITEMS.Crop crop = SRC.DATA.CropData.getCrop(cropName);
-                if (crop != null) {
-                    // Add multiple crops to inventory
+                if (crop != null) {                    // Add multiple crops to inventory
                     int harvestQuantity = crop.getCropPerHarvest();
                     for (int i = 0; i < harvestQuantity; i++) {
                         player.addItemToInventory(crop);
                     }
+                    
+                    // Update player crop harvested statistics
+                    player.incrementCropsHarvested(harvestQuantity);
+                    
                     System.out.println("DEBUG: Harvested " + harvestQuantity + "x " + cropName);
                 } else {
                     System.out.println("DEBUG: Could not find crop data for " + cropName);
