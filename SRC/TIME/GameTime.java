@@ -117,8 +117,13 @@ public class GameTime {
     
     public void setHour(int hour) { this.hour = hour; }
     public void setMinute(int minute) { this.minute = minute; }
-    public void setCurrentSeason(Season season) { this.currentSeason = season; }
-    public void setCurrentWeather(Weather weather) { this.currentWeather = weather; }
+    public void setCurrentSeason(Season season) {
+        this.currentSeason = season;
+    }
+
+    public void setCurrentWeather(Weather weather) {
+        this.currentWeather = weather;
+    }
     
     public String getFormattedTime() {
         return String.format("%02d:%02d", hour, minute);

@@ -29,9 +29,12 @@ import SRC.MAP.NPC_HOUSE.MayorTadiHouseMap;
 import SRC.MAP.NPC_HOUSE.PerryHouseMap;
 import SRC.OBJECT.SuperObject;
 import SRC.TIME.Time;
+import SRC.TIME.GameTime;
 import SRC.SEASON.Season;
 import SRC.WEATHER.Weather;
-import SRC.UI.NPCUi; // NPCUi has been moved to SRC.UI, so update the import and field
+import SRC.UI.NPCUi;
+import SRC.UI.CheatUI; 
+import SRC.CHEAT.Cheat;
 import SRC.SHIPPINGBIN.ShippingBin;
 import SRC.SHIPPINGBIN.ShippingBinUI;
 import SRC.UI.StoreUI;
@@ -51,7 +54,8 @@ public class GamePanel extends JPanel implements Runnable {
     private final int screenWidth = tileSize * maxScreenCol; // 768 pixels
     private final int screenHeight = tileSize * maxScreenRow; // 576 pixels
     private final int FPS = 60;
-      // Game states
+      
+    // Game states
     public static final int PLAY_STATE = 0;
     public static final int MAP_MENU_STATE = 1;
     public static final int INVENTORY_STATE = 2;
@@ -60,8 +64,10 @@ public class GamePanel extends JPanel implements Runnable {
     public static final int STORE_STATE = 5;
     public static final int COOKING_STATE = 6;
     public static final int TV_STATE = 7;
+    public static final int CHEAT_STATE = 8;
     private int gameState = PLAY_STATE;
-      // Inventory UI properties
+
+    // Inventory UI properties
     private BufferedImage inventoryImage;
     
     // Map menu
@@ -136,6 +142,10 @@ public class GamePanel extends JPanel implements Runnable {
     
     // Cooking system
     private CookingUI cookingUI;
+
+    // Cheat system
+    private SRC.UI.CheatUI cheatUI;
+    private SRC.CHEAT.Cheat cheat;
 
     // Getters and setters
     public int getTileSize() {
@@ -454,10 +464,16 @@ public class GamePanel extends JPanel implements Runnable {
         this.setDoubleBuffered(true); 
         this.addKeyListener(keyHandler);
         this.addMouseListener(mouseHandler);
-        this.setFocusable(true);        // Initialize map menu images
+        this.setFocusable(true);
+
+        // Initialize map menu images
         mapMenuImages = new BufferedImage[TOTAL_WORLD_MAPS];
-        loadMapMenuImages();        // Initialize clock UI
-        this.clockUI = new ClockUI(screenWidth, screenHeight);        // Initialize day UI
+        loadMapMenuImages();
+
+        // Initialize clock UI
+        this.clockUI = new ClockUI(screenWidth, screenHeight);
+
+        // Initialize day UI 
         this.dayUI = new DayUI(screenWidth, screenHeight, clockUI);
         
         // Initialize energy UI
@@ -466,6 +482,11 @@ public class GamePanel extends JPanel implements Runnable {
         // Initialize holding item UI
         this.holdingItemUI = new HoldingItemUI(screenWidth, screenHeight);
         
+        // Initialize cheat system
+        this.cheatUI = new CheatUI(this);
+        this.cheat = new Cheat(player, player.getPlayerAction().getInventory(), clockUI, this);
+        this.cheatUI.setCheat(cheat);
+
         // Load inventory image
         loadInventoryImage();// Initialize shipping bin system
         this.ShippingBin = new ShippingBin();
@@ -918,12 +939,14 @@ public class GamePanel extends JPanel implements Runnable {
         currentMap = newMap;
         
         System.out.println("Switched to map: " + newMap.getMapName());
-    }
-    @Override
+    }    @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        Graphics2D g2 = (Graphics2D) g;        if (gameState == PLAY_STATE) {
+        Graphics2D g2 = (Graphics2D) g;
+
+        // Draw background and game world for play state and cheat state
+        if (gameState == PLAY_STATE || gameState == CHEAT_STATE) {
             // Set the background to black (will be visible around small maps)
             g2.setColor(Color.black);
             g2.fillRect(0, 0, screenWidth, screenHeight);
@@ -932,7 +955,8 @@ public class GamePanel extends JPanel implements Runnable {
             // --- Draw Player ---
             // Calculate player's screen position (relative to camera)
             int playerScreenX = player.getWorldX() - cameraX;
-            int playerScreenY = player.getWorldY() - cameraY;            // Draw the player at their screen position
+            int playerScreenY = player.getWorldY() - cameraY;
+            // Draw the player at their screen position
             player.draw(g2, playerScreenX, playerScreenY);
             
             // Apply night lighting effect after drawing game content but before UI elements
@@ -1051,6 +1075,11 @@ public class GamePanel extends JPanel implements Runnable {
             if (player.getPlayerAction().getTvUI() != null) {
                 player.getPlayerAction().getTvUI().draw(g2);
             }
+        }
+        
+        // Draw cheat console UI if in cheat state
+        if (gameState == CHEAT_STATE) {
+            cheatUI.draw(g2);
         }
         
         npcUi.drawMessagePanel(g2);
@@ -1632,6 +1661,33 @@ public class GamePanel extends JPanel implements Runnable {
             Color nightOverlay = new Color(0, 0, 0, alpha);
             g2.setColor(nightOverlay);
             g2.fillRect(0, 0, screenWidth, screenHeight);
+        }
+    }
+
+    public CheatUI getCheatUI() {
+        return cheatUI;
+    }
+
+    public void toggleCheatConsole() {
+        if (gameState == CHEAT_STATE) {
+            gameState = PLAY_STATE;
+            cheatUI.toggle();
+        } else {
+            gameState = CHEAT_STATE;
+            cheatUI.toggle();
+        }
+    }    // Game Time management
+    private GameTime gameTime;
+
+    public void setSeason(Season season) {
+        if (gameTime != null) {
+            gameTime.setCurrentSeason(season);
+        }
+    }
+
+    public void setWeather(Weather weather) {
+        if (gameTime != null) {
+            gameTime.setCurrentWeather(weather);
         }
     }
 }

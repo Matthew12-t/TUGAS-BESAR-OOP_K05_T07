@@ -19,13 +19,29 @@ public class KeyHandler implements KeyListener {
     public KeyHandler() {
         // No GamePanel reference
     }    
-    
-    @Override
+      @Override
     public void keyTyped(KeyEvent e) {
-        // TODO Auto-generated method stub
-    }    @Override
+        // Handle character input for cheat console
+        if (gamePanel != null && gamePanel.getGameState() == GamePanel.CHEAT_STATE) {
+            gamePanel.getCheatUI().handleCharInput(e.getKeyChar());
+        }
+    }@Override
     public void keyPressed(KeyEvent e) {
-        int code = e.getKeyCode();        // Only handle these if we have a gamePanel reference
+        int code = e.getKeyCode();
+        
+        // Handle cheat activation with Ctrl+C
+        if (gamePanel != null && e.isControlDown() && code == KeyEvent.VK_C) {
+            gamePanel.toggleCheatConsole();
+            return; // Don't process other keys when cheat is activated
+        }
+        
+        // Handle cheat UI input if cheat console is active
+        if (gamePanel != null && gamePanel.getGameState() == GamePanel.CHEAT_STATE) {
+            gamePanel.getCheatUI().handleKeyInput(e);
+            return; // Don't process other keys when in cheat state
+        }
+        
+        // Only handle these if we have a gamePanel reference
         if (gamePanel != null) {
             // Handle SLEEP_STATE specially - only respond to Enter key
             if (gamePanel.getGameState() == GamePanel.SLEEP_STATE) {
