@@ -157,9 +157,8 @@ public class FishingUI {
             return false;
         }
         
-        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-            // Check if player has enough energy for this attempt
-            if (!gp.getPlayer().hasEnoughEnergy(ENERGY_PER_ATTEMPT)) {
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {            // Check if player has enough energy for this attempt using new logic
+            if (!gp.getPlayer().getPlayerAction().hasEnoughEnergy(ENERGY_PER_ATTEMPT)) {
                 javax.swing.JOptionPane.showMessageDialog(null, 
                     "Not enough energy for another attempt!\n" +
                     "The fish got away...",

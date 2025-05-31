@@ -192,9 +192,19 @@ public class Player extends Entity {
         if (energy > MAX_ENERGY) {
             energy = MAX_ENERGY;
         }
+    }      public boolean hasEnoughEnergy(int requiredEnergy) {
+        // New logic: action can be performed if currentEnergy - requiredEnergy > lowerBound
+        // Lower bound is -20, so action requires currentEnergy - requiredEnergy > -20
+        final int LOWER_ENERGY_BOUND = -20;
+        return (energy - requiredEnergy) > LOWER_ENERGY_BOUND;
     }
-      public boolean hasEnoughEnergy(int requiredEnergy) {
-        return energy >= requiredEnergy;
+    
+    /**
+     * Get the lower energy bound
+     * @return lower energy bound value
+     */
+    public int getLowerEnergyBound() {
+        return -20;
     }
       public double getEnergyPercentage() {
         // Return percentage based on energy, but cap at 0 for UI display

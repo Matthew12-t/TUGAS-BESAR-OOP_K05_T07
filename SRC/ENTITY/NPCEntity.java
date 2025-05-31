@@ -9,14 +9,14 @@ import java.awt.Rectangle;
 import SRC.MAIN.GamePanel;
 import SRC.ITEMS.Item;
 
-public class NPCEntity extends Entity implements NPC {
-    // Basic NPC properties
+public class NPCEntity extends Entity implements NPC {    // Basic NPC properties
     private String name;
     private String location;
     private String description;
     private int heartPoints;
     private static final int MAX_HEART_POINTS = 150;
     private String relationshipStatus; 
+    private int engagementDay; // Track the day when became fiance
     private List<Item> lovedItems;
     private List<Item> likedItems;
     private List<Item> hatedItems;
@@ -28,9 +28,9 @@ public class NPCEntity extends Entity implements NPC {
         this.name = name;
         this.location = location;
         this.description = description;
-        
-        this.heartPoints = 0; 
+          this.heartPoints = 0; 
         this.relationshipStatus = "single";
+        this.engagementDay = -1; // -1 means not engaged yet
         this.lovedItems = new ArrayList<>();
         this.likedItems = new ArrayList<>();
         this.hatedItems = new ArrayList<>();
@@ -142,10 +142,10 @@ public class NPCEntity extends Entity implements NPC {
                     showMessageToUI(message);
                     gp.addHours(1);
                     break;
-                }
-                if (relationshipStatus.equals("single")) {
+                }                if (relationshipStatus.equals("single")) {
                     if (heartPoints >= MAX_HEART_POINTS) {
                         relationshipStatus = "fiance";
+                        engagementDay = gp.getCurrentDay(); // Record the day of engagement
                         player.setEnergy(player.getEnergy() - 10);
                         message = name + " menerima lamaranmu! Selamat yaaa :).";
                     } else {
@@ -177,8 +177,16 @@ public class NPCEntity extends Entity implements NPC {
                     System.out.println(message);
                     showMessageToUI(message);
                     break;
-                }
-                if (relationshipStatus.equals("fiance")) {
+                }                if (relationshipStatus.equals("fiance")) {
+                    // Check if at least one day has passed since engagement
+                    int currentDay = gp.getCurrentDay();
+                    if (currentDay <= engagementDay) {
+                        message = "Buru-buru amat, baru juga jadi fiance";
+                        System.out.println(message);
+                        showMessageToUI(message);
+                        break; // Don't reduce energy if not enough time has passed
+                    }
+                    
                     relationshipStatus = "spouse";
                     player.setEnergy(player.getEnergy() - 80);
                     message = name + " sekarang menjadi pasanganmu! Selamat yaaa semoga bahagia selalu.";

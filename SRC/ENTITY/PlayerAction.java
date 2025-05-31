@@ -304,12 +304,11 @@ public class PlayerAction {
         
         // Initialize TileManager if needed
         SRC.TILES.TileManager tileManager = gamePanel.getTileManager();
-        
-        // Attempt to till the tile at player's position
+          // Attempt to till the tile at player's position
         if (tileManager.tillTile(playerCol, playerRow)) {
             // Consume energy and time for successful tilling
             consumeEnergy(TILLING_ENERGY_COST);
-            addGameTime(5); // Add 5 minutes to game time
+            addGameTime(5); // Add 5 minutes per tile (1 tile × 5 minutes = 5 minutes)
             System.out.println("DEBUG: Successfully tilled land at (" + playerCol + ", " + playerRow + ")");
             return true;
         } else {
@@ -350,12 +349,11 @@ public class PlayerAction {
         
         // Initialize TileManager if needed
         SRC.TILES.TileManager tileManager = gamePanel.getTileManager();
-        
-        // Attempt to recover the land at player's position
+          // Attempt to recover the land at player's position
         if (tileManager.recoverLand(playerCol, playerRow)) {
             // Consume energy and time for successful land recovery
             consumeEnergy(LAND_RECOVERY_ENERGY_COST);
-            addGameTime(5); // Add 5 minutes to game time
+            addGameTime(5); // Add 5 minutes per tile (1 tile × 5 minutes = 5 minutes)
             System.out.println("DEBUG: Successfully recovered land at (" + playerCol + ", " + playerRow + ")");
             return true;
         } else {
@@ -626,14 +624,35 @@ public class PlayerAction {
      */
     public void setEnergy(int energy) {
         player.setEnergy(energy);
-    }
-      /**
-     * Check if player has enough energy for an action (delegate to Player)
+    }    /**
+     * Check if player has enough energy for an action using new logic
      * @param requiredEnergy energy required
      * @return true if player has enough energy
      */
     public boolean hasEnoughEnergy(int requiredEnergy) {
-        return player.hasEnoughEnergy(requiredEnergy);
+        return hasEnoughEnergyForAction(requiredEnergy);
+    }
+    
+    /**
+     * Check if player has enough energy for an action using new logic
+     * Action can be performed if currentEnergy - actionEnergy > lowerBound
+     * @param energyCost energy cost for the action
+     * @return true if action can be performed
+     */
+    private boolean hasEnoughEnergyForAction(int energyCost) {
+        int currentEnergy = player.getCurrentEnergy();
+        int lowerBound = player.getLowerEnergyBound(); // -20
+        
+        // Action bisa dilakukan jika energy setelah action masih di atas lower bound
+        boolean canPerformAction = (currentEnergy - energyCost) > -21;
+        
+        System.out.println("DEBUG: Energy Check - Current: " + currentEnergy + 
+                          ", Cost: " + energyCost + 
+                          ", After Action: " + (currentEnergy - energyCost) + 
+                          ", Lower Bound: " + lowerBound + 
+                          ", Can Perform: " + canPerformAction);
+        
+        return canPerformAction;
     }
       /**
      * Get energy percentage (0.0 to 1.0) (delegate to Player)
@@ -775,8 +794,7 @@ public class PlayerAction {
             executeSleep(SleepUI.SleepTrigger.LATE_TIME);
             return;
         }
-    }
-      /**
+    }    /**
      * Execute sleep sequence (immediate spawn and effects)
      */
     private void executeSleep(SleepUI.SleepTrigger trigger) {
@@ -788,32 +806,37 @@ public class PlayerAction {
         // LANGSUNG TRANSPORT PLAYER KE HOUSE BED
         transportPlayerToHouseBed();
         
-        // LANGSUNG PERFORM SLEEP EFFECTS (restore energy, set time to 10:00)
+        // Get shipping bin value BEFORE processing sleep effects
+        int shippingBinValue = gamePanel.getShippingBin().calculateTotalValue();
+        
+        // Get current game state for sleep result
+        int currentDay = gamePanel.getCurrentDay();
+        Season currentSeason = gamePanel.getSeason();
+        Weather currentWeather = gamePanel.getWeather();
+        
+        // Create sleep result with shipping bin income BEFORE effects
+        SleepUI.SleepResult sleepResult;
+        if (shippingBinValue > 0) {
+            sleepResult = SleepUI.createSleepResultWithShipping(
+                trigger, currentDay, currentSeason, currentWeather, shippingBinValue);
+        } else {
+            sleepResult = SleepUI.createSleepResult(trigger, currentDay, currentSeason, currentWeather);
+        }
+        
+        // LANGSUNG PERFORM SLEEP EFFECTS (restore energy, set time to 10:00, process shipping)
         performSleepEffects(trigger);
         
-        // Create sleep result SETELAH effects applied
-        SleepUI.SleepResult sleepResult = createSleepResult(trigger);
-        
-        // Show sleep screen
+        // Show sleep screen with correct income
         sleepUI.showSleepResult(sleepResult);
         
         // Set game state to sleep mode
         gamePanel.setGameState(GamePanel.SLEEP_STATE);
     }    /**
-     * Create sleep result based on current game state
-     */
-    private SleepUI.SleepResult createSleepResult(SleepUI.SleepTrigger trigger) {
-        int currentDay = gamePanel.getCurrentDay();
-        Season currentSeason = gamePanel.getSeason();
-        Weather currentWeather = gamePanel.getWeather();
-        
-        return SleepUI.createSleepResult(trigger, currentDay, currentSeason, currentWeather);
-    }/**
      * Get access to the sleep UI
      */
     public SleepUI getSleepUI() {
         return this.sleepUI;
-    }    /**
+    }/**
      * Check if player is near a bed (within collision distance)
      * Improved logic to account for bed size (2x4 tiles)
      * Now supports beds in all house maps (HouseMap and NPCHouseMap)
@@ -910,13 +933,27 @@ public class PlayerAction {
         }
         
         return false;
-    }
-    /**
+    }    /**
      * Perform sleep effects (restore energy, set time to 10:00 AM, process shipping bin)
      */
     private void performSleepEffects(SleepUI.SleepTrigger trigger) {
-        // Restore full energy
-        player.setEnergy(MAX_ENERGY);
+        // Restore energy based on current energy level
+        int currentEnergy = player.getCurrentEnergy();
+        int newEnergy;
+        
+        if (currentEnergy <= 0) {
+            // If energy <= 0, add only 10 energy
+            newEnergy = currentEnergy + 10;
+        } else if (currentEnergy < (MAX_ENERGY * 0.1)) {
+            // If energy < 10% of MAX_ENERGY, restore to half MAX_ENERGY
+            newEnergy = MAX_ENERGY / 2;
+        } else {
+            // If energy >= 10% of MAX_ENERGY, restore to full MAX_ENERGY
+            newEnergy = MAX_ENERGY;
+        }
+        
+        player.setEnergy(newEnergy);
+        System.out.println("DEBUG: Energy restored from " + currentEnergy + " to " + newEnergy);
         
         // Set time to 10:00 AM instead of 6:00 AM
         Time currentTime = gamePanel.getCurrentTime();
@@ -926,23 +963,14 @@ public class PlayerAction {
         // Process shipping bin income
         int shippingBinValue = gamePanel.getShippingBin().calculateTotalValue();
         if (shippingBinValue > 0) {
-            // Get current day and season for income calculation
-            int currentDay = gamePanel.getCurrentDay();
-            Season currentSeason = gamePanel.getSeason();
-            Weather currentWeather = gamePanel.getWeather();
-            
-            // Create sleep result with shipping bin income
-            SleepUI.SleepResult sleepResult = SleepUI.createSleepResultWithShipping(
-                trigger, currentDay, currentSeason, currentWeather, shippingBinValue);
-            
-            // Add total income to player's gold
-            player.addGold(sleepResult.getIncome());
+            // Add shipping bin income to player's gold
+            player.addGold(shippingBinValue);
             
             // Clear shipping bin after processing
             gamePanel.getShippingBin().clearAllItems();
             
-            System.out.println("DEBUG: Shipping bin processed - Value: " + shippingBinValue + 
-                             ", Total income: " + sleepResult.getIncome() + " gold added");        } else {
+            System.out.println("DEBUG: Shipping bin processed - Value: " + shippingBinValue + " gold added");
+        } else {
             // No shipping bin income - player gets no gold
             System.out.println("DEBUG: No shipping bin items - no income received");
         }
@@ -954,7 +982,7 @@ public class PlayerAction {
         currentTime.setMinute(0);
         
         System.out.println("DEBUG: Sleep effects applied - Energy restored, time set to 10:00 AM, advanced to next day");
-    }    /**
+    }/**
      * Transport player to last bed location (spawn beside the bed, not on it)
      */
     private void transportPlayerToHouseBed() {
@@ -1111,12 +1139,11 @@ public class PlayerAction {
         
         // Initialize TileManager if needed
         SRC.TILES.TileManager tileManager = gamePanel.getTileManager();
-        
-        // Attempt to plant the seed at player's position
+          // Attempt to plant the seed at player's position
         if (tileManager.plantSeed(playerCol, playerRow, heldSeedName, daysToGrow)) {
             // Consume energy and time for successful planting
             consumeEnergy(PLANTING_ENERGY_COST);
-            addGameTime(5); // Add 5 minutes to game time
+            addGameTime(5); // Add 5 minutes per tile (1 tile × 5 minutes = 5 minutes)
             
             // Remove one seed from inventory
             removeSeedFromInventory(heldSeedName);
@@ -1225,35 +1252,75 @@ public class PlayerAction {
             System.out.println("DEBUG: No plant at this location");
             return false;
         }
-        
-        if (!tileManager.isPlantReadyToHarvest(playerCol, playerRow)) {
+          if (!tileManager.isPlantReadyToHarvest(playerCol, playerRow)) {
             System.out.println("DEBUG: Plant is not ready to harvest yet");
             return false;
         }
-        
-        // Attempt to harvest the crop
+          // Attempt to harvest the crop first to get crop data
         String cropName = tileManager.harvestCrop(playerCol, playerRow);
+        System.out.println("DEBUG: TileManager.harvestCrop() returned: '" + cropName + "'");
+        
         if (cropName != null) {
-            // Add crop to inventory
-            try {                
+            // Add crop to inventory with enhanced debugging
+            try {                System.out.println("DEBUG: Attempting to get crop data for: '" + cropName + "'");
                 SRC.ITEMS.Crop crop = SRC.DATA.CropData.getCrop(cropName);
-                if (crop != null) {                    // Add multiple crops to inventory
+                
+                if (crop != null) {
                     int harvestQuantity = crop.getCropPerHarvest();
+                    int totalEnergyCost = harvestQuantity * 5; // 5 energy per crop
+                    
+                    System.out.println("DEBUG: Crop data found - Name: '" + crop.getName() + 
+                                     "', Harvest Quantity: " + harvestQuantity + 
+                                     ", Total Energy Cost: " + totalEnergyCost);
+                    
+                    // Check if player has enough energy (5 energy per crop)
+                    if (!hasEnoughEnergy(totalEnergyCost)) {
+                        System.out.println("DEBUG: Not enough energy to harvest " + harvestQuantity + 
+                                         " crops (need " + totalEnergyCost + " energy)");
+                        return false;                    }
+                    
+                    // Check inventory before adding
+                    System.out.println("DEBUG: Inventory before harvest:");
+                    printInventoryDebug();
+                    
+                    // Add multiple crops to inventory
                     for (int i = 0; i < harvestQuantity; i++) {
-                        player.addItemToInventory(crop);
+                        // Use the corrected method call
+                        inventory.addItem(crop, 1);
+                        System.out.println("DEBUG: Added crop #" + (i+1) + " to inventory directly");
                     }
+                    
+                    // Check inventory after adding
+                    System.out.println("DEBUG: Inventory after harvest:");
+                    printInventoryDebug();
                     
                     // Update player crop harvested statistics
                     player.incrementCropsHarvested(harvestQuantity);
                     
-                    System.out.println("DEBUG: Harvested " + harvestQuantity + "x " + cropName);
+                    // Consume energy based on number of crops harvested (5 per crop)
+                    consumeEnergy(totalEnergyCost);
+                    
+                    System.out.println("DEBUG: Successfully harvested " + harvestQuantity + "x " + cropName + 
+                                     " and consumed " + totalEnergyCost + " energy");
                 } else {
-                    System.out.println("DEBUG: Could not find crop data for " + cropName);
-                }
-            } catch (Exception e) {
-                System.out.println("DEBUG: Error adding crop to inventory: " + e.getMessage());
+                    System.out.println("DEBUG: ERROR - Could not find crop data for '" + cropName + "'");
+                    System.out.println("DEBUG: Available crops in CropData:");
+                    // Try to list available crops for debugging
+                    try {
+                        java.util.Map<String, SRC.ITEMS.Crop> allCrops = SRC.DATA.CropData.getAllCrops();
+                        for (String key : allCrops.keySet()) {
+                            System.out.println("DEBUG:   - '" + key + "'");
+                        }
+                    } catch (Exception e2) {
+                        System.out.println("DEBUG: Error accessing CropData: " + e2.getMessage());
+                    }                    return false;
+                }            } catch (Exception e) {
+                System.out.println("DEBUG: Exception in harvest processing: " + e.getMessage());
+                e.printStackTrace();
+                return false;
             }
-            addGameTime(2);
+            
+            addGameTime(5); // Add 5 minutes per tile (1 tile × 5 minutes = 5 minutes)
             
             System.out.println("DEBUG: Successfully harvested " + cropName + " at (" + playerCol + ", " + playerRow + ")");
             return true;
@@ -1261,6 +1328,22 @@ public class PlayerAction {
             System.out.println("DEBUG: Failed to harvest crop at (" + playerCol + ", " + playerRow + ")");
             return false;
         }
+    }
+    
+    /**
+     * Debug method to print current inventory contents
+     */
+    private void printInventoryDebug() {
+        Item[] items = inventory.getItems();
+        int[] quantities = inventory.getQuantities();
+        
+        System.out.println("=== INVENTORY DEBUG ===");
+        for (int i = 0; i < items.length; i++) {
+            if (items[i] != null) {
+                System.out.println("Slot " + i + ": " + items[i].getName() + " x" + quantities[i]);
+            }
+        }
+        System.out.println("=====================");
     }
     
     /**
@@ -1281,9 +1364,8 @@ public class PlayerAction {
             System.out.println("DEBUG: Player must be holding a Watering Can to water plants");
             return false;
         }
-        
-        // Check energy requirements (2 energy for watering)
-        if (!hasEnoughEnergy(2)) {
+          // Check energy requirements (5 energy for watering)
+        if (!hasEnoughEnergy(5)) {
             System.out.println("DEBUG: Not enough energy to water plants");
             return false;
         }
@@ -1308,13 +1390,12 @@ public class PlayerAction {
         }
         
         // Perform watering
-        boolean success = tileManager.waterPlant(playerCol, playerRow);
-        if (success) {
+        boolean success = tileManager.waterPlant(playerCol, playerRow);        if (success) {
             // Consume energy for watering
-            consumeEnergy(2);
+            consumeEnergy(5);
             
-            // Add time for watering (1 minute)
-            addGameTime(1);
+            // Add time for watering (5 minutes per tile - 1 tile × 5 minutes = 5 minutes)
+            addGameTime(5);
             
             System.out.println("DEBUG: Successfully watered plant at (" + playerCol + ", " + playerRow + ")");
             return true;
@@ -1413,5 +1494,94 @@ public class PlayerAction {
      */
     public SRC.UI.TvUI getTvUI() {
         return tvUI;
+    }
+    
+    /**
+     * Perform marriage action when player uses Proposal Ring near an NPC
+     * @return true if marriage action was performed successfully
+     */
+    public boolean performMarriage() {
+        System.out.println("DEBUG: performMarriage called");
+        
+        // Check if player is holding a Proposal Ring
+        if (!player.isHolding("Proposal Ring")) {
+            System.out.println("DEBUG: Player must be holding a Proposal Ring to propose");
+            return false;
+        }
+        
+        // Check if player has enough energy for marriage (80 energy)
+        final int MARRIAGE_ENERGY_COST = 80;
+        if (!hasEnoughEnergy(MARRIAGE_ENERGY_COST)) {
+            System.out.println("DEBUG: Not enough energy for marriage proposal");
+            System.out.println("DEBUG: Marriage requires " + MARRIAGE_ENERGY_COST + " energy, current energy: " + player.getEnergy());
+            return false;
+        }
+        
+        // Check if player is near an eligible NPC
+        if (!isPlayerNearEligibleNPC()) {
+            System.out.println("DEBUG: No eligible NPC nearby for marriage");
+            return false;
+        }
+        
+        // Perform marriage proposal
+        consumeEnergy(MARRIAGE_ENERGY_COST);
+        addGameTime(30); // Marriage takes 30 minutes
+        
+        // Remove Proposal Ring from inventory (one-time use)
+        removeProposalRingFromInventory();
+        
+        System.out.println("DEBUG: Successfully performed marriage - consumed " + MARRIAGE_ENERGY_COST + " energy");
+        System.out.println("DEBUG: Congratulations on your marriage!");
+        return true;
+    }
+    
+    /**
+     * Check if player is near an eligible NPC for marriage
+     * @return true if near eligible NPC
+     */
+    private boolean isPlayerNearEligibleNPC() {
+        // Get player position in tiles
+        int tileSize = gamePanel.getTileSize();
+        int playerCol = (player.getWorldX() + player.getPlayerVisualWidth() / 2) / tileSize;
+        int playerRow = (player.getWorldY() + player.getPlayerVisualHeight() / 2) / tileSize;
+        
+        // For now, simulate being near an NPC (in a real game, this would check for actual NPCs)
+        // Check if player is in a house map (where NPCs might be)
+        SRC.MAP.Map currentMap = gamePanel.getCurrentMap();
+        if (currentMap != null && currentMap.getMapName().contains("House")) {
+            System.out.println("DEBUG: Player is in a house map, eligible for marriage proposal");
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Remove Proposal Ring from inventory after marriage
+     */
+    private void removeProposalRingFromInventory() {
+        Item[] items = player.getInventoryItems();
+        int[] quantities = player.getInventoryQuantities();
+        
+        for (int i = 0; i < items.length; i++) {
+            if (items[i] != null && items[i].getName().equals("Proposal Ring")) {
+                if (quantities[i] > 1) {
+                    quantities[i]--; // Reduce quantity
+                } else {
+                    player.removeItemFromInventory(i); // Remove item completely
+                    // Clear held tool if this ring was being held
+                    if (player.isHolding("Proposal Ring")) {
+                        player.setCurrentHoldingTool(null);
+                    }
+                    // Reset selection if this was the selected item
+                    if (gamePanel.getMouseHandler().getSelectedSlotIndex() == i) {
+                        gamePanel.getMouseHandler().setSelectedSlotIndex(-1);
+                    }
+                }
+                System.out.println("DEBUG: Removed Proposal Ring from inventory");
+                return;
+            }
+        }
+        System.out.println("DEBUG: Could not find Proposal Ring in inventory to remove");
     }
 }
