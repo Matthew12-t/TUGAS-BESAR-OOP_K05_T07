@@ -371,11 +371,6 @@ public class Player extends Entity {
         return false;
     }
     
-    /**
-     * Check if player collides with a specific NPC
-     * @param npc The NPC to check collision with
-     * @return true if collision is detected
-     */
     private boolean checkCollisionWithNPC(NPCEntity npc) {
         java.awt.Rectangle playerBounds = new java.awt.Rectangle(
             getWorldX() + collisionOffsetX,
@@ -408,17 +403,17 @@ public class Player extends Entity {
             if(gender.equals("BOY")){
                 for (int i = 0; i < TOTAL_FRAMES; i++) {
                     down[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/BOY/boy-walk-" + (i+1) + "-100.png"));
-                    up[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/BOY/boy-walk-back" + (i+1) + "-100.png"));
-                    left[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/BOY/boy-walk-left" + (i+1) + "-100.png"));
-                    right[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/BOY/boy-walk-right" + (i+1) + "-100.png"));
+                    up[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/BOY/boy-walk-back-" + (i+1) + "-100.png"));
+                    left[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/BOY/boy-walk-left-" + (i+1) + "-100.png"));
+                    right[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/BOY/boy-walk-right-" + (i+1) + "-100.png"));
                 }
             } 
             else {                
                 for (int i = 0; i < TOTAL_FRAMES; i++) {
                     down[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/GIRL/girl-walk-" + (i+1) + "-100.png"));
-                    up[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/GIRL/girl-walk-back" + (i+1) + "-100.png"));
-                    left[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/GIRL/girl-walk-left" + (i+1) + "-100.png"));
-                    right[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/GIRL/girl-walk-right" + (i+1) + "-100.png"));
+                    up[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/GIRL/girl-walk-back-" + (i+1) + "-100.png"));
+                    left[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/GIRL/girl-walk-left-" + (i+1) + "-100.png"));
+                    right[i] = ImageIO.read(getClass().getResourceAsStream("/RES/ENTITY/PLAYER/GIRL/girl-walk-right-" + (i+1) + "-100.png"));
                 }
             } 
         }     
