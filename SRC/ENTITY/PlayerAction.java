@@ -304,12 +304,11 @@ public class PlayerAction {
         
         // Initialize TileManager if needed
         SRC.TILES.TileManager tileManager = gamePanel.getTileManager();
-        
-        // Attempt to till the tile at player's position
+          // Attempt to till the tile at player's position
         if (tileManager.tillTile(playerCol, playerRow)) {
             // Consume energy and time for successful tilling
             consumeEnergy(TILLING_ENERGY_COST);
-            addGameTime(5); // Add 5 minutes to game time
+            addGameTime(5); // Add 5 minutes per tile (1 tile × 5 minutes = 5 minutes)
             System.out.println("DEBUG: Successfully tilled land at (" + playerCol + ", " + playerRow + ")");
             return true;
         } else {
@@ -350,12 +349,11 @@ public class PlayerAction {
         
         // Initialize TileManager if needed
         SRC.TILES.TileManager tileManager = gamePanel.getTileManager();
-        
-        // Attempt to recover the land at player's position
+          // Attempt to recover the land at player's position
         if (tileManager.recoverLand(playerCol, playerRow)) {
             // Consume energy and time for successful land recovery
             consumeEnergy(LAND_RECOVERY_ENERGY_COST);
-            addGameTime(5); // Add 5 minutes to game time
+            addGameTime(5); // Add 5 minutes per tile (1 tile × 5 minutes = 5 minutes)
             System.out.println("DEBUG: Successfully recovered land at (" + playerCol + ", " + playerRow + ")");
             return true;
         } else {
@@ -937,8 +935,23 @@ public class PlayerAction {
      * Perform sleep effects (restore energy, set time to 10:00 AM, process shipping bin)
      */
     private void performSleepEffects(SleepUI.SleepTrigger trigger) {
-        // Restore full energy
-        player.setEnergy(MAX_ENERGY);
+        // Restore energy based on current energy level
+        int currentEnergy = player.getCurrentEnergy();
+        int newEnergy;
+        
+        if (currentEnergy <= 0) {
+            // If energy <= 0, add only 10 energy
+            newEnergy = currentEnergy + 10;
+        } else if (currentEnergy < (MAX_ENERGY * 0.1)) {
+            // If energy < 10% of MAX_ENERGY, restore to half MAX_ENERGY
+            newEnergy = MAX_ENERGY / 2;
+        } else {
+            // If energy >= 10% of MAX_ENERGY, restore to full MAX_ENERGY
+            newEnergy = MAX_ENERGY;
+        }
+        
+        player.setEnergy(newEnergy);
+        System.out.println("DEBUG: Energy restored from " + currentEnergy + " to " + newEnergy);
         
         // Set time to 10:00 AM instead of 6:00 AM
         Time currentTime = gamePanel.getCurrentTime();
@@ -1124,12 +1137,11 @@ public class PlayerAction {
         
         // Initialize TileManager if needed
         SRC.TILES.TileManager tileManager = gamePanel.getTileManager();
-        
-        // Attempt to plant the seed at player's position
+          // Attempt to plant the seed at player's position
         if (tileManager.plantSeed(playerCol, playerRow, heldSeedName, daysToGrow)) {
             // Consume energy and time for successful planting
             consumeEnergy(PLANTING_ENERGY_COST);
-            addGameTime(5); // Add 5 minutes to game time
+            addGameTime(5); // Add 5 minutes per tile (1 tile × 5 minutes = 5 minutes)
             
             // Remove one seed from inventory
             removeSeedFromInventory(heldSeedName);
@@ -1237,12 +1249,11 @@ public class PlayerAction {
             System.out.println("DEBUG: No plant at this location");
             return false;
         }
-        
-        if (!tileManager.isPlantReadyToHarvest(playerCol, playerRow)) {
+          if (!tileManager.isPlantReadyToHarvest(playerCol, playerRow)) {
             System.out.println("DEBUG: Plant is not ready to harvest yet");
             return false;
         }
-          // Attempt to harvest the crop
+          // Attempt to harvest the crop first to get crop data
         String cropName = tileManager.harvestCrop(playerCol, playerRow);
         System.out.println("DEBUG: TileManager.harvestCrop() returned: '" + cropName + "'");
         
@@ -1253,15 +1264,25 @@ public class PlayerAction {
                 SRC.ITEMS.Crop crop = SRC.DATA.CropData.getCrop(cropName);
                 
                 if (crop != null) {
+                    int harvestQuantity = crop.getCropPerHarvest();
+                    int totalEnergyCost = harvestQuantity * 5; // 5 energy per crop
+                    
                     System.out.println("DEBUG: Crop data found - Name: '" + crop.getName() + 
-                                     "', Harvest Quantity: " + crop.getCropPerHarvest());
+                                     "', Harvest Quantity: " + harvestQuantity + 
+                                     ", Total Energy Cost: " + totalEnergyCost);
+                    
+                    // Check if player has enough energy (5 energy per crop)
+                    if (!hasEnoughEnergy(totalEnergyCost)) {
+                        System.out.println("DEBUG: Not enough energy to harvest " + harvestQuantity + 
+                                         " crops (need " + totalEnergyCost + " energy)");
+                        return false;
+                    }
                     
                     // Check inventory before adding
                     System.out.println("DEBUG: Inventory before harvest:");
                     printInventoryDebug();
                     
                     // Add multiple crops to inventory
-                    int harvestQuantity = crop.getCropPerHarvest();
                     for (int i = 0; i < harvestQuantity; i++) {
                         // Use the corrected method call
                         inventory.addItem(crop, 1);
@@ -1272,7 +1293,11 @@ public class PlayerAction {
                     System.out.println("DEBUG: Inventory after harvest:");
                     printInventoryDebug();
                     
-                    System.out.println("DEBUG: Successfully harvested " + harvestQuantity + "x " + cropName);
+                    // Consume energy based on number of crops harvested (5 per crop)
+                    consumeEnergy(totalEnergyCost);
+                    
+                    System.out.println("DEBUG: Successfully harvested " + harvestQuantity + "x " + cropName + 
+                                     " and consumed " + totalEnergyCost + " energy");
                 } else {
                     System.out.println("DEBUG: ERROR - Could not find crop data for '" + cropName + "'");
                     System.out.println("DEBUG: Available crops in CropData:");
@@ -1284,15 +1309,14 @@ public class PlayerAction {
                         }
                     } catch (Exception e2) {
                         System.out.println("DEBUG: Error accessing CropData: " + e2.getMessage());
-                    }
-                    return false;
-                }
-            } catch (Exception e) {
+                    }                    return false;
+                }            } catch (Exception e) {
                 System.out.println("DEBUG: Exception in harvest processing: " + e.getMessage());
                 e.printStackTrace();
                 return false;
             }
-            addGameTime(2);
+            
+            addGameTime(5); // Add 5 minutes per tile (1 tile × 5 minutes = 5 minutes)
             
             System.out.println("DEBUG: Successfully harvested " + cropName + " at (" + playerCol + ", " + playerRow + ")");
             return true;
@@ -1336,9 +1360,8 @@ public class PlayerAction {
             System.out.println("DEBUG: Player must be holding a Watering Can to water plants");
             return false;
         }
-        
-        // Check energy requirements (2 energy for watering)
-        if (!hasEnoughEnergy(2)) {
+          // Check energy requirements (5 energy for watering)
+        if (!hasEnoughEnergy(5)) {
             System.out.println("DEBUG: Not enough energy to water plants");
             return false;
         }
@@ -1363,13 +1386,12 @@ public class PlayerAction {
         }
         
         // Perform watering
-        boolean success = tileManager.waterPlant(playerCol, playerRow);
-        if (success) {
+        boolean success = tileManager.waterPlant(playerCol, playerRow);        if (success) {
             // Consume energy for watering
-            consumeEnergy(2);
+            consumeEnergy(5);
             
-            // Add time for watering (1 minute)
-            addGameTime(1);
+            // Add time for watering (5 minutes per tile - 1 tile × 5 minutes = 5 minutes)
+            addGameTime(5);
             
             System.out.println("DEBUG: Successfully watered plant at (" + playerCol + ", " + playerRow + ")");
             return true;

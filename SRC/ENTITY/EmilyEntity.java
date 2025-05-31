@@ -178,9 +178,9 @@ public class EmilyEntity extends NPCEntity {
             return "Emily: Terima kasih, aku bisa memasak dengan ini! " + baseMsg;
         } else if (baseMsg.contains("hates")) {
             return "Emily: Oh, aku tidak suka ini... " + baseMsg;
-        } else {
+        } else if (baseMsg.contains("accepts")) {
             return "Emily: Terima kasih, tapi aku harap lain kali lebih enak! " + baseMsg;
-        }
+        } else {return baseMsg; }
     }
     
     /**
