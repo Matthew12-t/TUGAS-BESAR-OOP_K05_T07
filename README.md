@@ -1,6 +1,7 @@
 # TUGAS-BESAR-OOP_K05
 
 ❗❔**Deskripsi Proyek** ❔❗
+
 Spakbor Hills adalah Stardew Valley yang disederhanakan. Game ini dibangun dengan menggunakan bahasa Java. Pemain bisa berjalan-jalan menyusuri dunia piksel, bertani, berdagang, dan bahkan menikah dengan NPC.
 
 ⚙ **Fitur** ⚙
