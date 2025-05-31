@@ -29,19 +29,19 @@ public class ClockUI {
     
     // Weather and Season images
     private BufferedImage weatherImage;
-    private BufferedImage seasonImage;
-    
-    // Weather and Season objects
+    private BufferedImage seasonImage;    // Weather and Season objects
     private Weather currentWeather = Weather.SUNNY;
     private Season currentSeason = Season.SPRING;
+    
+    // Weather management system
+    private SRC.WEATHER.WeatherManager weatherManager;
     
     // Time management for fishing system
     private boolean isTimePaused = false;
     
     // Screen dimensions for drawing
     private int screenWidth;
-    private int screenHeight;
-      /**
+    private int screenHeight;    /**
      * Constructor for ClockUI
      * @param screenWidth The screen width for positioning
      * @param screenHeight The screen height for positioning
@@ -49,6 +49,9 @@ public class ClockUI {
     public ClockUI(int screenWidth, int screenHeight) {
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
+          // Initialize weather management system
+        this.weatherManager = new SRC.WEATHER.WeatherManager();
+        
         loadClockImage();
         loadWeatherImage();
         loadSeasonImage();
@@ -149,23 +152,24 @@ public class ClockUI {
         if (minute >= 60) {
             minute -= 60;
             hour++;
-        }
-          if (hour >= 24) {
+        }        if (hour >= 24) {
             hour = 0;
             minute = 0;
             day++;
             dayOfWeek = (dayOfWeek + 1) % 7;
             
-            // Update weather randomly each day
+            // Update weather using WeatherManager for guaranteed rainy days
             Weather oldWeather = currentWeather;
-            currentWeather = (Math.random() < 0.3) ? Weather.RAINY : Weather.SUNNY;
+            currentWeather = weatherManager.getNextDayWeather();
             
             // Reload weather image if weather changed
             if (oldWeather != currentWeather) {
                 loadWeatherImage();
             }
             
-            if ((day - 1) % 10 == 0 && day != 1) {
+            // Log weather statistics for current season cycle
+            System.out.println("DEBUG: " + weatherManager.getCycleStatistics());
+              if ((day - 1) % 10 == 0 && day != 1) {
                 Season oldSeason = currentSeason;
                 currentSeasonIndex = (currentSeasonIndex + 1) % seasons.length;
                 // Update current season based on index
@@ -181,6 +185,10 @@ public class ClockUI {
                 if (oldSeason != currentSeason) {
                     loadSeasonImage();
                 }
+                
+                // Generate new weather cycle for new season
+                weatherManager.forceNewCycle();
+                System.out.println("DEBUG: New season " + currentSeason.getDisplayName() + " started - generated new weather cycle");
             }
             
             if (day > 30) {
@@ -329,8 +337,7 @@ public class ClockUI {
         
         time.setHour(currentHour);
         time.setMinute(currentMinute);
-    }
-      /**
+    }    /**
      * Advance to next day (doesn't change time)
      */
     public void advanceToNextDay() {
@@ -338,14 +345,17 @@ public class ClockUI {
         day++;
         dayOfWeek = (dayOfWeek + 1) % 7;
         
-        // Update weather randomly each day
+        // Update weather using WeatherManager for guaranteed rainy days
         Weather oldWeather = currentWeather;
-        currentWeather = (Math.random() < 0.3) ? Weather.RAINY : Weather.SUNNY;
+        currentWeather = weatherManager.getNextDayWeather();
         
         // Reload weather image if weather changed
         if (oldWeather != currentWeather) {
             loadWeatherImage();
         }
+        
+        // Log weather statistics for current season cycle
+        System.out.println("DEBUG: " + weatherManager.getCycleStatistics());
         
         // Check for season change every 10 days
         if ((day - 1) % 10 == 0 && day != 1) {
@@ -364,6 +374,10 @@ public class ClockUI {
             if (oldSeason != currentSeason) {
                 loadSeasonImage();
             }
+            
+            // Generate new weather cycle for new season
+            weatherManager.forceNewCycle();
+            System.out.println("DEBUG: New season " + currentSeason.getDisplayName() + " started - generated new weather cycle");
         }
         
         // Check for month/year progression
@@ -488,8 +502,7 @@ public class ClockUI {
     public String getCurrentDayName() {
         return dayNames[dayOfWeek];
     }
-    
-    /**
+      /**
      * Force reload all images (clock, weather, season)
      * Useful when manually changing time/weather/season
      */
@@ -497,5 +510,55 @@ public class ClockUI {
         loadClockImage();
         loadWeatherImage();
         loadSeasonImage();
+    }
+    
+    /**
+     * Get weather manager instance
+     * @return WeatherManager instance
+     */
+    public SRC.WEATHER.WeatherManager getWeatherManager() {
+        return weatherManager;
+    }
+    
+    /**
+     * Set weather manually (for cheat system)
+     * This bypasses the WeatherManager and sets weather directly
+     * @param weather Weather to set
+     */
+    public void setWeather(Weather weather) {
+        Weather oldWeather = currentWeather;
+        currentWeather = weather;
+        
+        // Reload weather image if weather changed
+        if (oldWeather != currentWeather) {
+            loadWeatherImage();
+        }
+    }
+    
+    /**
+     * Set season manually (for cheat system)
+     * @param season Season to set
+     */
+    public void setSeason(Season season) {
+        Season oldSeason = currentSeason;
+        currentSeason = season;
+        
+        // Update season index to match
+        Season[] seasonValues = Season.values();
+        for (int i = 0; i < seasonValues.length; i++) {
+            if (seasonValues[i] == season) {
+                currentSeasonIndex = i;
+                break;
+            }
+        }
+        
+        // Reload season image if season changed
+        if (oldSeason != currentSeason) {
+            loadSeasonImage();
+        }
+        
+        // Generate new weather cycle for new season
+        weatherManager.forceNewCycle();
+        System.out.println("DEBUG: Season manually changed to " + season.getDisplayName() + " - generated new weather cycle");
     }
 }

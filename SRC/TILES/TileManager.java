@@ -4,6 +4,7 @@ import SRC.MAIN.GamePanel;
 import SRC.MAP.Map;
 import SRC.TIME.Time;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
@@ -15,8 +16,7 @@ import java.awt.Color;
  */
 public class TileManager {
     private GamePanel gamePanel;
-    
-    // ===== PLANTED TILE MANAGEMENT =====
+      // ===== PLANTED TILE MANAGEMENT =====
       // Simple planted tile data structure
     public static class PlantedTileInfo {
         public String seedName;        // Nama seed yang ditanam
@@ -25,6 +25,7 @@ public class TileManager {
         public int daysToGrow;         // Total hari untuk harvest
         public boolean isWatered;      // Apakah sudah disiram hari ini
         public int lastWateredDay;     // Hari terakhir disiram
+        public HashSet<Integer> wateredDays; // Track all days when plant was watered
           public PlantedTileInfo(String seedName, int plantedDay, int plantedHour, int daysToGrow) {
             this.seedName = seedName;
             this.plantedDay = plantedDay;
@@ -32,6 +33,8 @@ public class TileManager {
             this.daysToGrow = daysToGrow;
             this.isWatered = true; // Start with watered status (free watering on planting day)
             this.lastWateredDay = plantedDay; // Last watered day is the planting day
+            this.wateredDays = new HashSet<>();
+            this.wateredDays.add(plantedDay); // Add planting day as watered (free watering)
         }
     }
     
@@ -112,54 +115,50 @@ public class TileManager {
         // Perform land recovery - convert tilled soil back to land
         currentMap.setTileInMap(col, row, Tile.TILE_LAND);
         System.out.println("DEBUG: Successfully recovered land at (" + col + ", " + row + ")");
-        return true;
-    }
-      // ===== PLANTED TILE GROWTH LOGIC =====
-      /**
-     * Calculate growth stage based on current time and watering status
-     * Growth happens after 24 hours have passed since planting (if watered)
+        return true;    }
+    
+    // ===== PLANTED TILE GROWTH LOGIC =====
+    
+    /**
+     * Calculate growth stage based on current day and watering status
+     * Growth happens when day changes (if watered on the previous day)
      * @param plantInfo plant information
      * @return growth stage (1 = newly planted, daysToGrow+1 = ready to harvest)
      */
     private int calculateGrowthStage(PlantedTileInfo plantInfo) {
         // Get current game time
         int currentDay = gamePanel.getCurrentDay();
-        Time currentTime = gamePanel.getCurrentTime();
-        int currentHour = (currentTime != null) ? currentTime.getHour() : 6; // Default 6 AM
         
         // Update watering status berdasarkan weather
         updateWateringFromWeather(plantInfo, currentDay);
         
-        // Calculate total hours passed since planting
-        int totalHoursPassed = ((currentDay - plantInfo.plantedDay) * 24) + (currentHour - plantInfo.plantedHour);
+        // Calculate how many days have passed since planting
+        int daysPassed = currentDay - plantInfo.plantedDay;
         
-        // If less than 0 hours (should not happen), return stage 1
-        if (totalHoursPassed < 0) {
+        // If negative days (should not happen), return stage 1
+        if (daysPassed < 0) {
             return 1;
         }
         
-        // Calculate how many 24-hour periods have passed
-        int full24HourPeriods = totalHoursPassed / 24;
-        
         // Growth stage calculation:
-        // - Stage 1: Just planted (0-23 hours since planting)
-        // - Stage 2: After first 24 hours (if watered)
-        // - Stage 3: After second 24 hours (if watered)
+        // - Stage 1: Day of planting (day 0)
+        // - Stage 2: Day 1 after planting (if watered on day 0)
+        // - Stage 3: Day 2 after planting (if watered on day 1)
         // - etc.
         
         int growthStage = 1; // Start at stage 1 (newly planted)
         
-        // For each completed 24-hour period, check if plant was watered
+        // For each day that has passed, check if plant was watered
         // and advance growth stage if it was
-        for (int period = 0; period < full24HourPeriods; period++) {
-            // Calculate which day this 24-hour period corresponds to
-            int dayToCheck = plantInfo.plantedDay + period;
+        for (int day = 0; day < daysPassed; day++) {
+            // Calculate which day to check for watering
+            int dayToCheck = plantInfo.plantedDay + day;
             
-            // Check if plant was watered during this period
+            // Check if plant was watered during this day
             if (wasPlantWateredOnDay(plantInfo, dayToCheck)) {
                 growthStage++;
             }
-            // If not watered, growth stage doesn't advance for this period
+            // If not watered, growth stage doesn't advance for this day
             
             // Stop if we've reached maximum growth stage
             if (growthStage > plantInfo.daysToGrow + 1) {
@@ -169,30 +168,17 @@ public class TileManager {
         
         // Cap at maximum growth stage (daysToGrow + 1 for harvest stage)
         return Math.min(growthStage, plantInfo.daysToGrow + 1);
-    }
-      /**
+    }    /**
      * Cek apakah tanaman disiram pada hari tertentu
      */
     private boolean wasPlantWateredOnDay(PlantedTileInfo plantInfo, int day) {
         // Tanaman dianggap disiram jika:
-        // 1. Hari pertama ditanam (gratis watering)
-        // 2. Hari terakhir disiram manual adalah hari tersebut (exact match)
-        // 3. Weather rainy di hari tersebut (semua tanaman auto-watered)
+        // 1. Hari tersebut ada dalam Set wateredDays (manual watering atau rainy day)
+        // 2. Hari pertama ditanam sudah otomatis included di wateredDays
         
-        if (day == plantInfo.plantedDay) {
-            return true; // Hari pertama gratis watering
-        }
-        
-        if (plantInfo.lastWateredDay == day) {
-            return true; // Sudah disiram manual pada hari tersebut
-        }
-        
-        // Cek weather history (untuk implementasi sederhana, anggap rainy random)
-        // Bisa diimprove dengan weather history yang sebenarnya
-        return false;
+        return plantInfo.wateredDays.contains(day);
     }
-    
-    /**
+      /**
      * Update watering status berdasarkan weather saat ini
      */
     private void updateWateringFromWeather(PlantedTileInfo plantInfo, int currentDay) {
@@ -201,6 +187,8 @@ public class TileManager {
             plantInfo.lastWateredDay < currentDay) {
             plantInfo.isWatered = true;
             plantInfo.lastWateredDay = currentDay;
+            // Add rainy day to watered days Set
+            plantInfo.wateredDays.add(currentDay);
         }
         
         // Reset isWatered jika sudah ganti hari
@@ -300,15 +288,14 @@ public class TileManager {
             System.out.println("DEBUG: No plant at this tile!");
             return null;
         }
-        
-        // Check apakah siap harvest
+          // Check apakah siap harvest
         if (!isPlantReadyToHarvestInternal(plantInfo)) {
             System.out.println("DEBUG: Plant is not ready to harvest yet!");
             return null;
         }
         
-        // Get crop name dari seed name
-        String cropName = plantInfo.seedName.replace(" Seeds", "");
+        // Get crop name dari seed name (fix: use " Seed" not " Seeds")
+        String cropName = plantInfo.seedName.replace(" Seed", "");
         
         // Remove planted tile data
         plantedTiles.remove(tileKey);
@@ -457,8 +444,7 @@ public class TileManager {
         
         int currentDay = gamePanel.getCurrentDay();
         return plantInfo.isWatered && plantInfo.lastWateredDay == currentDay;
-    }
-      /**
+    }    /**
      * Water a plant manually
      */
     public boolean waterPlant(int col, int row) {
@@ -476,7 +462,11 @@ public class TileManager {
         plantInfo.isWatered = true;
         plantInfo.lastWateredDay = currentDay;
         
+        // Add current day to watered days Set (this fixes the bug!)
+        plantInfo.wateredDays.add(currentDay);
+        
         System.out.println("DEBUG: Plant watered at (" + col + ", " + row + ") on day " + currentDay);
+        System.out.println("DEBUG: Plant watered days: " + plantInfo.wateredDays);
         return true;
     }
     
