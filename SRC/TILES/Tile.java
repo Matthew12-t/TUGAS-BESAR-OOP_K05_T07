@@ -161,40 +161,23 @@ public class Tile {
         return solidArea;
     }
     
-    /**
-     * Mengecek apakah tile ini sama dengan tile lain
-     * @param other Tile lain yang akan dibandingkan
-     * @return true jika pointrid (col, row) sama
-     */    
+  
     public boolean equals(Tile other) {
         return this.col == other.col && this.row == other.row;
     }
     
-    /**
-     * Menghitung jarak Manhattan antara tile ini dengan tile lain
-     * @param other Tile lain
-     * @return Jarak Manhattan (jumlah langkah horizontal dan vertikal)
-     */
+
     public int distanceTo(Tile other) {
         return Math.abs(this.col - other.col) + Math.abs(this.row - other.row);
     }
     
-    /**
-     * Mendapatkan posisi tengah tile dalam koordinat dunia
-     * @return Array berisi [centerX, centerY]
-     */
+
     public int[] getCenter() {
         int centerX = worldX + solidArea.width / 2;
         int centerY = worldY + solidArea.height / 2;
         return new int[]{centerX, centerY};
     }
     
-    /**
-     * Mengecek apakah suatu koordinat dunia terletak di dalam tile ini
-     * @param x Koordinat X dunia
-     * @param y Koordinat Y dunia
-     * @return true jika koordinat berada dalam tile
-     */
     public boolean contains(int x, int y) {
         return x >= worldX && x < worldX + solidArea.width &&
                y >= worldY && y < worldY + solidArea.height;

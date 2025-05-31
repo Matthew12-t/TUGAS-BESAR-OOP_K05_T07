@@ -21,8 +21,31 @@ Spakbor Hills adalah Stardew Valley yang disederhanakan. Game ini dibangun denga
 - Git
 - (Opsional) IDE: IntelliJ, VSCode
 
-🖥 **Cara Menggunakan** 🖥
+🖥 **Cara Menggunakan (Recommended - Makefile)** 🖥
 1. Clone repository Github
-2. Masukkan perintah berikut: javac -cp . -d . SRC\MAIN\*.java SRC\ENTITY\*.java SRC\MAP\*.java SRC\MAP\NPC_HOUSE\*.java SRC\UI\*.java SRC\INVENTORY\*.java SRC\ITEMS\*.java SRC\SEASON\*.java SRC\WEATHER\*.java SRC\TIME\*.java SRC\DATA\*.java SRC\CHEAT\*.java SRC\ENDGAME\*.java SRC\MAIN\MENU\*.java SRC\SHIPPINGBIN\*.java
-3. Tunggu sampai kompilasi selesai lalu masukkan perintah berikut untuk bermain: javac -cp . SRC/MAIN/Main.java; java -cp . SRC.MAIN.Main
+2. Pastikan mingw32-make terinstall (atau gunakan build.bat untuk Windows)
+3. Kompilasi dan jalankan game:
+   ```
+   mingw32-make run
+   ```
 4. Selamat menikmati ✨
+
+## 🔧 Troubleshooting
+
+**Jika gambar/suara tidak muncul saat menggunakan kompilasi manual:**
+```bash
+# Pastikan RES directory ada di classpath:
+java -cp "build/classes;RES;." SRC.MAIN.Main
+```
+
+
+🖥 **Cara Manual (Alternatif)** 🖥
+1. Clone repository Github
+2. Kompilasi semua file Java (termasuk subdirektori):
+   ```
+   javac -cp . -d build/classes SRC/MAIN/*.java SRC/ENTITY/*.java SRC/ENTITY/ACTION/*.java SRC/MAP/*.java SRC/MAP/NPC_HOUSE/*.java SRC/UI/*.java SRC/INVENTORY/*.java SRC/ITEMS/*.java SRC/SEASON/*.java SRC/WEATHER/*.java SRC/TIME/*.java SRC/DATA/*.java SRC/CHEAT/*.java SRC/ENDGAME/*.java SRC/MAIN/MENU/*.java SRC/SHIPPINGBIN/*.java SRC/STORE/*.java SRC/COOKING/*.java SRC/TILES/*.java SRC/OBJECT/*.java SRC/UTIL/*.java
+   ```
+3. Jalankan game:
+   ```
+   java -cp build/classes SRC.MAIN.Main
+   ```
