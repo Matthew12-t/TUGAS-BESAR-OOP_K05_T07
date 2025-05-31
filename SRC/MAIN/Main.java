@@ -9,7 +9,7 @@ public class Main {
         JFrame window = new JFrame();
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setResizable(true);
-        window.setTitle("Stardew Valley");
+        window.setTitle("Spakbor Village");
         
         GamePanel gamePanel = new GamePanel();
         window.add(gamePanel);
