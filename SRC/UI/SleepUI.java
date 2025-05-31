@@ -165,17 +165,10 @@ public class SleepUI {
             g.dispose();
         }
     }
-      /**
-     * Update sleep UI (no auto-close, wait for Enter key)
-     */
+      
     public void update() {
-        // SleepUI sekarang tidak auto-close, menunggu Enter key
-        // Auto-close logic dihapus
     }
     
-    /**
-     * Handle Enter key press to close sleep screen
-     */
     public void handleEnterPress() {
         if (isDisplaying) {
             isDisplaying = false;

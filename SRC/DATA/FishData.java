@@ -163,14 +163,25 @@ public class FishData {
             return null;
         }
     }
-    
-    /**
+      /**
      * Check if fish exists
      * @param fishName Name of the fish
      * @return true if fish exists
      */
     public static boolean hasFish(String fishName) {
-        return fish.containsKey(fishName);
+        // Try exact key match first
+        if (fish.containsKey(fishName)) {
+            return true;
+        }
+        
+        // If no exact match, check if any fish has this name
+        for (Fish fishItem : fish.values()) {
+            if (fishItem.getName().equals(fishName)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
       /**
      * Get fish by location

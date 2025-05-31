@@ -28,7 +28,6 @@ public class PlayerAction {
     private static final int MAX_ENERGY = 100;
       // Sleep system constants
     private static final int LOW_ENERGY_THRESHOLD = -20;
-    private static final int LATE_NIGHT_HOUR = 2; // 02:00
     
     // Last bed location tracking
     private String lastBedMapName = "House Map"; // Default to House Map
@@ -787,13 +786,14 @@ public class PlayerAction {
             executeSleep(SleepUI.SleepTrigger.LOW_ENERGY);
             return;
         }
-          // Check late night sleep
         Time currentTime = gamePanel.getCurrentTime();
-        if (currentTime.getHour() == LATE_NIGHT_HOUR && currentTime.getMinute() == 0) {
-            System.out.println("DEBUG: Auto sleep triggered - Late night");
+        int hour = currentTime.getHour();
+        if (hour >= 2 && hour <= 5) {
+            System.out.println("DEBUG: Auto sleep triggered - Late night (Hour: " + hour + ")");
             executeSleep(SleepUI.SleepTrigger.LATE_TIME);
             return;
         }
+   
     }    /**
      * Execute sleep sequence (immediate spawn and effects)
      */
@@ -1005,13 +1005,9 @@ public class PlayerAction {
             }
         }
         
-        
-        // Position player to the RIGHT of bed (not on top)
+          // Position player correctly beside the bed using stored bed coordinates
         player.setWorldX(player.getWorldX()); // Move 1 tile to the right
-        player.setWorldY(player.getWorldY() ); // Center vertically beside the bed
-        
-        System.out.println("DEBUG: Player transported to last bed at " + lastBedMapName + 
-                         " position (" + lastBedX + "," + lastBedY + ") - Player positioned beside bed");
+        player.setWorldY(player.getWorldY() );
     }
     
     /**

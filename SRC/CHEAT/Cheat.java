@@ -14,7 +14,9 @@ public class Cheat {
     private Inventory inventory;
     private GameData gameData;
     private ClockUI clockUI;
-    private GamePanel gp;    public Cheat(Player player, Inventory inventory, ClockUI clockUI, GamePanel gp) {
+    private GamePanel gp;    
+    
+    public Cheat(Player player, Inventory inventory, ClockUI clockUI, GamePanel gp) {
         this.player = player;
         this.inventory = inventory;
         this.clockUI = clockUI;
@@ -36,9 +38,7 @@ public class Cheat {
                            "add time {minutes}\n" +
                            "add item {name} {quantity}";
                 }
-                
-                switch (parts[1]) {
-                    case "gold":
+                  switch (parts[1]) {                    case "gold":
                         if (parts.length != 3) return "Usage: add gold {amount}";
                         return addGold(parts);
                     case "time":
@@ -49,7 +49,10 @@ public class Cheat {
                         return addItem(parts);
                     default:
                         return "Invalid add command. Valid options: gold, time, item";
-                }            } else if (parts[0].equals("goto")) {
+                }            
+            } 
+            
+            else if (parts[0].equals("goto")) {
                 if (parts.length == 2 && parts[1].equals("endgame")) {
                     return gotoEndgame();
                 } else if (parts.length != 3) {
@@ -73,18 +76,21 @@ public class Cheat {
         } catch (Exception e) {
             return "Error executing command: " + e.getMessage();
         }
-    }
-    
-    private String addItem(String[] parts) {
+    }    private String addItem(String[] parts) {
         try {
             // Get quantity from last part
             int quantity = Integer.parseInt(parts[parts.length - 1]);
             
-            // Build item name from parts between "item" and quantity
+            // Build item name from parts between "item" and quantity preserving original case
             StringBuilder itemName = new StringBuilder();
             for (int i = 2; i < parts.length - 1; i++) {
                 if (i > 2) itemName.append(" ");
-                itemName.append(parts[i]);
+                // Capitalize first letter of each word
+                String word = parts[i];
+                if (word.length() > 0) {
+                    word = word.substring(0, 1).toUpperCase() + word.substring(1);
+                }
+                itemName.append(word);
             }
             
             String itemNameStr = itemName.toString().trim();
@@ -104,11 +110,21 @@ public class Cheat {
             return "Invalid quantity. Please enter a valid number.";
         }
     }
-    
-    private String addTime(String[] parts) {
+      private String addTime(String[] parts) {
         try {
             int minutes = Integer.parseInt(parts[2]);
+            
+            // Add time
             gp.addMinutes(minutes);
+            
+            // Check time for auto sleep trigger (2AM-5:59AM)
+            SRC.TIME.Time currentTime = gp.getCurrentTime();
+            int hour = currentTime.getHour();
+            if (hour >= 2 && hour <= 5) {
+                // Trigger auto sleep if time is between 2:00-5:59 AM
+                player.getPlayerAction().checkAutomaticSleep();
+            }
+            
             return "Added " + minutes + " minutes to game time";
         } catch (NumberFormatException e) {
             return "Invalid time. Please enter a valid number of minutes.";

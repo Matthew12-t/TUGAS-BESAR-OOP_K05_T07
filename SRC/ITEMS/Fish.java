@@ -45,54 +45,59 @@ public class Fish extends Item implements Edible {
         // Load image untuk fish ini
         String imagePath = "RES/FISH/" + name.toLowerCase().replace(" ", "_") + ".png";
         loadImage(imagePath);
-    }    
-    /**
-     * Calculate sell price based on fish properties using the pricing formula
+    }      /**
+     * Calculate sell price based on fish properties using the pricing formula:
+     * Price = 4^(number of seasons) × 2^(number of hours) × 2^(number of weather variations) × 4^(number of locations) × C
+     * Where C = 10 for common fish, C = 5 for regular fish, C = 25 for legendary fish
+     * 
+     * NOTE: This implementation is simplified as we can't determine all factors at creation time:
+     * - Number of seasons: Simplified to 4 (ANY) or 1 (specific season)
+     * - Number of hours: Can't be calculated correctly here (handled in FishPriceValidator)
+     * - Weather variations: 2 (ANY) or 1 (specific weather)
+     * - Number of locations: Simplified to 1 for all fish (actual number handled in FishPriceValidator)
      */
     private static int calculateSellPrice(String type, Season season, Weather weather, String location) {
-        int basePrice;
-        
-        // Base price by type
+        // Base value (C) by type
+        int baseValue;
         switch (type) {
             case "Common":
-                basePrice = 25;
+                baseValue = 10;
                 break;
             case "Regular":
-                basePrice = 75;
+                baseValue = 5;
                 break;
             case "Legendary":
-                basePrice = 1000;
+                baseValue = 25;
                 break;
             default:
-                basePrice = 50;
+                baseValue = 5;
         }
         
-        // Season multiplier (1-4 based on number of seasons)
-        double seasonMultiplier = season == Season.ANY ? 4.0 : 1.0;
+        // Calculate number of seasons
+        int numSeasons = (season == Season.ANY) ? 4 : 1;
         
-        // Weather multiplier (1-2 based on weather variations)
-        double weatherMultiplier = weather == Weather.ANY ? 2.0 : 1.5;
+        // Calculate number of weather variations
+        int numWeather = (weather == Weather.ANY) ? 2 : 1;
         
-        // Location multiplier (1-4 based on location count)
-        double locationMultiplier;
-        switch (location) {
-            case "Forest River":
-                locationMultiplier = 1.2;
-                break;
-            case "Mountain Lake":
-                locationMultiplier = 1.5;
-                break;
-            case "Pond":
-                locationMultiplier = 1.0;
-                break;
-            case "Ocean":
-                locationMultiplier = 1.8;
-                break;
-            default:
-                locationMultiplier = 1.0;
+        // Calculate hours (can't be determined accurately at creation time, use default)
+        // For exact calculation, see FishPriceValidator.java
+        int startHour = 0;
+        int endHour = 0;
+        
+        if (startHour != endHour) {
+            startHour = 12; // Default assumption
         }
         
-        return (int) (basePrice * seasonMultiplier * weatherMultiplier * locationMultiplier);
+        // Number of locations (can't be determined accurately at creation time, use default)
+        int numLocations = 1;
+        
+        // Calculate using formula
+        double price = Math.pow(4, numSeasons) * 
+                      Math.pow(2, numWeather) * 
+                      Math.pow(4, numLocations) * 
+                      baseValue;
+        
+        return (int)price;
     }
     
     /**
